@@ -12,8 +12,9 @@ website:
         href: https://twitter.com
 format:
   html:
-    theme: cosmo
+    theme: sketchy
     css: styles.css
 
-
+execute:
+  freeze: auto
 
