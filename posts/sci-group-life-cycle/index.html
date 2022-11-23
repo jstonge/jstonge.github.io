@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.2.269">
+<meta name="generator" content="quarto-1.0.37">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -12,15 +12,10 @@
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
-div.columns{display: flex; gap: min(4vw, 1.5em);}
-div.column{flex: auto; overflow-x: auto;}
+span.underline{text-decoration: underline;}
+div.column{display: inline-block; vertical-align: top; width: 50%;}
 div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
 ul.task-list{list-style: none;}
-ul.task-list li input[type="checkbox"] {
-  width: 0.8em;
-  margin: 0 0.8em 0.2em -1.6em;
-  vertical-align: middle;
-}
 pre > code.sourceCode { white-space: pre; position: relative; }
 pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
 pre > code.sourceCode > span:empty { height: 1.2em; }
@@ -59,7 +54,7 @@ code span.al { color: #ff0000; font-weight: bold; } /* Alert */
 code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
 code span.at { color: #7d9029; } /* Attribute */
 code span.bn { color: #40a070; } /* BaseN */
-code span.bu { color: #008000; } /* BuiltIn */
+code span.bu { } /* BuiltIn */
 code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
 code span.ch { color: #4070a0; } /* Char */
 code span.cn { color: #880000; } /* Constant */
@@ -72,7 +67,7 @@ code span.er { color: #ff0000; font-weight: bold; } /* Error */
 code span.ex { } /* Extension */
 code span.fl { color: #40a070; } /* Float */
 code span.fu { color: #06287e; } /* Function */
-code span.im { color: #008000; font-weight: bold; } /* Import */
+code span.im { } /* Import */
 code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
 code span.kw { color: #007020; font-weight: bold; } /* Keyword */
 code span.op { color: #666666; } /* Operator */
@@ -136,29 +131,26 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
   <header id="quarto-header" class="headroom fixed-top">
     <nav class="navbar navbar-expand-lg navbar-dark ">
       <div class="navbar-container container-fluid">
-      <div class="navbar-brand-container">
-    <a class="navbar-brand" href="../../index.html">
+      <a class="navbar-brand" href="../../index.html">
     <span class="navbar-title">teenyverse</span>
-    </a>
-  </div>
+  </a>
           <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
   <span class="navbar-toggler-icon"></span>
 </button>
           <div class="collapse navbar-collapse" id="navbarCollapse">
             <ul class="navbar-nav navbar-nav-scroll ms-auto">
   <li class="nav-item">
-    <a class="nav-link" href="../../about.html">
- <span class="menu-text">About</span></a>
+    <a class="nav-link" href="../../about.html">About</a>
   </li>  
   <li class="nav-item compact">
     <a class="nav-link" href="https://github.com/"><i class="bi bi-github" role="img">
 </i> 
- <span class="menu-text"></span></a>
+ </a>
   </li>  
   <li class="nav-item compact">
     <a class="nav-link" href="https://twitter.com"><i class="bi bi-twitter" role="img">
 </i> 
- <span class="menu-text"></span></a>
+ </a>
   </li>  
 </ul>
               <div id="quarto-search" class="" title="Search"></div>
@@ -176,14 +168,18 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
           This model describes the dilemma of learning to code in research groups when the cost of learning to code depends on the relative number of coders and non-coders in the group.
         </div>
       </div>
-                </div>
+                          <div class="quarto-categories">
+                <div class="quarto-category">Approximate Master Equations</div>
+                <div class="quarto-category">Scientific Groups</div>
+                <div class="quarto-category">Programming in Science</div>
+              </div>
+                  </div>
   </div>
     
   
   <div class="quarto-title-meta">
 
       
-    
       
     </div>
     
@@ -231,7 +227,8 @@ Model Sketch
 \log[\tau_g(n,p; \alpha, \beta))] &amp;= \alpha (n-1) +\beta (c * p + (1-c)(p+1)) - \alpha * n + \beta * p \\
                                   &amp;= -\alpha + \beta(1-c)
 \end{align*}\]</span></p>
-<p>Note that <span class="math inline">\(\tau_g\)</span> ends up being a function of <span class="math inline">\(n, p\)</span> through the cost function: <span class="math display">\[c(n,p) = c_0*e^{-\frac{p}{n}}\]</span></p>
+<p>Note that <span class="math inline">\(\tau_g\)</span> ends up being a function of <span class="math inline">\(n, p\)</span> through the cost function:</p>
+<p><span class="math display">\[c(n,p) = c_0*e^{-\frac{p}{n}}\]</span></p>
 <p>You can explore both functions below:</p>
 <div class="callout-tip callout callout-style-default callout-captioned">
 <div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-2-contents" aria-controls="callout-2" aria-expanded="false" aria-label="Toggle callout">
@@ -247,14 +244,14 @@ Cost function
 <div class="callout-body-container callout-body">
 <div class="panel-grid layout-sidebar ms-md-0 layout-sidebar-left">
 <div class="cell panel-sidebar card bg-light p-2 g-col-24 g-col-lg-7">
-<div class="sourceCode cell-code hidden" id="cb1" data-startfrom="57" data-source-offset="-28"><pre class="sourceCode js code-with-copy"><code class="sourceCode javascript" style="counter-reset: source-line 56;"><span id="cb1-57"><a href="#cb1-57" aria-hidden="true" tabindex="-1"></a><span class="kw">function</span> <span class="fu">cost_prog</span>(n<span class="op">,</span> i<span class="op">,</span> c_0) { <span class="cf">return</span> c_0 <span class="op">*</span> <span class="bu">Math</span><span class="op">.</span><span class="fu">exp</span>(<span class="op">-</span>i<span class="op">/</span>n)<span class="op">;</span> }</span>
-<span id="cb1-58"><a href="#cb1-58" aria-hidden="true" tabindex="-1"></a><span class="kw">function</span> <span class="fu">cost_prog2</span>(n<span class="op">,</span> i<span class="op">,</span> c_0) { <span class="cf">return</span> c_0 <span class="op">*</span> <span class="bu">Math</span><span class="op">.</span><span class="fu">exp</span>(<span class="op">-</span>i<span class="op">/</span>(n<span class="op">+</span>i))<span class="op">;</span> }</span>
-<span id="cb1-59"><a href="#cb1-59" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-60"><a href="#cb1-60" aria-hidden="true" tabindex="-1"></a>max_gr_size <span class="op">=</span> <span class="dv">20</span></span>
-<span id="cb1-61"><a href="#cb1-61" aria-hidden="true" tabindex="-1"></a>viewof N <span class="op">=</span> Inputs<span class="op">.</span><span class="fu">range</span>([<span class="dv">1</span><span class="op">,</span> max_gr_size]<span class="op">,</span> {<span class="dt">value</span><span class="op">:</span> <span class="dv">20</span><span class="op">,</span> <span class="dt">step</span><span class="op">:</span> <span class="dv">1</span><span class="op">,</span> <span class="dt">label</span><span class="op">:</span> <span class="st">"group Size"</span>})</span>
-<span id="cb1-62"><a href="#cb1-62" aria-hidden="true" tabindex="-1"></a>viewof coder <span class="op">=</span> Inputs<span class="op">.</span><span class="fu">range</span>([<span class="dv">0</span><span class="op">,</span> (N<span class="op">-</span><span class="dv">1</span>)]<span class="op">,</span> {<span class="dt">value</span><span class="op">:</span> <span class="dv">10</span><span class="op">,</span> <span class="dt">step</span><span class="op">:</span> <span class="dv">1</span><span class="op">,</span> <span class="dt">label</span><span class="op">:</span> <span class="st">"# coder"</span>})</span>
-<span id="cb1-63"><a href="#cb1-63" aria-hidden="true" tabindex="-1"></a>viewof c_0 <span class="op">=</span> Inputs<span class="op">.</span><span class="fu">range</span>([<span class="dv">0</span><span class="op">,</span> <span class="dv">1</span>]<span class="op">,</span> {<span class="dt">value</span><span class="op">:</span> <span class="fl">0.95</span><span class="op">,</span> <span class="dt">step</span><span class="op">:</span> <span class="fl">0.01</span><span class="op">,</span> <span class="dt">label</span><span class="op">:</span> <span class="st">"c₀"</span>})</span>
-<span id="cb1-64"><a href="#cb1-64" aria-hidden="true" tabindex="-1"></a>viewof nc <span class="op">=</span> Inputs<span class="op">.</span><span class="fu">range</span>([<span class="dv">1</span><span class="op">,</span> N]<span class="op">,</span> {<span class="dt">value</span><span class="op">:</span> (N<span class="op">-</span>coder)<span class="op">,</span> <span class="dt">step</span><span class="op">:</span> <span class="fl">1.</span><span class="op">,</span> <span class="dt">label</span><span class="op">:</span> <span class="st">"# non-coder"</span><span class="op">,</span> <span class="dt">disabled</span><span class="op">:</span><span class="kw">true</span>})</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code hidden" id="cb1" data-startfrom="61" data-source-offset="-28"><pre class="sourceCode js code-with-copy"><code class="sourceCode javascript" style="counter-reset: source-line 60;"><span id="cb1-61"><a href="#cb1-61" aria-hidden="true" tabindex="-1"></a><span class="kw">function</span> <span class="fu">cost_prog</span>(n<span class="op">,</span> i<span class="op">,</span> c_0) { <span class="cf">return</span> c_0 <span class="op">*</span> <span class="bu">Math</span><span class="op">.</span><span class="fu">exp</span>(<span class="op">-</span>i<span class="op">/</span>n)<span class="op">;</span> }</span>
+<span id="cb1-62"><a href="#cb1-62" aria-hidden="true" tabindex="-1"></a><span class="kw">function</span> <span class="fu">cost_prog2</span>(n<span class="op">,</span> i<span class="op">,</span> c_0) { <span class="cf">return</span> c_0 <span class="op">*</span> <span class="bu">Math</span><span class="op">.</span><span class="fu">exp</span>(<span class="op">-</span>i<span class="op">/</span>(n<span class="op">+</span>i))<span class="op">;</span> }</span>
+<span id="cb1-63"><a href="#cb1-63" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-64"><a href="#cb1-64" aria-hidden="true" tabindex="-1"></a>max_gr_size <span class="op">=</span> <span class="dv">20</span></span>
+<span id="cb1-65"><a href="#cb1-65" aria-hidden="true" tabindex="-1"></a>viewof N <span class="op">=</span> Inputs<span class="op">.</span><span class="fu">range</span>([<span class="dv">1</span><span class="op">,</span> max_gr_size]<span class="op">,</span> {<span class="dt">value</span><span class="op">:</span> <span class="dv">20</span><span class="op">,</span> <span class="dt">step</span><span class="op">:</span> <span class="dv">1</span><span class="op">,</span> <span class="dt">label</span><span class="op">:</span> <span class="st">"group Size"</span>})</span>
+<span id="cb1-66"><a href="#cb1-66" aria-hidden="true" tabindex="-1"></a>viewof coder <span class="op">=</span> Inputs<span class="op">.</span><span class="fu">range</span>([<span class="dv">0</span><span class="op">,</span> (N<span class="op">-</span><span class="dv">1</span>)]<span class="op">,</span> {<span class="dt">value</span><span class="op">:</span> <span class="dv">10</span><span class="op">,</span> <span class="dt">step</span><span class="op">:</span> <span class="dv">1</span><span class="op">,</span> <span class="dt">label</span><span class="op">:</span> <span class="st">"# coder"</span>})</span>
+<span id="cb1-67"><a href="#cb1-67" aria-hidden="true" tabindex="-1"></a>viewof c_0 <span class="op">=</span> Inputs<span class="op">.</span><span class="fu">range</span>([<span class="dv">0</span><span class="op">,</span> <span class="dv">1</span>]<span class="op">,</span> {<span class="dt">value</span><span class="op">:</span> <span class="fl">0.95</span><span class="op">,</span> <span class="dt">step</span><span class="op">:</span> <span class="fl">0.01</span><span class="op">,</span> <span class="dt">label</span><span class="op">:</span> <span class="st">"c₀"</span>})</span>
+<span id="cb1-68"><a href="#cb1-68" aria-hidden="true" tabindex="-1"></a>viewof nc <span class="op">=</span> Inputs<span class="op">.</span><span class="fu">range</span>([<span class="dv">1</span><span class="op">,</span> N]<span class="op">,</span> {<span class="dt">value</span><span class="op">:</span> (N<span class="op">-</span>coder)<span class="op">,</span> <span class="dt">step</span><span class="op">:</span> <span class="fl">1.</span><span class="op">,</span> <span class="dt">label</span><span class="op">:</span> <span class="st">"# non-coder"</span><span class="op">,</span> <span class="dt">disabled</span><span class="op">:</span><span class="kw">true</span>})</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display">
 <div>
 <div id="ojs-cell-1-1" data-nodetype="declaration">
@@ -310,16 +307,16 @@ Cost function
 <div class="tab-content">
 <div id="tabset-1-1" class="tab-pane active" role="tabpanel" aria-labelledby="tabset-1-1-tab">
 <div class="cell">
-<div class="sourceCode cell-code hidden" id="cb2" data-startfrom="72" data-source-offset="-0"><pre class="sourceCode js code-with-copy"><code class="sourceCode javascript" style="counter-reset: source-line 71;"><span id="cb2-72"><a href="#cb2-72" aria-hidden="true" tabindex="-1"></a>non_coder <span class="op">=</span> N <span class="op">-</span> coder</span>
-<span id="cb2-73"><a href="#cb2-73" aria-hidden="true" tabindex="-1"></a>xs <span class="op">=</span> [<span class="op">...</span><span class="bu">Array</span>(N)<span class="op">.</span><span class="fu">keys</span>()]<span class="op">;</span></span>
-<span id="cb2-74"><a href="#cb2-74" aria-hidden="true" tabindex="-1"></a>ys <span class="op">=</span> xs<span class="op">.</span><span class="fu">map</span>(x <span class="kw">=&gt;</span> <span class="fu">cost_prog</span>(non_coder<span class="op">,</span> x<span class="op">,</span> c_0))</span>
-<span id="cb2-75"><a href="#cb2-75" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-76"><a href="#cb2-76" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-77"><a href="#cb2-77" aria-hidden="true" tabindex="-1"></a>Plot<span class="op">.</span><span class="fu">lineY</span>(ys)<span class="op">.</span><span class="fu">plot</span>({</span>
-<span id="cb2-78"><a href="#cb2-78" aria-hidden="true" tabindex="-1"></a>    <span class="dt">height</span><span class="op">:</span> <span class="dv">400</span><span class="op">,</span> <span class="dt">width</span><span class="op">:</span> <span class="dv">450</span><span class="op">,</span> <span class="dt">grid</span><span class="op">:</span> <span class="kw">true</span><span class="op">,</span></span>
-<span id="cb2-79"><a href="#cb2-79" aria-hidden="true" tabindex="-1"></a>    <span class="dt">y</span><span class="op">:</span> { <span class="dt">label</span><span class="op">:</span> <span class="st">"↑ c(n,p)"</span><span class="op">,</span> <span class="dt">domain</span><span class="op">:</span>[<span class="dv">0</span><span class="op">,</span><span class="dv">1</span>] }<span class="op">,</span></span>
-<span id="cb2-80"><a href="#cb2-80" aria-hidden="true" tabindex="-1"></a>    <span class="dt">x</span><span class="op">:</span> { <span class="dt">label</span><span class="op">:</span> <span class="st">"p/n →"</span> }</span>
-<span id="cb2-81"><a href="#cb2-81" aria-hidden="true" tabindex="-1"></a>})</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code hidden" id="cb2" data-startfrom="76" data-source-offset="-0"><pre class="sourceCode js code-with-copy"><code class="sourceCode javascript" style="counter-reset: source-line 75;"><span id="cb2-76"><a href="#cb2-76" aria-hidden="true" tabindex="-1"></a>non_coder <span class="op">=</span> N <span class="op">-</span> coder</span>
+<span id="cb2-77"><a href="#cb2-77" aria-hidden="true" tabindex="-1"></a>xs <span class="op">=</span> [<span class="op">...</span><span class="bu">Array</span>(N)<span class="op">.</span><span class="fu">keys</span>()]<span class="op">;</span></span>
+<span id="cb2-78"><a href="#cb2-78" aria-hidden="true" tabindex="-1"></a>ys <span class="op">=</span> xs<span class="op">.</span><span class="fu">map</span>(x <span class="kw">=&gt;</span> <span class="fu">cost_prog</span>(non_coder<span class="op">,</span> x<span class="op">,</span> c_0))</span>
+<span id="cb2-79"><a href="#cb2-79" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-80"><a href="#cb2-80" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-81"><a href="#cb2-81" aria-hidden="true" tabindex="-1"></a>Plot<span class="op">.</span><span class="fu">lineY</span>(ys)<span class="op">.</span><span class="fu">plot</span>({</span>
+<span id="cb2-82"><a href="#cb2-82" aria-hidden="true" tabindex="-1"></a>    <span class="dt">height</span><span class="op">:</span> <span class="dv">400</span><span class="op">,</span> <span class="dt">width</span><span class="op">:</span> <span class="dv">450</span><span class="op">,</span> <span class="dt">grid</span><span class="op">:</span> <span class="kw">true</span><span class="op">,</span></span>
+<span id="cb2-83"><a href="#cb2-83" aria-hidden="true" tabindex="-1"></a>    <span class="dt">y</span><span class="op">:</span> { <span class="dt">label</span><span class="op">:</span> <span class="st">"↑ c(n,p)"</span><span class="op">,</span> <span class="dt">domain</span><span class="op">:</span>[<span class="dv">0</span><span class="op">,</span><span class="dv">1</span>] }<span class="op">,</span></span>
+<span id="cb2-84"><a href="#cb2-84" aria-hidden="true" tabindex="-1"></a>    <span class="dt">x</span><span class="op">:</span> { <span class="dt">label</span><span class="op">:</span> <span class="st">"p/n →"</span> }</span>
+<span id="cb2-85"><a href="#cb2-85" aria-hidden="true" tabindex="-1"></a>})</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display">
 <div>
 <div id="ojs-cell-2-1" data-nodetype="declaration">
@@ -353,14 +350,14 @@ Cost function
 </div>
 <div id="tabset-1-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-1-2-tab">
 <div class="cell">
-<div class="sourceCode cell-code hidden" id="cb3" data-startfrom="93" data-source-offset="-0"><pre class="sourceCode js code-with-copy"><code class="sourceCode javascript" style="counter-reset: source-line 92;"><span id="cb3-93"><a href="#cb3-93" aria-hidden="true" tabindex="-1"></a>x2s <span class="op">=</span> [<span class="op">...</span><span class="bu">Array</span>(N)<span class="op">.</span><span class="fu">keys</span>()]<span class="op">;</span></span>
-<span id="cb3-94"><a href="#cb3-94" aria-hidden="true" tabindex="-1"></a>y2s <span class="op">=</span> x2s<span class="op">.</span><span class="fu">map</span>(x <span class="kw">=&gt;</span> <span class="fu">cost_prog2</span>(non_coder<span class="op">,</span> x<span class="op">,</span> c_0))</span>
-<span id="cb3-95"><a href="#cb3-95" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-96"><a href="#cb3-96" aria-hidden="true" tabindex="-1"></a>Plot<span class="op">.</span><span class="fu">lineY</span>(y2s)<span class="op">.</span><span class="fu">plot</span>({</span>
-<span id="cb3-97"><a href="#cb3-97" aria-hidden="true" tabindex="-1"></a>    <span class="dt">height</span><span class="op">:</span> <span class="dv">400</span><span class="op">,</span> <span class="dt">width</span><span class="op">:</span> <span class="dv">450</span><span class="op">,</span> <span class="dt">grid</span><span class="op">:</span> <span class="kw">true</span><span class="op">,</span></span>
-<span id="cb3-98"><a href="#cb3-98" aria-hidden="true" tabindex="-1"></a>    <span class="dt">y</span><span class="op">:</span> { <span class="dt">label</span><span class="op">:</span> <span class="st">"↑ c(n,p)"</span><span class="op">,</span> <span class="dt">domain</span><span class="op">:</span>[<span class="dv">0</span><span class="op">,</span><span class="dv">1</span>] }<span class="op">,</span></span>
-<span id="cb3-99"><a href="#cb3-99" aria-hidden="true" tabindex="-1"></a>    <span class="dt">x</span><span class="op">:</span> { <span class="dt">label</span><span class="op">:</span> <span class="st">"p/n →"</span> }</span>
-<span id="cb3-100"><a href="#cb3-100" aria-hidden="true" tabindex="-1"></a>})</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code hidden" id="cb3" data-startfrom="97" data-source-offset="-0"><pre class="sourceCode js code-with-copy"><code class="sourceCode javascript" style="counter-reset: source-line 96;"><span id="cb3-97"><a href="#cb3-97" aria-hidden="true" tabindex="-1"></a>x2s <span class="op">=</span> [<span class="op">...</span><span class="bu">Array</span>(N)<span class="op">.</span><span class="fu">keys</span>()]<span class="op">;</span></span>
+<span id="cb3-98"><a href="#cb3-98" aria-hidden="true" tabindex="-1"></a>y2s <span class="op">=</span> x2s<span class="op">.</span><span class="fu">map</span>(x <span class="kw">=&gt;</span> <span class="fu">cost_prog2</span>(non_coder<span class="op">,</span> x<span class="op">,</span> c_0))</span>
+<span id="cb3-99"><a href="#cb3-99" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-100"><a href="#cb3-100" aria-hidden="true" tabindex="-1"></a>Plot<span class="op">.</span><span class="fu">lineY</span>(y2s)<span class="op">.</span><span class="fu">plot</span>({</span>
+<span id="cb3-101"><a href="#cb3-101" aria-hidden="true" tabindex="-1"></a>    <span class="dt">height</span><span class="op">:</span> <span class="dv">400</span><span class="op">,</span> <span class="dt">width</span><span class="op">:</span> <span class="dv">450</span><span class="op">,</span> <span class="dt">grid</span><span class="op">:</span> <span class="kw">true</span><span class="op">,</span></span>
+<span id="cb3-102"><a href="#cb3-102" aria-hidden="true" tabindex="-1"></a>    <span class="dt">y</span><span class="op">:</span> { <span class="dt">label</span><span class="op">:</span> <span class="st">"↑ c(n,p)"</span><span class="op">,</span> <span class="dt">domain</span><span class="op">:</span>[<span class="dv">0</span><span class="op">,</span><span class="dv">1</span>] }<span class="op">,</span></span>
+<span id="cb3-103"><a href="#cb3-103" aria-hidden="true" tabindex="-1"></a>    <span class="dt">x</span><span class="op">:</span> { <span class="dt">label</span><span class="op">:</span> <span class="st">"p/n →"</span> }</span>
+<span id="cb3-104"><a href="#cb3-104" aria-hidden="true" tabindex="-1"></a>})</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display">
 <div>
 <div id="ojs-cell-3-1" data-nodetype="declaration">
@@ -405,17 +402,17 @@ Group benefits
 <div class="callout-body-container callout-body">
 <div class="panel-grid layout-sidebar ms-md-0 layout-sidebar-left">
 <div class="cell panel-sidebar card bg-light p-2 g-col-24 g-col-lg-7">
-<div class="sourceCode cell-code hidden" id="cb4" data-startfrom="119" data-source-offset="-28"><pre class="sourceCode js code-with-copy"><code class="sourceCode javascript" style="counter-reset: source-line 118;"><span id="cb4-119"><a href="#cb4-119" aria-hidden="true" tabindex="-1"></a><span class="kw">function</span> <span class="fu">tau</span>(n<span class="op">,</span> i<span class="op">,</span> alpha<span class="op">,</span> beta) {</span>
-<span id="cb4-120"><a href="#cb4-120" aria-hidden="true" tabindex="-1"></a>    <span class="kw">const</span> c <span class="op">=</span> <span class="fu">cost_prog</span>(n<span class="op">,</span> i<span class="op">,</span> <span class="dv">1</span>)</span>
-<span id="cb4-121"><a href="#cb4-121" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="bu">Math</span><span class="op">.</span><span class="fu">exp</span>(<span class="op">-</span>alpha <span class="op">+</span> beta<span class="op">*</span>(<span class="dv">1</span> <span class="op">-</span> c))</span>
-<span id="cb4-122"><a href="#cb4-122" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb4-123"><a href="#cb4-123" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-124"><a href="#cb4-124" aria-hidden="true" tabindex="-1"></a>tau_max_gr_size <span class="op">=</span> <span class="dv">20</span></span>
-<span id="cb4-125"><a href="#cb4-125" aria-hidden="true" tabindex="-1"></a>viewof tau_alpha <span class="op">=</span> Inputs<span class="op">.</span><span class="fu">range</span>([<span class="dv">2</span><span class="op">,</span> <span class="dv">4</span>]<span class="op">,</span> {<span class="dt">value</span><span class="op">:</span> <span class="fl">1.</span><span class="op">,</span> <span class="dt">step</span><span class="op">:</span> <span class="dv">1</span><span class="op">,</span> <span class="dt">label</span><span class="op">:</span> <span class="st">"α"</span><span class="op">,</span> <span class="dt">format</span><span class="op">:</span> x <span class="kw">=&gt;</span> <span class="dv">10</span><span class="op">**-</span>x})</span>
-<span id="cb4-126"><a href="#cb4-126" aria-hidden="true" tabindex="-1"></a>viewof tau_beta <span class="op">=</span> Inputs<span class="op">.</span><span class="fu">range</span>([<span class="dv">1</span><span class="op">,</span> <span class="dv">3</span>]<span class="op">,</span> {<span class="dt">value</span><span class="op">:</span> <span class="fl">1.</span><span class="op">,</span> <span class="dt">step</span><span class="op">:</span> <span class="dv">1</span><span class="op">,</span> <span class="dt">label</span><span class="op">:</span> <span class="st">"β"</span><span class="op">,</span> <span class="dt">format</span><span class="op">:</span> x <span class="kw">=&gt;</span> <span class="dv">10</span><span class="op">**-</span>x})</span>
-<span id="cb4-127"><a href="#cb4-127" aria-hidden="true" tabindex="-1"></a>viewof tau_N <span class="op">=</span> Inputs<span class="op">.</span><span class="fu">range</span>([<span class="dv">0</span><span class="op">,</span> tau_max_gr_size]<span class="op">,</span> {<span class="dt">value</span><span class="op">:</span> <span class="dv">20</span><span class="op">,</span> <span class="dt">step</span><span class="op">:</span> <span class="dv">1</span><span class="op">,</span> <span class="dt">label</span><span class="op">:</span> <span class="st">"group Size"</span>})</span>
-<span id="cb4-128"><a href="#cb4-128" aria-hidden="true" tabindex="-1"></a>viewof tau_coder <span class="op">=</span> Inputs<span class="op">.</span><span class="fu">range</span>([<span class="dv">1</span><span class="op">,</span> tau_max_gr_size]<span class="op">,</span> {<span class="dt">value</span><span class="op">:</span> <span class="dv">10</span><span class="op">,</span> <span class="dt">step</span><span class="op">:</span> <span class="dv">1</span><span class="op">,</span> <span class="dt">label</span><span class="op">:</span> <span class="st">"# coder"</span>})</span>
-<span id="cb4-129"><a href="#cb4-129" aria-hidden="true" tabindex="-1"></a>viewof tau_nc <span class="op">=</span> Inputs<span class="op">.</span><span class="fu">range</span>([<span class="dv">1</span><span class="op">,</span> max_gr_size]<span class="op">,</span> {<span class="dt">value</span><span class="op">:</span> (tau_N<span class="op">-</span>tau_coder)<span class="op">,</span> <span class="dt">step</span><span class="op">:</span> <span class="fl">1.</span><span class="op">,</span> <span class="dt">label</span><span class="op">:</span> <span class="st">"# non-coder"</span><span class="op">,</span> <span class="dt">disabled</span><span class="op">:</span><span class="kw">true</span>})</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code hidden" id="cb4" data-startfrom="123" data-source-offset="-28"><pre class="sourceCode js code-with-copy"><code class="sourceCode javascript" style="counter-reset: source-line 122;"><span id="cb4-123"><a href="#cb4-123" aria-hidden="true" tabindex="-1"></a><span class="kw">function</span> <span class="fu">tau</span>(n<span class="op">,</span> i<span class="op">,</span> alpha<span class="op">,</span> beta) {</span>
+<span id="cb4-124"><a href="#cb4-124" aria-hidden="true" tabindex="-1"></a>    <span class="kw">const</span> c <span class="op">=</span> <span class="fu">cost_prog</span>(n<span class="op">,</span> i<span class="op">,</span> <span class="dv">1</span>)</span>
+<span id="cb4-125"><a href="#cb4-125" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="bu">Math</span><span class="op">.</span><span class="fu">exp</span>(<span class="op">-</span>alpha <span class="op">+</span> beta<span class="op">*</span>(<span class="dv">1</span> <span class="op">-</span> c))</span>
+<span id="cb4-126"><a href="#cb4-126" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb4-127"><a href="#cb4-127" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-128"><a href="#cb4-128" aria-hidden="true" tabindex="-1"></a>tau_max_gr_size <span class="op">=</span> <span class="dv">20</span></span>
+<span id="cb4-129"><a href="#cb4-129" aria-hidden="true" tabindex="-1"></a>viewof tau_alpha <span class="op">=</span> Inputs<span class="op">.</span><span class="fu">range</span>([<span class="dv">2</span><span class="op">,</span> <span class="dv">4</span>]<span class="op">,</span> {<span class="dt">value</span><span class="op">:</span> <span class="fl">1.</span><span class="op">,</span> <span class="dt">step</span><span class="op">:</span> <span class="dv">1</span><span class="op">,</span> <span class="dt">label</span><span class="op">:</span> <span class="st">"α"</span><span class="op">,</span> <span class="dt">format</span><span class="op">:</span> x <span class="kw">=&gt;</span> <span class="dv">10</span><span class="op">**-</span>x})</span>
+<span id="cb4-130"><a href="#cb4-130" aria-hidden="true" tabindex="-1"></a>viewof tau_beta <span class="op">=</span> Inputs<span class="op">.</span><span class="fu">range</span>([<span class="dv">1</span><span class="op">,</span> <span class="dv">3</span>]<span class="op">,</span> {<span class="dt">value</span><span class="op">:</span> <span class="fl">1.</span><span class="op">,</span> <span class="dt">step</span><span class="op">:</span> <span class="dv">1</span><span class="op">,</span> <span class="dt">label</span><span class="op">:</span> <span class="st">"β"</span><span class="op">,</span> <span class="dt">format</span><span class="op">:</span> x <span class="kw">=&gt;</span> <span class="dv">10</span><span class="op">**-</span>x})</span>
+<span id="cb4-131"><a href="#cb4-131" aria-hidden="true" tabindex="-1"></a>viewof tau_N <span class="op">=</span> Inputs<span class="op">.</span><span class="fu">range</span>([<span class="dv">0</span><span class="op">,</span> tau_max_gr_size]<span class="op">,</span> {<span class="dt">value</span><span class="op">:</span> <span class="dv">20</span><span class="op">,</span> <span class="dt">step</span><span class="op">:</span> <span class="dv">1</span><span class="op">,</span> <span class="dt">label</span><span class="op">:</span> <span class="st">"group Size"</span>})</span>
+<span id="cb4-132"><a href="#cb4-132" aria-hidden="true" tabindex="-1"></a>viewof tau_coder <span class="op">=</span> Inputs<span class="op">.</span><span class="fu">range</span>([<span class="dv">1</span><span class="op">,</span> tau_max_gr_size]<span class="op">,</span> {<span class="dt">value</span><span class="op">:</span> <span class="dv">10</span><span class="op">,</span> <span class="dt">step</span><span class="op">:</span> <span class="dv">1</span><span class="op">,</span> <span class="dt">label</span><span class="op">:</span> <span class="st">"# coder"</span>})</span>
+<span id="cb4-133"><a href="#cb4-133" aria-hidden="true" tabindex="-1"></a>viewof tau_nc <span class="op">=</span> Inputs<span class="op">.</span><span class="fu">range</span>([<span class="dv">1</span><span class="op">,</span> max_gr_size]<span class="op">,</span> {<span class="dt">value</span><span class="op">:</span> (tau_N<span class="op">-</span>tau_coder)<span class="op">,</span> <span class="dt">step</span><span class="op">:</span> <span class="fl">1.</span><span class="op">,</span> <span class="dt">label</span><span class="op">:</span> <span class="st">"# non-coder"</span><span class="op">,</span> <span class="dt">disabled</span><span class="op">:</span><span class="kw">true</span>})</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display">
 <div>
 <div id="ojs-cell-4-1" data-nodetype="declaration">
@@ -471,15 +468,15 @@ Group benefits
 <div class="tab-content">
 <div id="tabset-2-1" class="tab-pane active" role="tabpanel" aria-labelledby="tabset-2-1-tab">
 <div class="cell">
-<div class="sourceCode cell-code hidden" id="cb5" data-startfrom="137" data-source-offset="-0"><pre class="sourceCode js code-with-copy"><code class="sourceCode javascript" style="counter-reset: source-line 136;"><span id="cb5-137"><a href="#cb5-137" aria-hidden="true" tabindex="-1"></a>tau_non_coder <span class="op">=</span> tau_N <span class="op">-</span> tau_coder</span>
-<span id="cb5-138"><a href="#cb5-138" aria-hidden="true" tabindex="-1"></a>tau_xs <span class="op">=</span> [<span class="op">...</span><span class="bu">Array</span>(tau_N)<span class="op">.</span><span class="fu">keys</span>()]<span class="op">;</span></span>
-<span id="cb5-139"><a href="#cb5-139" aria-hidden="true" tabindex="-1"></a>tau_ys <span class="op">=</span> tau_xs<span class="op">.</span><span class="fu">map</span>(x <span class="kw">=&gt;</span> <span class="fu">tau</span>(tau_non_coder<span class="op">,</span> x<span class="op">,</span> <span class="dv">10</span><span class="op">**-</span>tau_alpha<span class="op">,</span> <span class="dv">10</span><span class="op">**-</span>tau_beta))</span>
-<span id="cb5-140"><a href="#cb5-140" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-141"><a href="#cb5-141" aria-hidden="true" tabindex="-1"></a>Plot<span class="op">.</span><span class="fu">lineY</span>(tau_ys)<span class="op">.</span><span class="fu">plot</span>({</span>
-<span id="cb5-142"><a href="#cb5-142" aria-hidden="true" tabindex="-1"></a>    <span class="dt">height</span><span class="op">:</span> <span class="dv">400</span><span class="op">,</span> <span class="dt">width</span><span class="op">:</span> <span class="dv">450</span><span class="op">,</span> <span class="dt">grid</span><span class="op">:</span> <span class="kw">true</span><span class="op">,</span></span>
-<span id="cb5-143"><a href="#cb5-143" aria-hidden="true" tabindex="-1"></a>    <span class="dt">y</span><span class="op">:</span> { <span class="dt">label</span><span class="op">:</span> <span class="st">"↑ τ(α,β;n,p)"</span> }<span class="op">,</span></span>
-<span id="cb5-144"><a href="#cb5-144" aria-hidden="true" tabindex="-1"></a>    <span class="dt">x</span><span class="op">:</span> { <span class="dt">label</span><span class="op">:</span> <span class="st">"p/n →"</span> }</span>
-<span id="cb5-145"><a href="#cb5-145" aria-hidden="true" tabindex="-1"></a>})</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code hidden" id="cb5" data-startfrom="141" data-source-offset="-0"><pre class="sourceCode js code-with-copy"><code class="sourceCode javascript" style="counter-reset: source-line 140;"><span id="cb5-141"><a href="#cb5-141" aria-hidden="true" tabindex="-1"></a>tau_non_coder <span class="op">=</span> tau_N <span class="op">-</span> tau_coder</span>
+<span id="cb5-142"><a href="#cb5-142" aria-hidden="true" tabindex="-1"></a>tau_xs <span class="op">=</span> [<span class="op">...</span><span class="bu">Array</span>(tau_N)<span class="op">.</span><span class="fu">keys</span>()]<span class="op">;</span></span>
+<span id="cb5-143"><a href="#cb5-143" aria-hidden="true" tabindex="-1"></a>tau_ys <span class="op">=</span> tau_xs<span class="op">.</span><span class="fu">map</span>(x <span class="kw">=&gt;</span> <span class="fu">tau</span>(tau_non_coder<span class="op">,</span> x<span class="op">,</span> <span class="dv">10</span><span class="op">**-</span>tau_alpha<span class="op">,</span> <span class="dv">10</span><span class="op">**-</span>tau_beta))</span>
+<span id="cb5-144"><a href="#cb5-144" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-145"><a href="#cb5-145" aria-hidden="true" tabindex="-1"></a>Plot<span class="op">.</span><span class="fu">lineY</span>(tau_ys)<span class="op">.</span><span class="fu">plot</span>({</span>
+<span id="cb5-146"><a href="#cb5-146" aria-hidden="true" tabindex="-1"></a>    <span class="dt">height</span><span class="op">:</span> <span class="dv">400</span><span class="op">,</span> <span class="dt">width</span><span class="op">:</span> <span class="dv">450</span><span class="op">,</span> <span class="dt">grid</span><span class="op">:</span> <span class="kw">true</span><span class="op">,</span></span>
+<span id="cb5-147"><a href="#cb5-147" aria-hidden="true" tabindex="-1"></a>    <span class="dt">y</span><span class="op">:</span> { <span class="dt">label</span><span class="op">:</span> <span class="st">"↑ τ(α,β;n,p)"</span> }<span class="op">,</span></span>
+<span id="cb5-148"><a href="#cb5-148" aria-hidden="true" tabindex="-1"></a>    <span class="dt">x</span><span class="op">:</span> { <span class="dt">label</span><span class="op">:</span> <span class="st">"p/n →"</span> }</span>
+<span id="cb5-149"><a href="#cb5-149" aria-hidden="true" tabindex="-1"></a>})</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display">
 <div>
 <div id="ojs-cell-5-1" data-nodetype="declaration">
@@ -532,45 +529,26 @@ Initialization scheme
 </div>
 <div id="callout-4" class="callout-4-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<div class="sourceCode" id="cb6"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="kw">function</span> <span class="fu">initialize_u0</span>(;N<span class="op">::</span><span class="dt">Int</span>=<span class="fl">20</span>, M<span class="op">::</span><span class="dt">Int</span>=<span class="fl">20</span>, p<span class="op">::</span><span class="dt">Float64</span>=<span class="fl">0.01</span>)</span>
-<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>  <span class="kw">function</span> <span class="fu">make_draw</span>()</span>
-<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>    G <span class="op">=</span> <span class="fu">zeros</span>(N, N<span class="op">+</span><span class="fl">1</span>)</span>
-<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> _ <span class="kw">in</span> <span class="fl">1</span><span class="op">:</span>N</span>
-<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>      n <span class="op">=</span> <span class="fu">rand</span>(<span class="fl">1</span><span class="op">:</span>N)</span>
-<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>      i <span class="op">=</span> <span class="fu">sum</span>(<span class="fu">collect</span>(<span class="fu">rand</span>(<span class="fu">Binomial</span>(<span class="fl">1</span>, p), N))[<span class="fl">1</span>]) <span class="co"># how many total programmers?</span></span>
-<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>      G[n, i<span class="op">+</span><span class="fl">1</span>] <span class="op">+=</span> <span class="fl">1</span> <span class="co"># everytime combination G[ℓ,i], count +1</span></span>
-<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>    <span class="cf">end</span></span>
-<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> G</span>
-<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>  <span class="kw">end</span></span>
-<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>  G <span class="op">=</span> <span class="fu">make_draw</span>()</span>
-<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a>  <span class="co"># making sure we start with zero programmers but we have varying group size</span></span>
-<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a>  <span class="cf">while</span> <span class="fu">sum</span>(G[<span class="op">:</span>,<span class="fl">2</span><span class="op">:</span>N<span class="op">+</span><span class="fl">1</span>]) <span class="op">!=</span> <span class="fl">0</span></span>
-<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a>    G <span class="op">=</span> <span class="fu">make_draw</span>()</span>
-<span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a>  <span class="cf">end</span></span>
-<span id="cb6-19"><a href="#cb6-19" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-20"><a href="#cb6-20" aria-hidden="true" tabindex="-1"></a>  G <span class="op">=</span> G <span class="op">./</span> N <span class="co"># normalized by tot number of groups</span></span>
-<span id="cb6-21"><a href="#cb6-21" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-22"><a href="#cb6-22" aria-hidden="true" tabindex="-1"></a>  hm <span class="op">=</span> <span class="fu">heatmap</span>(G, xlabel<span class="op">=</span><span class="st">"# non-coders"</span>, ylabel<span class="op">=</span><span class="st">"# coders"</span>, title<span class="op">=</span><span class="st">"Frac groups with p coders and n non-coder"</span>, c <span class="op">=</span> <span class="op">:</span>heat)</span>
-<span id="cb6-23"><a href="#cb6-23" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-24"><a href="#cb6-24" aria-hidden="true" tabindex="-1"></a>  <span class="co"># ArrayPartition are nice because we can access the level such as G.x[ℓ][i]</span></span>
-<span id="cb6-25"><a href="#cb6-25" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> <span class="fu">ArrayPartition</span>(<span class="fu">Tuple</span>([G[n,<span class="op">:</span>] for n<span class="op">=</span><span class="fl">1</span><span class="op">:</span>N])), hm</span>
-<span id="cb6-26"><a href="#cb6-26" aria-hidden="true" tabindex="-1"></a><span class="kw">end</span></span>
-<span id="cb6-27"><a href="#cb6-27" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-28"><a href="#cb6-28" aria-hidden="true" tabindex="-1"></a>μ  <span class="op">=</span> <span class="fl">0.001</span>   <span class="co"># inflow new students-non coders</span></span>
-<span id="cb6-29"><a href="#cb6-29" aria-hidden="true" tabindex="-1"></a>νₙ <span class="op">=</span> <span class="fl">0.01</span>    <span class="co"># death rate non-coders</span></span>
-<span id="cb6-30"><a href="#cb6-30" aria-hidden="true" tabindex="-1"></a>νₚ <span class="op">=</span> <span class="fl">0.05</span>    <span class="co"># death rate coders</span></span>
-<span id="cb6-31"><a href="#cb6-31" aria-hidden="true" tabindex="-1"></a>α  <span class="op">=</span> <span class="fl">0.01</span>    <span class="co"># benefits non coders</span></span>
-<span id="cb6-32"><a href="#cb6-32" aria-hidden="true" tabindex="-1"></a>β  <span class="op">=</span> <span class="fl">0.1</span>     <span class="co"># benefits coders</span></span>
-<span id="cb6-33"><a href="#cb6-33" aria-hidden="true" tabindex="-1"></a>p  <span class="op">=</span> [μ, νₙ, νₚ, α, β]</span>
-<span id="cb6-34"><a href="#cb6-34" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-35"><a href="#cb6-35" aria-hidden="true" tabindex="-1"></a>n,M <span class="op">=</span> <span class="fl">20</span>, <span class="fl">1000</span></span>
-<span id="cb6-36"><a href="#cb6-36" aria-hidden="true" tabindex="-1"></a>u₀, hm <span class="op">=</span> <span class="fu">initialize_u0</span>(N<span class="op">=</span>n, M<span class="op">=</span>M, p<span class="op">=</span><span class="fl">0.01</span>)</span>
-<span id="cb6-37"><a href="#cb6-37" aria-hidden="true" tabindex="-1"></a>tspan <span class="op">=</span> (<span class="fl">0</span>., <span class="fl">4000</span>.)</span>
-<span id="cb6-38"><a href="#cb6-38" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-39"><a href="#cb6-39" aria-hidden="true" tabindex="-1"></a>hm <span class="co"># show p_n init mat</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb6"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="kw">function</span> <span class="fu">initialize_u0</span>(;N<span class="op">::</span><span class="dt">Int</span>=<span class="fl">20</span>)</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>  N <span class="op">+=</span> <span class="fl">1</span> <span class="co"># add column for zeroth case</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>  G <span class="op">=</span> <span class="fu">zeros</span>(N, N)</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> i<span class="op">=</span><span class="fl">1</span><span class="op">:</span>N, j<span class="op">=</span><span class="fl">1</span><span class="op">:</span>N</span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>    G[i,j] <span class="op">=</span> <span class="fl">1</span><span class="op">/</span>(N<span class="op">*</span>N)</span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>  <span class="cf">end</span></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> <span class="fu">ArrayPartition</span>(<span class="fu">Tuple</span>([G[n,<span class="op">:</span>] for n<span class="op">=</span><span class="fl">1</span><span class="op">:</span>N]))</span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a><span class="kw">end</span></span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>μ  <span class="op">=</span> <span class="fl">0.001</span>   <span class="co"># inflow new students-non coders</span></span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>νₙ <span class="op">=</span> <span class="fl">0.01</span>    <span class="co"># death rate non-coders</span></span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>νₚ <span class="op">=</span> <span class="fl">0.05</span>    <span class="co"># death rate coders</span></span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a>α  <span class="op">=</span> <span class="fl">0.01</span>    <span class="co"># benefits non coders</span></span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a>β  <span class="op">=</span> <span class="fl">0.1</span>     <span class="co"># benefits coders</span></span>
+<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a>p  <span class="op">=</span> [μ, νₙ, νₚ, α, β]</span>
+<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a>n <span class="op">=</span> <span class="fl">9</span></span>
+<span id="cb6-19"><a href="#cb6-19" aria-hidden="true" tabindex="-1"></a>u₀ <span class="op">=</span> <span class="fu">initialize_u0</span>(N<span class="op">=</span>n)</span>
+<span id="cb6-20"><a href="#cb6-20" aria-hidden="true" tabindex="-1"></a>tspan <span class="op">=</span> (<span class="fl">0</span>., <span class="fl">1000</span>.)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </div>
 </div>
@@ -599,8 +577,8 @@ Initialization scheme
 <section id="output" class="level2">
 <h2 class="anchored" data-anchor-id="output">Output</h2>
 <div class="cell">
-<div class="sourceCode cell-code hidden" id="cb8" data-startfrom="233" data-source-offset="-0"><pre class="sourceCode js code-with-copy"><code class="sourceCode javascript" style="counter-reset: source-line 232;"><span id="cb8-233"><a href="#cb8-233" aria-hidden="true" tabindex="-1"></a>data <span class="op">=</span> <span class="fu">FileAttachment</span>(<span class="st">"data.json"</span>)<span class="op">.</span><span class="fu">json</span>()</span>
-<span id="cb8-234"><a href="#cb8-234" aria-hidden="true" tabindex="-1"></a>p <span class="op">=</span> <span class="bu">Object</span><span class="op">.</span><span class="fu">keys</span>(data)<span class="op">.</span><span class="fu">map</span>(d <span class="kw">=&gt;</span> d<span class="op">.</span><span class="fu">split</span>(<span class="st">"_"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code hidden" id="cb8" data-startfrom="218" data-source-offset="-0"><pre class="sourceCode js code-with-copy"><code class="sourceCode javascript" style="counter-reset: source-line 217;"><span id="cb8-218"><a href="#cb8-218" aria-hidden="true" tabindex="-1"></a>data <span class="op">=</span> <span class="fu">FileAttachment</span>(<span class="st">"data.json"</span>)<span class="op">.</span><span class="fu">json</span>()</span>
+<span id="cb8-219"><a href="#cb8-219" aria-hidden="true" tabindex="-1"></a>p <span class="op">=</span> <span class="bu">Object</span><span class="op">.</span><span class="fu">keys</span>(data)<span class="op">.</span><span class="fu">map</span>(d <span class="kw">=&gt;</span> d<span class="op">.</span><span class="fu">split</span>(<span class="st">"_"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display">
 <div>
 <div id="ojs-cell-6-1" data-nodetype="declaration">
@@ -618,13 +596,14 @@ Initialization scheme
 </div>
 <div class="panel-grid layout-sidebar ms-md-0 layout-sidebar-left">
 <div class="cell panel-sidebar card bg-light p-2 g-col-24 g-col-lg-7">
-<div class="sourceCode cell-code hidden" id="cb9" data-startfrom="240" data-source-offset="-1"><pre class="sourceCode js code-with-copy"><code class="sourceCode javascript" style="counter-reset: source-line 239;"><span id="cb9-240"><a href="#cb9-240" aria-hidden="true" tabindex="-1"></a>minmax <span class="op">=</span> (p<span class="op">,</span> i) <span class="kw">=&gt;</span> d3<span class="op">.</span><span class="fu">extent</span>(p<span class="op">.</span><span class="fu">map</span>(d <span class="kw">=&gt;</span> <span class="pp">parseFloat</span>(d[i])))</span>
-<span id="cb9-241"><a href="#cb9-241" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-242"><a href="#cb9-242" aria-hidden="true" tabindex="-1"></a>viewof mu    <span class="op">=</span> Inputs<span class="op">.</span><span class="fu">range</span>(<span class="fu">minmax</span>(p<span class="op">,</span><span class="dv">0</span>)<span class="op">,</span> {<span class="dt">step</span><span class="op">:</span> <span class="fl">0.03</span><span class="op">,</span> <span class="dt">label</span><span class="op">:</span> <span class="st">"μ"</span><span class="op">,</span> <span class="dt">value</span><span class="op">:</span><span class="st">"0.0001"</span>})</span>
-<span id="cb9-243"><a href="#cb9-243" aria-hidden="true" tabindex="-1"></a>viewof nu_n  <span class="op">=</span> Inputs<span class="op">.</span><span class="fu">range</span>(<span class="fu">minmax</span>(p<span class="op">,</span><span class="dv">0</span>)<span class="op">,</span> {<span class="dt">step</span><span class="op">:</span> <span class="fl">0.05</span><span class="op">,</span> <span class="dt">label</span><span class="op">:</span> <span class="st">"νₙ"</span><span class="op">,</span> <span class="dt">value</span><span class="op">:</span><span class="st">"0.01"</span>})</span>
-<span id="cb9-244"><a href="#cb9-244" aria-hidden="true" tabindex="-1"></a>viewof nu_p  <span class="op">=</span> Inputs<span class="op">.</span><span class="fu">range</span>(<span class="fu">minmax</span>(p<span class="op">,</span><span class="dv">1</span>)<span class="op">,</span> {<span class="dt">step</span><span class="op">:</span> <span class="fl">0.1</span><span class="op">,</span>  <span class="dt">label</span><span class="op">:</span> <span class="st">"νₚ"</span><span class="op">,</span> <span class="dt">value</span><span class="op">:</span><span class="st">"0.05"</span>})</span>
-<span id="cb9-245"><a href="#cb9-245" aria-hidden="true" tabindex="-1"></a>viewof alpha <span class="op">=</span> Inputs<span class="op">.</span><span class="fu">range</span>(<span class="fu">minmax</span>(p<span class="op">,</span><span class="dv">2</span>)<span class="op">,</span> {<span class="dt">step</span><span class="op">:</span> <span class="fl">0.15</span><span class="op">,</span> <span class="dt">label</span><span class="op">:</span> <span class="st">"α"</span><span class="op">,</span> <span class="dt">value</span><span class="op">:</span><span class="st">"0.01"</span>})</span>
-<span id="cb9-246"><a href="#cb9-246" aria-hidden="true" tabindex="-1"></a>viewof beta  <span class="op">=</span> Inputs<span class="op">.</span><span class="fu">range</span>(<span class="fu">minmax</span>(p<span class="op">,</span><span class="dv">3</span>)<span class="op">,</span> {<span class="dt">step</span><span class="op">:</span> <span class="fl">0.05</span><span class="op">,</span> <span class="dt">label</span><span class="op">:</span> <span class="st">"β"</span><span class="op">,</span> <span class="dt">value</span><span class="op">:</span><span class="st">"0.1"</span>})</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code hidden" id="cb9" data-startfrom="224" data-source-offset="-0"><pre class="sourceCode js code-with-copy"><code class="sourceCode javascript" style="counter-reset: source-line 223;"><span id="cb9-224"><a href="#cb9-224" aria-hidden="true" tabindex="-1"></a>minmax <span class="op">=</span> (p<span class="op">,</span> i) <span class="kw">=&gt;</span> d3<span class="op">.</span><span class="fu">extent</span>(p<span class="op">.</span><span class="fu">map</span>(d <span class="kw">=&gt;</span> <span class="pp">parseFloat</span>(d[i])))</span>
+<span id="cb9-225"><a href="#cb9-225" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-226"><a href="#cb9-226" aria-hidden="true" tabindex="-1"></a>viewof N_    <span class="op">=</span> Inputs<span class="op">.</span><span class="fu">range</span>(<span class="fu">minmax</span>(p<span class="op">,</span><span class="dv">0</span>)<span class="op">,</span> {<span class="dt">step</span><span class="op">:</span> <span class="dv">1</span><span class="op">,</span> <span class="dt">label</span><span class="op">:</span> <span class="st">"N"</span><span class="op">,</span> <span class="dt">value</span><span class="op">:</span><span class="st">"9"</span>})</span>
+<span id="cb9-227"><a href="#cb9-227" aria-hidden="true" tabindex="-1"></a>viewof mu    <span class="op">=</span> Inputs<span class="op">.</span><span class="fu">range</span>(<span class="fu">minmax</span>(p<span class="op">,</span><span class="dv">1</span>)<span class="op">,</span> {<span class="dt">step</span><span class="op">:</span> <span class="fl">0.03</span><span class="op">,</span> <span class="dt">label</span><span class="op">:</span> <span class="st">"μ"</span><span class="op">,</span> <span class="dt">value</span><span class="op">:</span><span class="st">"0.0001"</span>})</span>
+<span id="cb9-228"><a href="#cb9-228" aria-hidden="true" tabindex="-1"></a>viewof nu_n  <span class="op">=</span> Inputs<span class="op">.</span><span class="fu">range</span>(<span class="fu">minmax</span>(p<span class="op">,</span><span class="dv">2</span>)<span class="op">,</span> {<span class="dt">step</span><span class="op">:</span> <span class="fl">0.05</span><span class="op">,</span> <span class="dt">label</span><span class="op">:</span> <span class="st">"νₙ"</span><span class="op">,</span> <span class="dt">value</span><span class="op">:</span><span class="st">"0.01"</span>})</span>
+<span id="cb9-229"><a href="#cb9-229" aria-hidden="true" tabindex="-1"></a>viewof nu_p  <span class="op">=</span> Inputs<span class="op">.</span><span class="fu">range</span>(<span class="fu">minmax</span>(p<span class="op">,</span><span class="dv">3</span>)<span class="op">,</span> {<span class="dt">step</span><span class="op">:</span> <span class="fl">0.1</span><span class="op">,</span>  <span class="dt">label</span><span class="op">:</span> <span class="st">"νₚ"</span><span class="op">,</span> <span class="dt">value</span><span class="op">:</span><span class="st">"0.05"</span>})</span>
+<span id="cb9-230"><a href="#cb9-230" aria-hidden="true" tabindex="-1"></a>viewof alpha <span class="op">=</span> Inputs<span class="op">.</span><span class="fu">range</span>(<span class="fu">minmax</span>(p<span class="op">,</span><span class="dv">4</span>)<span class="op">,</span> {<span class="dt">step</span><span class="op">:</span> <span class="fl">0.15</span><span class="op">,</span> <span class="dt">label</span><span class="op">:</span> <span class="st">"α"</span><span class="op">,</span> <span class="dt">value</span><span class="op">:</span><span class="st">"0.01"</span>})</span>
+<span id="cb9-231"><a href="#cb9-231" aria-hidden="true" tabindex="-1"></a>viewof beta  <span class="op">=</span> Inputs<span class="op">.</span><span class="fu">range</span>(<span class="fu">minmax</span>(p<span class="op">,</span><span class="dv">5</span>)<span class="op">,</span> {<span class="dt">step</span><span class="op">:</span> <span class="fl">0.05</span><span class="op">,</span> <span class="dt">label</span><span class="op">:</span> <span class="st">"β"</span><span class="op">,</span> <span class="dt">value</span><span class="op">:</span><span class="st">"0.1"</span>})</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display">
 <div>
 <div id="ojs-cell-7-1" data-nodetype="declaration">
@@ -667,11 +646,36 @@ Initialization scheme
 </div>
 </div>
 </div>
+<div class="cell-output cell-output-display">
+<div>
+<div id="ojs-cell-7-7" data-nodetype="declaration">
+
 </div>
-<div class="panel-fill g-col-24 g-col-lg-17 pt-3 pt-lg-0">
+</div>
+</div>
+</div>
+<div class="panel-tabset g-col-24 g-col-lg-17 pt-3 pt-lg-0">
+<ul class="nav nav-tabs" role="tablist"><li class="nav-item" role="presentation"><a class="nav-link active" id="tabset-3-1-tab" data-bs-toggle="tab" data-bs-target="#tabset-3-1" role="tab" aria-controls="tabset-3-1" aria-selected="true">Plot</a></li></ul>
+<div class="tab-content">
+<div id="tabset-3-1" class="tab-pane active" role="tabpanel" aria-labelledby="tabset-3-1-tab">
 <div class="cell">
-<div class="sourceCode cell-code hidden" id="cb10" data-startfrom="250" data-source-offset="-0"><pre class="sourceCode js code-with-copy"><code class="sourceCode javascript" style="counter-reset: source-line 249;"><span id="cb10-250"><a href="#cb10-250" aria-hidden="true" tabindex="-1"></a>viewof myN    <span class="op">=</span> Inputs<span class="op">.</span><span class="fu">range</span>([<span class="dv">1</span><span class="op">,</span><span class="dv">11</span>]<span class="op">,</span> {<span class="dt">step</span><span class="op">:</span> <span class="dv">1</span><span class="op">,</span> <span class="dt">label</span><span class="op">:</span> <span class="st">"sekect N"</span>})</span>
-<span id="cb10-251"><a href="#cb10-251" aria-hidden="true" tabindex="-1"></a>Inputs<span class="op">.</span><span class="fu">table</span>(data[<span class="st">"0.001_0.01_0.05_0.01_0.1"</span>]<span class="op">.</span><span class="fu">filter</span>(d <span class="kw">=&gt;</span> d<span class="op">.</span><span class="at">N</span> <span class="op">==</span> myN))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code hidden" id="cb10" data-startfrom="239" data-source-offset="-0"><pre class="sourceCode js code-with-copy"><code class="sourceCode javascript" style="counter-reset: source-line 238;"><span id="cb10-239"><a href="#cb10-239" aria-hidden="true" tabindex="-1"></a>f <span class="op">=</span> (x) <span class="kw">=&gt;</span> <span class="bu">Number</span><span class="op">.</span><span class="fu">isInteger</span>(x) <span class="op">?</span> x<span class="op">.</span><span class="fu">toPrecision</span>(<span class="dv">2</span>) <span class="op">:</span> x</span>
+<span id="cb10-240"><a href="#cb10-240" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-241"><a href="#cb10-241" aria-hidden="true" tabindex="-1"></a>Plot<span class="op">.</span><span class="fu">plot</span>({</span>
+<span id="cb10-242"><a href="#cb10-242" aria-hidden="true" tabindex="-1"></a>  <span class="dt">x</span><span class="op">:</span> {<span class="dt">type</span><span class="op">:</span><span class="st">"log"</span>}<span class="op">,</span></span>
+<span id="cb10-243"><a href="#cb10-243" aria-hidden="true" tabindex="-1"></a>  <span class="dt">y</span><span class="op">:</span> {<span class="dt">domain</span><span class="op">:</span> [<span class="dv">0</span><span class="op">,</span><span class="dv">1</span>]}<span class="op">,</span></span>
+<span id="cb10-244"><a href="#cb10-244" aria-hidden="true" tabindex="-1"></a>  <span class="dt">color</span><span class="op">:</span> {<span class="dt">scheme</span><span class="op">:</span> <span class="st">"reds"</span><span class="op">,</span> <span class="dt">type</span><span class="op">:</span> <span class="st">"ordinal"</span><span class="op">,</span> <span class="dt">legend</span><span class="op">:</span> <span class="kw">true</span>}<span class="op">,</span></span>
+<span id="cb10-245"><a href="#cb10-245" aria-hidden="true" tabindex="-1"></a>  <span class="dt">marks</span><span class="op">:</span> [</span>
+<span id="cb10-246"><a href="#cb10-246" aria-hidden="true" tabindex="-1"></a>    Plot<span class="op">.</span><span class="fu">line</span>(</span>
+<span id="cb10-247"><a href="#cb10-247" aria-hidden="true" tabindex="-1"></a>      data[<span class="vs">`</span><span class="sc">${</span><span class="fu">f</span>(N_)<span class="sc">}</span><span class="vs">_</span><span class="sc">${</span><span class="fu">f</span>(mu)<span class="sc">}</span><span class="vs">_</span><span class="sc">${</span><span class="fu">f</span>(nu_n)<span class="sc">}</span><span class="vs">_</span><span class="sc">${</span><span class="fu">f</span>(nu_p)<span class="sc">}</span><span class="vs">_</span><span class="sc">${</span><span class="fu">f</span>(alpha)<span class="sc">}</span><span class="vs">_</span><span class="sc">${</span><span class="fu">f</span>(beta)<span class="sc">}</span><span class="vs">`</span>]<span class="op">,</span> {</span>
+<span id="cb10-248"><a href="#cb10-248" aria-hidden="true" tabindex="-1"></a>        <span class="dt">x</span><span class="op">:</span> <span class="st">'timesteps'</span><span class="op">,</span> <span class="dt">y</span><span class="op">:</span> <span class="st">"value"</span><span class="op">,</span> <span class="dt">stroke</span><span class="op">:</span> <span class="st">"N"</span></span>
+<span id="cb10-249"><a href="#cb10-249" aria-hidden="true" tabindex="-1"></a>        })<span class="op">,</span></span>
+<span id="cb10-250"><a href="#cb10-250" aria-hidden="true" tabindex="-1"></a>    Plot<span class="op">.</span><span class="fu">dot</span>(</span>
+<span id="cb10-251"><a href="#cb10-251" aria-hidden="true" tabindex="-1"></a>      data[<span class="vs">`</span><span class="sc">${</span><span class="fu">f</span>(N_)<span class="sc">}</span><span class="vs">_</span><span class="sc">${</span><span class="fu">f</span>(mu)<span class="sc">}</span><span class="vs">_</span><span class="sc">${</span><span class="fu">f</span>(nu_n)<span class="sc">}</span><span class="vs">_</span><span class="sc">${</span><span class="fu">f</span>(nu_p)<span class="sc">}</span><span class="vs">_</span><span class="sc">${</span><span class="fu">f</span>(alpha)<span class="sc">}</span><span class="vs">_</span><span class="sc">${</span><span class="fu">f</span>(beta)<span class="sc">}</span><span class="vs">`</span>]<span class="op">,</span> {</span>
+<span id="cb10-252"><a href="#cb10-252" aria-hidden="true" tabindex="-1"></a>        <span class="dt">x</span><span class="op">:</span> <span class="st">'timesteps'</span><span class="op">,</span> <span class="dt">y</span><span class="op">:</span> <span class="st">"value"</span><span class="op">,</span> <span class="dt">stroke</span><span class="op">:</span> <span class="st">"N"</span></span>
+<span id="cb10-253"><a href="#cb10-253" aria-hidden="true" tabindex="-1"></a>        })</span>
+<span id="cb10-254"><a href="#cb10-254" aria-hidden="true" tabindex="-1"></a>  ]</span>
+<span id="cb10-255"><a href="#cb10-255" aria-hidden="true" tabindex="-1"></a>})</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display">
 <div>
 <div id="ojs-cell-8-1" data-nodetype="declaration">
@@ -682,36 +686,6 @@ Initialization scheme
 <div class="cell-output cell-output-display">
 <div>
 <div id="ojs-cell-8-2" data-nodetype="expression">
-
-</div>
-</div>
-</div>
-</div>
-<div class="panel-tabset">
-<ul class="nav nav-tabs" role="tablist"><li class="nav-item" role="presentation"><a class="nav-link active" id="tabset-3-1-tab" data-bs-toggle="tab" data-bs-target="#tabset-3-1" role="tab" aria-controls="tabset-3-1" aria-selected="true">Plot</a></li></ul>
-<div class="tab-content">
-<div id="tabset-3-1" class="tab-pane active" role="tabpanel" aria-labelledby="tabset-3-1-tab">
-<div class="cell">
-<div class="sourceCode cell-code hidden" id="cb11" data-startfrom="259" data-source-offset="0"><pre class="sourceCode js code-with-copy"><code class="sourceCode javascript" style="counter-reset: source-line 258;"><span id="cb11-259"><a href="#cb11-259" aria-hidden="true" tabindex="-1"></a><span class="co">// f = (x) =&gt; Number.isInteger(x) ? x.toPrecision(2) : x</span></span>
-<span id="cb11-260"><a href="#cb11-260" aria-hidden="true" tabindex="-1"></a><span class="co">// Inputs.table(data["0.001_0.01_0.05_0.01_0.1"])</span></span>
-<span id="cb11-261"><a href="#cb11-261" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb11-262"><a href="#cb11-262" aria-hidden="true" tabindex="-1"></a>Plot<span class="op">.</span><span class="fu">plot</span>({</span>
-<span id="cb11-263"><a href="#cb11-263" aria-hidden="true" tabindex="-1"></a>  <span class="dt">x</span><span class="op">:</span> {<span class="dt">type</span><span class="op">:</span><span class="st">"log"</span>}<span class="op">,</span></span>
-<span id="cb11-264"><a href="#cb11-264" aria-hidden="true" tabindex="-1"></a>  <span class="dt">y</span><span class="op">:</span> {<span class="dt">domain</span><span class="op">:</span> [<span class="dv">0</span><span class="op">,</span><span class="dv">1</span>]}<span class="op">,</span></span>
-<span id="cb11-265"><a href="#cb11-265" aria-hidden="true" tabindex="-1"></a>  <span class="dt">color</span><span class="op">:</span> {<span class="dt">scheme</span><span class="op">:</span> <span class="st">"reds"</span><span class="op">,</span> <span class="dt">type</span><span class="op">:</span> <span class="st">"ordinal"</span><span class="op">,</span> <span class="dt">legend</span><span class="op">:</span> <span class="kw">true</span>}<span class="op">,</span></span>
-<span id="cb11-266"><a href="#cb11-266" aria-hidden="true" tabindex="-1"></a>  <span class="dt">marks</span><span class="op">:</span> [</span>
-<span id="cb11-267"><a href="#cb11-267" aria-hidden="true" tabindex="-1"></a>    Plot<span class="op">.</span><span class="fu">line</span>(</span>
-<span id="cb11-268"><a href="#cb11-268" aria-hidden="true" tabindex="-1"></a>      data[<span class="st">"0.001_0.01_0.05_0.01_0.1"</span>]<span class="op">,</span> {</span>
-<span id="cb11-269"><a href="#cb11-269" aria-hidden="true" tabindex="-1"></a>        <span class="dt">x</span><span class="op">:</span> <span class="st">'timesteps'</span><span class="op">,</span> <span class="dt">y</span><span class="op">:</span> <span class="st">"value"</span><span class="op">,</span> <span class="dt">stroke</span><span class="op">:</span> <span class="st">"N"</span></span>
-<span id="cb11-270"><a href="#cb11-270" aria-hidden="true" tabindex="-1"></a>        })<span class="op">,</span></span>
-<span id="cb11-271"><a href="#cb11-271" aria-hidden="true" tabindex="-1"></a>    Plot<span class="op">.</span><span class="fu">dot</span>(</span>
-<span id="cb11-272"><a href="#cb11-272" aria-hidden="true" tabindex="-1"></a>      data[<span class="st">"0.001_0.01_0.05_0.01_0.1"</span>]<span class="op">,</span> {</span>
-<span id="cb11-273"><a href="#cb11-273" aria-hidden="true" tabindex="-1"></a>        <span class="dt">x</span><span class="op">:</span> <span class="st">'timesteps'</span><span class="op">,</span> <span class="dt">y</span><span class="op">:</span> <span class="st">"value"</span><span class="op">,</span> <span class="dt">stroke</span><span class="op">:</span> <span class="st">"N"</span></span>
-<span id="cb11-274"><a href="#cb11-274" aria-hidden="true" tabindex="-1"></a>        })</span>
-<span id="cb11-275"><a href="#cb11-275" aria-hidden="true" tabindex="-1"></a>  ]</span>
-<span id="cb11-276"><a href="#cb11-276" aria-hidden="true" tabindex="-1"></a>})</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display">
-<div id="ojs-cell-9" data-nodetype="expression">
 
 </div>
 </div>
@@ -754,9 +728,8 @@ Initialization scheme
 </section>
 
 </main> <!-- /main -->
-
 <script type="ojs-module-contents">
-{"contents":[{"methodName":"interpret","cellName":"ojs-cell-1","inline":false,"source":"\n// i == p == # programmers\nfunction cost_prog(n, i, c_0) { return c_0 * Math.exp(-i/n); }\nfunction cost_prog2(n, i, c_0) { return c_0 * Math.exp(-i/(n+i)); }\n\nmax_gr_size = 20\nviewof N = Inputs.range([1, max_gr_size], {value: 20, step: 1, label: \"group Size\"})\nviewof coder = Inputs.range([0, (N-1)], {value: 10, step: 1, label: \"# coder\"})\nviewof c_0 = Inputs.range([0, 1], {value: 0.95, step: 0.01, label: \"c₀\"})\nviewof nc = Inputs.range([1, N], {value: (N-coder), step: 1., label: \"# non-coder\", disabled:true})\n"},{"methodName":"interpret","cellName":"ojs-cell-2","inline":false,"source":"non_coder = N - coder\nxs = [...Array(N).keys()];\nys = xs.map(x => cost_prog(non_coder, x, c_0))\n\n\nPlot.lineY(ys).plot({\n    height: 400, width: 450, grid: true,\n    y: { label: \"↑ c(n,p)\", domain:[0,1] },\n    x: { label: \"p/n →\" }\n})\n"},{"methodName":"interpret","cellName":"ojs-cell-3","inline":false,"source":"x2s = [...Array(N).keys()];\ny2s = x2s.map(x => cost_prog2(non_coder, x, c_0))\n\nPlot.lineY(y2s).plot({\n    height: 400, width: 450, grid: true,\n    y: { label: \"↑ c(n,p)\", domain:[0,1] },\n    x: { label: \"p/n →\" }\n})\n"},{"methodName":"interpret","cellName":"ojs-cell-4","inline":false,"source":"\n// i == p == # programmers\nfunction tau(n, i, alpha, beta) {\n    const c = cost_prog(n, i, 1)\n    return Math.exp(-alpha + beta*(1 - c))\n}\n\ntau_max_gr_size = 20\nviewof tau_alpha = Inputs.range([2, 4], {value: 1., step: 1, label: \"α\", format: x => 10**-x})\nviewof tau_beta = Inputs.range([1, 3], {value: 1., step: 1, label: \"β\", format: x => 10**-x})\nviewof tau_N = Inputs.range([0, tau_max_gr_size], {value: 20, step: 1, label: \"group Size\"})\nviewof tau_coder = Inputs.range([1, tau_max_gr_size], {value: 10, step: 1, label: \"# coder\"})\nviewof tau_nc = Inputs.range([1, max_gr_size], {value: (tau_N-tau_coder), step: 1., label: \"# non-coder\", disabled:true})\n"},{"methodName":"interpret","cellName":"ojs-cell-5","inline":false,"source":"tau_non_coder = tau_N - tau_coder\ntau_xs = [...Array(tau_N).keys()];\ntau_ys = tau_xs.map(x => tau(tau_non_coder, x, 10**-tau_alpha, 10**-tau_beta))\n\nPlot.lineY(tau_ys).plot({\n    height: 400, width: 450, grid: true,\n    y: { label: \"↑ τ(α,β;n,p)\" },\n    x: { label: \"p/n →\" }\n})\n"},{"methodName":"interpret","cellName":"ojs-cell-6","inline":false,"source":"data = FileAttachment(\"data.json\").json()\np = Object.keys(data).map(d => d.split(\"_\")) //unpack params\n"},{"methodName":"interpret","cellName":"ojs-cell-7","inline":false,"source":"\nminmax = (p, i) => d3.extent(p.map(d => parseFloat(d[i])))\n\nviewof mu    = Inputs.range(minmax(p,0), {step: 0.03, label: \"μ\", value:\"0.0001\"})\nviewof nu_n  = Inputs.range(minmax(p,0), {step: 0.05, label: \"νₙ\", value:\"0.01\"})\nviewof nu_p  = Inputs.range(minmax(p,1), {step: 0.1,  label: \"νₚ\", value:\"0.05\"})\nviewof alpha = Inputs.range(minmax(p,2), {step: 0.15, label: \"α\", value:\"0.01\"})\nviewof beta  = Inputs.range(minmax(p,3), {step: 0.05, label: \"β\", value:\"0.1\"})\n"},{"methodName":"interpret","cellName":"ojs-cell-8","inline":false,"source":"viewof myN    = Inputs.range([1,11], {step: 1, label: \"sekect N\"})\nInputs.table(data[\"0.001_0.01_0.05_0.01_0.1\"].filter(d => d.N == myN))\n"},{"methodName":"interpret","cellName":"ojs-cell-9","inline":false,"source":"// f = (x) => Number.isInteger(x) ? x.toPrecision(2) : x\n// Inputs.table(data[\"0.001_0.01_0.05_0.01_0.1\"])\n\nPlot.plot({\n  x: {type:\"log\"},\n  y: {domain: [0,1]},\n  color: {scheme: \"reds\", type: \"ordinal\", legend: true},\n  marks: [\n    Plot.line(\n      data[\"0.001_0.01_0.05_0.01_0.1\"], {\n        x: 'timesteps', y: \"value\", stroke: \"N\"\n        }),\n    Plot.dot(\n      data[\"0.001_0.01_0.05_0.01_0.1\"], {\n        x: 'timesteps', y: \"value\", stroke: \"N\"\n        })\n  ]\n})\n"},{"methodName":"interpretQuiet","source":"shinyInput('N')"},{"methodName":"interpretQuiet","source":"shinyInput('coder')"},{"methodName":"interpretQuiet","source":"shinyInput('c_0')"},{"methodName":"interpretQuiet","source":"shinyInput('nc')"},{"methodName":"interpretQuiet","source":"shinyInput('tau_alpha')"},{"methodName":"interpretQuiet","source":"shinyInput('tau_beta')"},{"methodName":"interpretQuiet","source":"shinyInput('tau_N')"},{"methodName":"interpretQuiet","source":"shinyInput('tau_coder')"},{"methodName":"interpretQuiet","source":"shinyInput('tau_nc')"},{"methodName":"interpretQuiet","source":"shinyInput('mu')"},{"methodName":"interpretQuiet","source":"shinyInput('nu_n')"},{"methodName":"interpretQuiet","source":"shinyInput('nu_p')"},{"methodName":"interpretQuiet","source":"shinyInput('alpha')"},{"methodName":"interpretQuiet","source":"shinyInput('beta')"},{"methodName":"interpretQuiet","source":"shinyInput('myN')"}]}
+{"contents":[{"methodName":"interpret","cellName":"ojs-cell-1","inline":false,"source":"\n// i == p == # programmers\nfunction cost_prog(n, i, c_0) { return c_0 * Math.exp(-i/n); }\nfunction cost_prog2(n, i, c_0) { return c_0 * Math.exp(-i/(n+i)); }\n\nmax_gr_size = 20\nviewof N = Inputs.range([1, max_gr_size], {value: 20, step: 1, label: \"group Size\"})\nviewof coder = Inputs.range([0, (N-1)], {value: 10, step: 1, label: \"# coder\"})\nviewof c_0 = Inputs.range([0, 1], {value: 0.95, step: 0.01, label: \"c₀\"})\nviewof nc = Inputs.range([1, N], {value: (N-coder), step: 1., label: \"# non-coder\", disabled:true})\n"},{"methodName":"interpret","cellName":"ojs-cell-2","inline":false,"source":"non_coder = N - coder\nxs = [...Array(N).keys()];\nys = xs.map(x => cost_prog(non_coder, x, c_0))\n\n\nPlot.lineY(ys).plot({\n    height: 400, width: 450, grid: true,\n    y: { label: \"↑ c(n,p)\", domain:[0,1] },\n    x: { label: \"p/n →\" }\n})\n"},{"methodName":"interpret","cellName":"ojs-cell-3","inline":false,"source":"x2s = [...Array(N).keys()];\ny2s = x2s.map(x => cost_prog2(non_coder, x, c_0))\n\nPlot.lineY(y2s).plot({\n    height: 400, width: 450, grid: true,\n    y: { label: \"↑ c(n,p)\", domain:[0,1] },\n    x: { label: \"p/n →\" }\n})\n"},{"methodName":"interpret","cellName":"ojs-cell-4","inline":false,"source":"\n// i == p == # programmers\nfunction tau(n, i, alpha, beta) {\n    const c = cost_prog(n, i, 1)\n    return Math.exp(-alpha + beta*(1 - c))\n}\n\ntau_max_gr_size = 20\nviewof tau_alpha = Inputs.range([2, 4], {value: 1., step: 1, label: \"α\", format: x => 10**-x})\nviewof tau_beta = Inputs.range([1, 3], {value: 1., step: 1, label: \"β\", format: x => 10**-x})\nviewof tau_N = Inputs.range([0, tau_max_gr_size], {value: 20, step: 1, label: \"group Size\"})\nviewof tau_coder = Inputs.range([1, tau_max_gr_size], {value: 10, step: 1, label: \"# coder\"})\nviewof tau_nc = Inputs.range([1, max_gr_size], {value: (tau_N-tau_coder), step: 1., label: \"# non-coder\", disabled:true})\n"},{"methodName":"interpret","cellName":"ojs-cell-5","inline":false,"source":"tau_non_coder = tau_N - tau_coder\ntau_xs = [...Array(tau_N).keys()];\ntau_ys = tau_xs.map(x => tau(tau_non_coder, x, 10**-tau_alpha, 10**-tau_beta))\n\nPlot.lineY(tau_ys).plot({\n    height: 400, width: 450, grid: true,\n    y: { label: \"↑ τ(α,β;n,p)\" },\n    x: { label: \"p/n →\" }\n})\n"},{"methodName":"interpret","cellName":"ojs-cell-6","inline":false,"source":"data = FileAttachment(\"data.json\").json()\np = Object.keys(data).map(d => d.split(\"_\")) //unpack params\n"},{"methodName":"interpret","cellName":"ojs-cell-7","inline":false,"source":"minmax = (p, i) => d3.extent(p.map(d => parseFloat(d[i])))\n\nviewof N_    = Inputs.range(minmax(p,0), {step: 1, label: \"N\", value:\"9\"})\nviewof mu    = Inputs.range(minmax(p,1), {step: 0.03, label: \"μ\", value:\"0.0001\"})\nviewof nu_n  = Inputs.range(minmax(p,2), {step: 0.05, label: \"νₙ\", value:\"0.01\"})\nviewof nu_p  = Inputs.range(minmax(p,3), {step: 0.1,  label: \"νₚ\", value:\"0.05\"})\nviewof alpha = Inputs.range(minmax(p,4), {step: 0.15, label: \"α\", value:\"0.01\"})\nviewof beta  = Inputs.range(minmax(p,5), {step: 0.05, label: \"β\", value:\"0.1\"})\n"},{"methodName":"interpret","cellName":"ojs-cell-8","inline":false,"source":"f = (x) => Number.isInteger(x) ? x.toPrecision(2) : x\n\nPlot.plot({\n  x: {type:\"log\"},\n  y: {domain: [0,1]},\n  color: {scheme: \"reds\", type: \"ordinal\", legend: true},\n  marks: [\n    Plot.line(\n      data[`${f(N_)}_${f(mu)}_${f(nu_n)}_${f(nu_p)}_${f(alpha)}_${f(beta)}`], {\n        x: 'timesteps', y: \"value\", stroke: \"N\"\n        }),\n    Plot.dot(\n      data[`${f(N_)}_${f(mu)}_${f(nu_n)}_${f(nu_p)}_${f(alpha)}_${f(beta)}`], {\n        x: 'timesteps', y: \"value\", stroke: \"N\"\n        })\n  ]\n})\n"},{"methodName":"interpretQuiet","source":"shinyInput('N')"},{"methodName":"interpretQuiet","source":"shinyInput('coder')"},{"methodName":"interpretQuiet","source":"shinyInput('c_0')"},{"methodName":"interpretQuiet","source":"shinyInput('nc')"},{"methodName":"interpretQuiet","source":"shinyInput('tau_alpha')"},{"methodName":"interpretQuiet","source":"shinyInput('tau_beta')"},{"methodName":"interpretQuiet","source":"shinyInput('tau_N')"},{"methodName":"interpretQuiet","source":"shinyInput('tau_coder')"},{"methodName":"interpretQuiet","source":"shinyInput('tau_nc')"},{"methodName":"interpretQuiet","source":"shinyInput('N_')"},{"methodName":"interpretQuiet","source":"shinyInput('mu')"},{"methodName":"interpretQuiet","source":"shinyInput('nu_n')"},{"methodName":"interpretQuiet","source":"shinyInput('nu_p')"},{"methodName":"interpretQuiet","source":"shinyInput('alpha')"},{"methodName":"interpretQuiet","source":"shinyInput('beta')"}]}
 </script>
 <script type="module">
 window._ojs.paths.runtimeToDoc = "../../posts/sci-group-life-cycle";
@@ -806,24 +779,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
     button.classList.add('code-copy-button-checked');
     var currentTitle = button.getAttribute("title");
     button.setAttribute("title", "Copied!");
-    let tooltip;
-    if (window.bootstrap) {
-      button.setAttribute("data-bs-toggle", "tooltip");
-      button.setAttribute("data-bs-placement", "left");
-      button.setAttribute("data-bs-title", "Copied!");
-      tooltip = new bootstrap.Tooltip(button, 
-        { trigger: "manual", 
-          customClass: "code-copy-button-tooltip",
-          offset: [0, -8]});
-      tooltip.show();    
-    }
     setTimeout(function() {
-      if (tooltip) {
-        tooltip.hide();
-        button.removeAttribute("data-bs-title");
-        button.removeAttribute("data-bs-toggle");
-        button.removeAttribute("data-bs-placement");
-      }
       button.setAttribute("title", currentTitle);
       button.classList.remove('code-copy-button-checked');
     }, 1000);
@@ -851,50 +807,31 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
   for (var i=0; i<noterefs.length; i++) {
     const ref = noterefs[i];
     tippyHover(ref, function() {
-      // use id or data attribute instead here
-      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      let href = ref.getAttribute('href');
       try { href = new URL(href).hash; } catch {}
       const id = href.replace(/^#\/?/, "");
       const note = window.document.getElementById(id);
       return note.innerHTML;
     });
   }
-  const findCites = (el) => {
-    const parentEl = el.parentElement;
-    if (parentEl) {
-      const cites = parentEl.dataset.cites;
-      if (cites) {
-        return {
-          el,
-          cites: cites.split(' ')
-        };
-      } else {
-        return findCites(el.parentElement)
-      }
-    } else {
-      return undefined;
-    }
-  };
   var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
   for (var i=0; i<bibliorefs.length; i++) {
     const ref = bibliorefs[i];
-    const citeInfo = findCites(ref);
-    if (citeInfo) {
-      tippyHover(citeInfo.el, function() {
-        var popup = window.document.createElement('div');
-        citeInfo.cites.forEach(function(cite) {
-          var citeDiv = window.document.createElement('div');
-          citeDiv.classList.add('hanging-indent');
-          citeDiv.classList.add('csl-entry');
-          var biblioDiv = window.document.getElementById('ref-' + cite);
-          if (biblioDiv) {
-            citeDiv.innerHTML = biblioDiv.innerHTML;
-          }
-          popup.appendChild(citeDiv);
-        });
-        return popup.innerHTML;
+    const cites = ref.parentNode.getAttribute('data-cites').split(' ');
+    tippyHover(ref, function() {
+      var popup = window.document.createElement('div');
+      cites.forEach(function(cite) {
+        var citeDiv = window.document.createElement('div');
+        citeDiv.classList.add('hanging-indent');
+        citeDiv.classList.add('csl-entry');
+        var biblioDiv = window.document.getElementById('ref-' + cite);
+        if (biblioDiv) {
+          citeDiv.innerHTML = biblioDiv.innerHTML;
+        }
+        popup.appendChild(citeDiv);
       });
-    }
+      return popup.innerHTML;
+    });
   }
 });
 </script>
