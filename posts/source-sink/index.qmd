@@ -5,6 +5,9 @@ format:
   html:
     echo: false
 editor: visual
+categories:
+  - Approximate Master Equations
+  - Institutions
 image: unions.jpg
 ---
 

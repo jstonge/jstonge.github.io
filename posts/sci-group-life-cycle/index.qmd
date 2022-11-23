@@ -4,6 +4,10 @@ description: This model describes the dilemma of learning to code in research gr
 format:
   html:
     echo: false
+categories:
+  - Approximate Master Equations
+  - Scientific Groups
+  - Programming in Science
 editor: visual
 ---
 
@@ -158,31 +162,14 @@ $p/n$ $\Rightarrow$ ${coder}`/` ${non_coder} = ${(tau_coder/(tau_nc)).toFixed(2)
 ## Initialization scheme
 
 ```julia
-function initialize_u0(;N::Int=20, M::Int=20, p::Float64=0.01)
-
-  function make_draw()
-    G = zeros(N, N+1)
-    for _ in 1:N
-      n = rand(1:N)
-      i = sum(collect(rand(Binomial(1, p), N))[1]) # how many total programmers?
-      G[n, i+1] += 1 # everytime combination G[ℓ,i], count +1
-    end
-    return G
+function initialize_u0(;N::Int=20)
+  N += 1 # add column for zeroth case
+  G = zeros(N, N)
+  
+  for i=1:N, j=1:N
+    G[i,j] = 1/(N*N)
   end
-
-  G = make_draw()
-
-  # making sure we start with zero programmers but we have varying group size
-  while sum(G[:,2:N+1]) != 0
-    G = make_draw()
-  end
-
-  G = G ./ N # normalized by tot number of groups
-
-  hm = heatmap(G, xlabel="# non-coders", ylabel="# coders", title="Frac groups with p coders and n non-coder", c = :heat)
-
-  # ArrayPartition are nice because we can access the level such as G.x[ℓ][i]
-  return ArrayPartition(Tuple([G[n,:] for n=1:N])), hm
+  return ArrayPartition(Tuple([G[n,:] for n=1:N]))
 end
 
 μ  = 0.001   # inflow new students-non coders
@@ -192,11 +179,9 @@ end
 β  = 0.1     # benefits coders
 p  = [μ, νₙ, νₚ, α, β]
 
-n,M = 20, 1000
-u₀, hm = initialize_u0(N=n, M=M, p=0.01)
-tspan = (0., 4000.)
-
-hm # show p_n init mat
+n = 9
+u₀ = initialize_u0(N=n)
+tspan = (0., 1000.)
 ```
 
 
@@ -236,29 +221,22 @@ p = Object.keys(data).map(d => d.split("_")) //unpack params
 
 ```{ojs}
 //| panel: sidebar
-
 minmax = (p, i) => d3.extent(p.map(d => parseFloat(d[i])))
 
-viewof mu    = Inputs.range(minmax(p,0), {step: 0.03, label: "μ", value:"0.0001"})
-viewof nu_n  = Inputs.range(minmax(p,0), {step: 0.05, label: "νₙ", value:"0.01"})
-viewof nu_p  = Inputs.range(minmax(p,1), {step: 0.1,  label: "νₚ", value:"0.05"})
-viewof alpha = Inputs.range(minmax(p,2), {step: 0.15, label: "α", value:"0.01"})
-viewof beta  = Inputs.range(minmax(p,3), {step: 0.05, label: "β", value:"0.1"})
+viewof N_    = Inputs.range(minmax(p,0), {step: 1, label: "N", value:"9"})
+viewof mu    = Inputs.range(minmax(p,1), {step: 0.03, label: "μ", value:"0.0001"})
+viewof nu_n  = Inputs.range(minmax(p,2), {step: 0.05, label: "νₙ", value:"0.01"})
+viewof nu_p  = Inputs.range(minmax(p,3), {step: 0.1,  label: "νₚ", value:"0.05"})
+viewof alpha = Inputs.range(minmax(p,4), {step: 0.15, label: "α", value:"0.01"})
+viewof beta  = Inputs.range(minmax(p,5), {step: 0.05, label: "β", value:"0.1"})
 ```
-
-```{ojs}
-viewof myN    = Inputs.range([1,11], {step: 1, label: "sekect N"})
-Inputs.table(data["0.001_0.01_0.05_0.01_0.1"].filter(d => d.N == myN))
-```
-
 
 ::: {.panel-tabset}
 
 ## Plot
 
 ```{ojs}
-// f = (x) => Number.isInteger(x) ? x.toPrecision(2) : x
-// Inputs.table(data["0.001_0.01_0.05_0.01_0.1"])
+f = (x) => Number.isInteger(x) ? x.toPrecision(2) : x
 
 Plot.plot({
   x: {type:"log"},
@@ -266,11 +244,11 @@ Plot.plot({
   color: {scheme: "reds", type: "ordinal", legend: true},
   marks: [
     Plot.line(
-      data["0.001_0.01_0.05_0.01_0.1"], {
+      data[`${f(N_)}_${f(mu)}_${f(nu_n)}_${f(nu_p)}_${f(alpha)}_${f(beta)}`], {
         x: 'timesteps', y: "value", stroke: "N"
         }),
     Plot.dot(
-      data["0.001_0.01_0.05_0.01_0.1"], {
+      data[`${f(N_)}_${f(mu)}_${f(nu_n)}_${f(nu_p)}_${f(alpha)}_${f(beta)}`], {
         x: 'timesteps', y: "value", stroke: "N"
         })
   ]
