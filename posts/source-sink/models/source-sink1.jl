@@ -1,4 +1,14 @@
-using Distributions, StatsBase, OrdinaryDiffEq, Plots, JSON, RecursiveArrayTools
+using Pkg; Pkg.activate("../../");
+using ArgParse, Distributions, StatsBase, OrdinaryDiffEq, JSON, RecursiveArrayTools
+
+function ArgParse.parse_item(::Type{StepRangeLen}, x::AbstractString)
+  start, step, stop = split(x, ":")
+  start = parse(Float64, start)
+  stop = parse(Float64, stop)
+  step = parse(Float64, step)
+  return range(start,stop,step=step)
+
+end
 
 function initialize_u0(;n::Int=20, L::Int=6, M::Int=20, p::Float64=0.01)
   G = zeros(L, n+1)
@@ -14,18 +24,6 @@ function initialize_u0(;n::Int=20, L::Int=6, M::Int=20, p::Float64=0.01)
   return ArrayPartition(Tuple([G[ℓ,:] for ℓ=1:L]))
 end
 
-"""
-source_sink
-
-Params:
-=======
-- β: spreading rate from non-adopter to adopter
-- γ: recovery at rate gamma (loose behavioral trait)
-- ρ: global behavioral diffusion (allows the behaviour to spread between groups)
-- μ: constant rate of transition regardless of fitness
-- b: benefits
-- c: institutional cost
-"""
 function source_sink!(du, u, p, t)
     G, L, n = u, length(u.x), length(first(u.x))
     β, γ, ρ, b, c, μ = p
@@ -55,35 +53,78 @@ function source_sink!(du, u, p, t)
     end
 end
 
+function parse_commandline()
+  s = ArgParseSettings()
 
-function main(p)
-  n, M = 20, 1000
-  u₀ = initialize_u0(n=n, L=6, M=M, p=0.01)
-
-  # Load old run
-  if isfile(".../data.json")
-    old_run = JSON.parsefile("../data.json")
-  end
-  
-  if haskey(old_run, join(p, "_")) == false
-    
-    tspan = (1.0, 4000)
-
-    prob = ODEProblem(source_sink!, u₀, tspan, p)
-    sol = solve(prob, DP5(), saveat = 1., reltol=1e-8, abstol=1e-8)
-  
-    L = length(sol[1].x)
-    n = length(sol[1].x[1])
-    I = zeros(L, length(sol.t))
-    
-    for t in 1:length(sol.t)
-      for ℓ in 1:L
-        G_nil = sol[t].x[ℓ]
-        I[ℓ, t] = sum((collect(0:(n-1)) / n) .* G_nil) / sum(G_nil)
-      end
+  @add_arg_table! s begin
+      "--beta"
+      arg_type = StepRangeLen
+      default = 0.07:0.05:0.22
+      help = "Spreading rate from non-adopter to adopter"
+      "--gamma"
+      arg_type = StepRangeLen
+      default = 0.9:0.1:1.1
+      help = "Recovery rate, i.e. rate at which adopters loose behavioral trait"
+      "--rho"
+      arg_type = StepRangeLen
+      default = 0.1:0.15:0.40
+      help = "Global behavioral diffusion (allows the behaviour to spread between groups)"
+      "-b"
+      arg_type = StepRangeLen
+      default = 0.12:0.05:0.22
+      help = "Group benefits"
+      "-c"
+      arg_type = StepRangeLen
+      default = .55:0.5:2.05
+      help = "Institutional cost"
     end
+
+  return parse_args(s)
+end
+
+
+# ------------------------------ run individual ------------------------------ #
+
+
+function main()
+  
+  args = parse_commandline()
+  for β=args["beta"], γ=args["gamma"], ρ=args["rho"], b=args["b"], c=args["c"]
     
-    function update_runs()     
+    # Init
+    μ = 1e-4 #  constant rate of transition regardless of fitness
+    p = [ρ, β, γ, b, c, μ]
+    
+    println("Doing $p")
+    
+    n, M = 20, 1000
+    u₀ = initialize_u0(n=n, L=6, M=M, p=0.01)
+    
+    # Load old run
+    old_run = isfile("../data.json") ? JSON.parsefile("../data.json") : Dict()
+    
+    # Check if already done
+    if haskey(old_run, join(p, "_")) && length(old_run[join(p, "_")]) >= 20
+      println("Already done.")
+    else
+      tspan = (1.0, 4000)
+      
+      # Solve problem
+      prob = ODEProblem(source_sink!, u₀, tspan, p)
+      sol = solve(prob, DP5(), saveat = 1., reltol=1e-8, abstol=1e-8)
+      
+      # Get summary statistics
+      L = length(sol[1].x)
+      n = length(sol[1].x[1])
+      I = zeros(L, length(sol.t))
+      for t in 1:length(sol.t)
+        for ℓ in 1:L
+          G_nil = sol[t].x[ℓ]
+          I[ℓ, t] = sum((collect(0:(n-1)) / n) .* G_nil) / sum(G_nil)
+        end
+      end
+      
+      # Wrangle summary stats into list of dicts where each dict is a level
       new_run = []
       for ℓ in 1:L
         tmp_dat = [Dict("L" => ℓ, "value" => I[ℓ, i], "timesteps" => i) for i in 1:3000]
@@ -91,7 +132,8 @@ function main(p)
         idx = unique(z -> x[z], 1:length(x))
         push!(new_run, tmp_dat[idx] )
       end
-  
+      
+      # Update old runs with new run
       if isfile("../data.json")
         get!(old_run, join(p, "_"), vcat(new_run...))    # If already exists, update the old run Dict()
         new_run = old_run
@@ -99,48 +141,14 @@ function main(p)
         new_run = Dict(join(p, "_") => vcat(new_run...)) # new Dict()
       end
       
+      # Write to disk
       open("../data.json", "w") do f 
         write(f, JSON.json(new_run))
       end
-    end
-    
-    update_runs()
-  
+
   end
 
-end
-
-# ------------------------------ run individual ------------------------------ #
-
-β, γ, ρ, b, c = 0.07, 1, 0.1, 0.18, 1.05 # base case from the paper
-γ = 1.1
-μ = 1e-4
-params = [β, γ, ρ, b, c, μ]
-
-main(params)
-
-# --------------------------------- run batch -------------------------------- #
-
-function get_tot_it()
-  tot_it = 0
-  for β=0.07:0.05:0.22, c = .55:0.5:2.05, b=0.12:0.05:0.22, ρ=0.1:0.15:0.40
-    tot_it += 1
   end
-  return tot_it
 end
 
-tot_it = get_tot_it()
-
-counter = 0 
-for β=0.07:0.05:0.22, c = .55:0.5:2.05, b=0.12:0.05:0.22, ρ=0.1:0.15:0.40
-  # γ = 0.9:0.1:1.0
-  γ = 1.1
-  μ = 1e-4
-  params = [β, γ, ρ, b, c, μ]
-
-  main(params)
- 
-  counter += 1
-  println((counter  / tot_it) * 100)
-end
-
+main()

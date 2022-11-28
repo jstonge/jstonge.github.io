@@ -223,7 +223,7 @@ p = Object.keys(data).map(d => d.split("_")) //unpack params
 //| panel: sidebar
 minmax = (p, i) => d3.extent(p.map(d => parseFloat(d[i])))
 
-viewof N_    = Inputs.range(minmax(p,0), {step: 1, label: "N", value:"9"})
+viewof N_    = Inputs.range(minmax(p,0), {step: 1, label: "N", value:"4"})
 viewof mu    = Inputs.range(minmax(p,1), {step: 0.03, label: "μ", value:"0.0001"})
 viewof nu_n  = Inputs.range(minmax(p,2), {step: 0.05, label: "νₙ", value:"0.01"})
 viewof nu_p  = Inputs.range(minmax(p,3), {step: 0.1,  label: "νₚ", value:"0.05"})
@@ -236,7 +236,8 @@ viewof beta  = Inputs.range(minmax(p,5), {step: 0.05, label: "β", value:"0.1"})
 ## Plot
 
 ```{ojs}
-f = (x) => Number.isInteger(x) ? x.toPrecision(2) : x
+
+f = (x) => x.toPrecision() ? x.toPrecision(2) : x
 
 Plot.plot({
   x: {type:"log"},
@@ -244,11 +245,11 @@ Plot.plot({
   color: {scheme: "reds", type: "ordinal", legend: true},
   marks: [
     Plot.line(
-      data[`${f(N_)}_${f(mu)}_${f(nu_n)}_${f(nu_p)}_${f(alpha)}_${f(beta)}`], {
+      data[`${N_}_${mu}_${nu_n}_${nu_p}_${alpha}_${beta}`], {
         x: 'timesteps', y: "value", stroke: "N"
         }),
     Plot.dot(
-      data[`${f(N_)}_${f(mu)}_${f(nu_n)}_${f(nu_p)}_${f(alpha)}_${f(beta)}`], {
+      data[`${N_}_${mu}_${nu_n}_${nu_p}_${alpha}_${beta}`], {
         x: 'timesteps', y: "value", stroke: "N"
         })
   ]
