@@ -20,7 +20,7 @@ p  = [μ, νₙ, νₚ, α, β]
 u₀ = initialize_u0(N=3)
 tspan = (0., 160.)
 
-c(n, i) = 0.95 * exp(-i / n)              # cost function
+c(n, i) = 0.95 * exp(-i / n)                # cost function
 τ(n, i, α, β) = n*exp(-α + β*(1 - c(n, i))) # group benefits
 
 function life_cycle_research_groups!(du, u, p, t)
@@ -36,9 +36,9 @@ function life_cycle_research_groups!(du, u, p, t)
     non_coder > 0 && ( du.x[n][i] += μ*(G.x[n-1][i]) )                # 1st term
     
     # for everybody
-    # println("2: $(νₙ*non_coder*G.x[n][i])")
+    println("2: $(νₙ*non_coder*G.x[n][i])")
     du.x[n][i] -= νₙ*non_coder*G.x[n][i]
-    # println("3: $(νₚ*coder*G.x[n][i])")
+    println("3: $(νₚ*coder*G.x[n][i])")
     du.x[n][i] -= νₚ*coder*G.x[n][i]
 
     # upper boxes don't exist 
@@ -70,41 +70,29 @@ maxsize = (N-1)+(P-1)
 I = zeros(maxsize, length(sol.t))
 weighted_avg = zeros(maxsize, length(sol.t))
 size_dis = zeros(maxsize, length(sol.t))
-
-
-dist_gsize = zeros(maxsize, 160)
+dist_gsize = zeros(maxsize, length(sol.t))
 sommeGNI = zeros(maxsize, length(sol.t))
-for t in 1:160
-  for n in 1:N
-    
-    G_nil = sol[t].x[n] # sol of group with n non-coders at time t
 
-    for i in 1:P
-
-      coder, noncoder = i-1, n-1 
+for t=1:length(sol.t)
+  for n=1:N
+    for i=1:P
       
+      coder, noncoder = i-1, n-1 
+      G_nil = sol[t].x[n] # sol of group with n non-coders at time t
       gsize = coder+noncoder
       
-      gsize > 0 && ( sommeGNI[gsize, t] += (coder+noncoder)*G_nil[i] )
-      
-      gsize > 0 && ( dist_gsize[gsize, t] = G_nil[i] )   # sol of group with n non-coders and i coders at time t, e.g.
-                                                         # proportion of groups with n non-coders and i coders.
-
+      gsize > 0 && ( sommeGNI[gsize, t] += gsize*G_nil[i] )
+      gsize > 0 && ( dist_gsize[gsize, t] = G_nil[i] )  
       gsize > 0 && ( weighted_avg[gsize, t] += (coder/gsize)*G_nil[i] )
-      # gsize > 0 && ( println( "t=$(t), n=$(N),i=$(P) == $(G_nil[i])" ) )
       gsize > 0 && ( size_dis[gsize, t] += G_nil[i] )
 
     end
   end
   
-  for gsize in 1:maxsize
-      # println("$(gsize),  $(weighted_avg[gsize, t]), $(size_dis[gsize, t])")
+  for gsize=1:maxsize
       I[gsize,t] = weighted_avg[gsize, t]/size_dis[gsize, t]
   end
 end
-
-# round.(dist_gsize[:, 10].*100, digits=3) # at time 10, 31.9% of groups had grsize = 0
-                                           # and 1.3% had groups of size 6
 
 # for i=1:160
 #   dist_gsize[:,i] = dist_gsize[:,i] / sum(dist_gsize[:,i])
@@ -119,20 +107,18 @@ end
 # ylabel!("Fraction of gsize (%)")
 
 
-heatmap(sommeGNI)
-xlabel!("time")
-ylabel!("grsize")
-title!("Couleur: (coder+noncoder)*G_nil[i] ")
+# heatmap(sommeGNI)
+# xlabel!("time")
+# ylabel!("grsize")
+# title!("Couleur: (coder+noncoder)*G_nil[i] ")
 
-# if isfile("data.json")
-#     old_run = JSON.parsefile("data.json")
-# end
+
+old_run = isfile("data.json") ? JSON.parsefile("data.json") : Dict()
 
 new_run = []
 for n in 1:N
-  tmp_dat = [Dict("N" => n, "value" => I[n, i], "timesteps" => i) for i in 1:1000]
+  tmp_dat = [Dict("N" => n, "value" => I[n, i], "timesteps" => i) for i in 1:length(sol.t)]
   x = round.([i["value"] for i in tmp_dat], digits=5) # To lighten the output file we only keep unique `y` values.
-  # idx = unique(z -> x[z], 1:length(x))
   push!(new_run, tmp_dat )
 end
 
@@ -149,4 +135,3 @@ open("data.json", "w") do f
   write(f, JSON.json(new_run))
 end
 
-keys(new_run)

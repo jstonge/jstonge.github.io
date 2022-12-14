@@ -131,7 +131,7 @@ end
 ## Plot 1
 
 ```{ojs}
-data = FileAttachment("data.json").json()
+data = FileAttachment("data2.json").json()
 p = Object.keys(data).map(d => d.split("_")) //unpack params
 ```
 
@@ -162,6 +162,43 @@ Plot.plot({
         }),
     Plot.dot(
       data[`${f(beta)}_${f(gamma)}_${f(rho)}_${f(b)}_${f(c)}_${f(mu)}`], {
+        x: 'timesteps', y: "value", stroke: "L"
+        })
+  ]
+})
+```
+
+## Plot 2
+
+```{ojs}
+data2 = FileAttachment("data2.json").json()
+p2 = Object.keys(data2).map(d => d.split("_")) //unpack params
+```
+
+```{ojs}
+//| panel: sidebar
+// 0.07_0.5_1.0_0.1_0.18_1.05_0.0001
+viewof beta2  = Inputs.range(minmax(p2,0), {step: 0.07, label: "β", value:"0.07"})
+viewof alpha2 = Inputs.range(minmax(p2,1), {step: 0.5, label: "β", value:"0.5"})
+viewof gamma2 = Inputs.range(minmax(p2,2), {step: 1.,  label: "γ", value:"1.0"})
+viewof rho2   = Inputs.range(minmax(p2,3), {step: 0.1, label: "ρ", value:"0.1"})
+viewof b2     = Inputs.range(minmax(p2,4), {step: 0.18, label: "b", value:"0.18"})
+viewof c2     = Inputs.range(minmax(p2,5), {step: 1.05,  label: "c", value:"1.05"})
+viewof mu2    = Inputs.range(minmax(p2,6), {step: 0.0001, label: "μ", value:"0.0001"})
+```
+
+```{ojs}
+Plot.plot({
+  x: {type:"log"},
+  y: {domain: [0,1]},
+  color: {scheme: "reds", type: "ordinal", legend: true},
+  marks: [
+    Plot.line(
+      data2[`${f(beta2)}_${f(alpha2)}_${f(gamma2)}_${f(rho2)}_${f(b2)}_${f(c2)}_${f(mu2)}`], {
+        x: 'timesteps', y: "value", stroke: "L"
+        }),
+    Plot.dot(
+      data2[`${f(beta2)}_${f(alpha2)}_${f(gamma2)}_${f(rho2)}_${f(b2)}_${f(c2)}_${f(mu2)}`], {
         x: 'timesteps', y: "value", stroke: "L"
         })
   ]

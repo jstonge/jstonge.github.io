@@ -4,8 +4,8 @@ using ArgParse, Distributions, StatsBase, OrdinaryDiffEq, JSON, RecursiveArrayTo
 function ArgParse.parse_item(::Type{StepRangeLen}, x::AbstractString)
   start, step, stop = split(x, ":")
   start = parse(Float64, start)
-  stop = parse(Float64, stop)
-  step = parse(Float64, step)
+  stop =  parse(Float64, stop)
+  step =  parse(Float64, step)
   return range(start,stop,step=step)
 
 end

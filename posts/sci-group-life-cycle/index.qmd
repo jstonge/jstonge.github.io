@@ -192,20 +192,39 @@ c(n, i) = 0.95 * exp(-i / n) # cost function
 τ(n, i, α, β) = exp(-α + β*(1 - c(n, i))) # group benefits
 
 function life_cycle_research_groups!(du, u, p, t)
-  G, N, P = u, length(u.x), length(first(u.x)) # Note that there can be no coders but not non-coders
-  μ, νₙ, νₚ, α, β = p
 
+  G, N, P = u, length(u.x), length(first(u₀.x)) # Note that there can be no coders but not non-coders
+  μ, νₙ, νₚ, α, β = p
   for n=1:N, i=1:P
-    coder, non_coder, gr_size = i-1, n, P-1   # we distinguish indices from actual values.
+    println("n:$(n), i:$(i), G.x[n][i]:$(G.x[n][i])")
+    coder, non_coder = i-1, n-1   # we distinguish indices from actual values.
     
-    du.x[n][i] = -τ(non_coder, coder, α, β)*G.x[n][i] # 4th term
-    coder < gr_size && ( du.x[n][i] += νₚ*( (coder+1)*G.x[n][i+1] - coder*G.x[n][i] ) )  # 5th term
-    non_coder > 1 && ( du.x[n][i] += μ*(G.x[n-1][i] - G.x[n][i])  )         # 1st term
+    du.x[n][i] = 0
+
+    non_coder > 0 && ( du.x[n][i] += μ*(G.x[n-1][i]) )                # 1st term
     
+    # for everybody
+    # println("2: $(νₙ*non_coder*G.x[n][i])")
+    du.x[n][i] -= νₙ*non_coder*G.x[n][i]
+    # println("3: $(νₚ*coder*G.x[n][i])")
+    du.x[n][i] -= νₚ*coder*G.x[n][i]
+
+    # upper boxes don't exist 
+    if i < P
+      # non_coder > 0 && println("4: $(τ(non_coder, coder, α, β)*G.x[n][i] )")
+      # We don't want to pass non_coder = 0 to τ()
+      non_coder > 0 && ( du.x[n][i] -= τ(non_coder, coder, α, β)*G.x[n][i] )               # 4th term
+      # println("5: $(νₚ*(coder+1)*G.x[n][i+1])")
+      du.x[n][i] += νₚ*(coder+1)*G.x[n][i+1]  # 5th term
+    end
+    
+    # the bottom boxes don't exist
     if n < N
-      du.x[n][i] += τ(non_coder+1, coder, α, β)*(1 - c(non_coder+1, coder))*G.x[n+1][i]     # 6th term
-      du.x[n][i] += νₙ*( (non_coder+1)*G.x[n+1][i] - non_coder*G.x[n][i] )      # 2nd term
-      coder > 0 && ( du.x[n][i] += τ(non_coder+1, coder-1, α, β)*(1 - c(non_coder+1, coder-1))*G.x[n+1][i-1] ) # 3rd term 
+      # println("6: $(μ*G.x[n][i])")
+      du.x[n][i] -= μ*G.x[n][i]                                       # 1st term
+      du.x[n][i] += τ(non_coder+1, coder, α, β)*(c(non_coder+1, coder))*G.x[n+1][i]     # 6th term
+      du.x[n][i] += νₙ*(non_coder+1)*G.x[n+1][i]                                            # 2nd term
+      coder > 0 && ( du.x[n][i] += τ(non_coder+1, coder-1, α, β)*(1-c(non_coder+1, coder-1))*G.x[n+1][i-1] ) # 3rd term 
     end
   end
 end
