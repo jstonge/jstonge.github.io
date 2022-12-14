@@ -313,11 +313,11 @@ Initialization scheme
 <section id="output" class="level2">
 <h2 class="anchored" data-anchor-id="output">Output</h2>
 <div class="panel-tabset">
-<ul class="nav nav-tabs" role="tablist"><li class="nav-item" role="presentation"><a class="nav-link active" id="tabset-2-1-tab" data-bs-toggle="tab" data-bs-target="#tabset-2-1" role="tab" aria-controls="tabset-2-1" aria-selected="true">Plot 1</a></li></ul>
+<ul class="nav nav-tabs" role="tablist"><li class="nav-item" role="presentation"><a class="nav-link active" id="tabset-2-1-tab" data-bs-toggle="tab" data-bs-target="#tabset-2-1" role="tab" aria-controls="tabset-2-1" aria-selected="true">Plot 1</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-2-2-tab" data-bs-toggle="tab" data-bs-target="#tabset-2-2" role="tab" aria-controls="tabset-2-2" aria-selected="false">Plot 2</a></li></ul>
 <div class="tab-content">
 <div id="tabset-2-1" class="tab-pane active" role="tabpanel" aria-labelledby="tabset-2-1-tab">
 <div class="cell">
-<div class="sourceCode cell-code hidden" id="cb3" data-startfrom="134" data-source-offset="-0"><pre class="sourceCode js code-with-copy"><code class="sourceCode javascript" style="counter-reset: source-line 133;"><span id="cb3-134"><a href="#cb3-134" aria-hidden="true" tabindex="-1"></a>data <span class="op">=</span> <span class="fu">FileAttachment</span>(<span class="st">"data.json"</span>)<span class="op">.</span><span class="fu">json</span>()</span>
+<div class="sourceCode cell-code hidden" id="cb3" data-startfrom="134" data-source-offset="-0"><pre class="sourceCode js code-with-copy"><code class="sourceCode javascript" style="counter-reset: source-line 133;"><span id="cb3-134"><a href="#cb3-134" aria-hidden="true" tabindex="-1"></a>data <span class="op">=</span> <span class="fu">FileAttachment</span>(<span class="st">"data2.json"</span>)<span class="op">.</span><span class="fu">json</span>()</span>
 <span id="cb3-135"><a href="#cb3-135" aria-hidden="true" tabindex="-1"></a>p <span class="op">=</span> <span class="bu">Object</span><span class="op">.</span><span class="fu">keys</span>(data)<span class="op">.</span><span class="fu">map</span>(d <span class="kw">=&gt;</span> d<span class="op">.</span><span class="fu">split</span>(<span class="st">"_"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display">
 <div>
@@ -427,6 +427,106 @@ Initialization scheme
 </div>
 </div>
 </div>
+<div id="tabset-2-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-2-2-tab">
+<div class="cell">
+<div class="sourceCode cell-code hidden" id="cb6" data-startfrom="174" data-source-offset="-0"><pre class="sourceCode js code-with-copy"><code class="sourceCode javascript" style="counter-reset: source-line 173;"><span id="cb6-174"><a href="#cb6-174" aria-hidden="true" tabindex="-1"></a>data2 <span class="op">=</span> <span class="fu">FileAttachment</span>(<span class="st">"data2.json"</span>)<span class="op">.</span><span class="fu">json</span>()</span>
+<span id="cb6-175"><a href="#cb6-175" aria-hidden="true" tabindex="-1"></a>p2 <span class="op">=</span> <span class="bu">Object</span><span class="op">.</span><span class="fu">keys</span>(data2)<span class="op">.</span><span class="fu">map</span>(d <span class="kw">=&gt;</span> d<span class="op">.</span><span class="fu">split</span>(<span class="st">"_"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<div>
+<div id="ojs-cell-4-1" data-nodetype="declaration">
+
+</div>
+</div>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+<div id="ojs-cell-4-2" data-nodetype="declaration">
+
+</div>
+</div>
+</div>
+</div>
+<div class="cell card bg-light p-2 g-col-24 g-col-lg-7">
+<div class="sourceCode cell-code hidden" id="cb7" data-startfrom="181" data-source-offset="-37"><pre class="sourceCode js code-with-copy"><code class="sourceCode javascript" style="counter-reset: source-line 180;"><span id="cb7-181"><a href="#cb7-181" aria-hidden="true" tabindex="-1"></a>viewof beta2  <span class="op">=</span> Inputs<span class="op">.</span><span class="fu">range</span>(<span class="fu">minmax</span>(p2<span class="op">,</span><span class="dv">0</span>)<span class="op">,</span> {<span class="dt">step</span><span class="op">:</span> <span class="fl">0.07</span><span class="op">,</span> <span class="dt">label</span><span class="op">:</span> <span class="st">"β"</span><span class="op">,</span> <span class="dt">value</span><span class="op">:</span><span class="st">"0.07"</span>})</span>
+<span id="cb7-182"><a href="#cb7-182" aria-hidden="true" tabindex="-1"></a>viewof alpha2 <span class="op">=</span> Inputs<span class="op">.</span><span class="fu">range</span>(<span class="fu">minmax</span>(p2<span class="op">,</span><span class="dv">1</span>)<span class="op">,</span> {<span class="dt">step</span><span class="op">:</span> <span class="fl">0.5</span><span class="op">,</span> <span class="dt">label</span><span class="op">:</span> <span class="st">"β"</span><span class="op">,</span> <span class="dt">value</span><span class="op">:</span><span class="st">"0.5"</span>})</span>
+<span id="cb7-183"><a href="#cb7-183" aria-hidden="true" tabindex="-1"></a>viewof gamma2 <span class="op">=</span> Inputs<span class="op">.</span><span class="fu">range</span>(<span class="fu">minmax</span>(p2<span class="op">,</span><span class="dv">2</span>)<span class="op">,</span> {<span class="dt">step</span><span class="op">:</span> <span class="fl">1.</span><span class="op">,</span>  <span class="dt">label</span><span class="op">:</span> <span class="st">"γ"</span><span class="op">,</span> <span class="dt">value</span><span class="op">:</span><span class="st">"1.0"</span>})</span>
+<span id="cb7-184"><a href="#cb7-184" aria-hidden="true" tabindex="-1"></a>viewof rho2   <span class="op">=</span> Inputs<span class="op">.</span><span class="fu">range</span>(<span class="fu">minmax</span>(p2<span class="op">,</span><span class="dv">3</span>)<span class="op">,</span> {<span class="dt">step</span><span class="op">:</span> <span class="fl">0.1</span><span class="op">,</span> <span class="dt">label</span><span class="op">:</span> <span class="st">"ρ"</span><span class="op">,</span> <span class="dt">value</span><span class="op">:</span><span class="st">"0.1"</span>})</span>
+<span id="cb7-185"><a href="#cb7-185" aria-hidden="true" tabindex="-1"></a>viewof b2     <span class="op">=</span> Inputs<span class="op">.</span><span class="fu">range</span>(<span class="fu">minmax</span>(p2<span class="op">,</span><span class="dv">4</span>)<span class="op">,</span> {<span class="dt">step</span><span class="op">:</span> <span class="fl">0.18</span><span class="op">,</span> <span class="dt">label</span><span class="op">:</span> <span class="st">"b"</span><span class="op">,</span> <span class="dt">value</span><span class="op">:</span><span class="st">"0.18"</span>})</span>
+<span id="cb7-186"><a href="#cb7-186" aria-hidden="true" tabindex="-1"></a>viewof c2     <span class="op">=</span> Inputs<span class="op">.</span><span class="fu">range</span>(<span class="fu">minmax</span>(p2<span class="op">,</span><span class="dv">5</span>)<span class="op">,</span> {<span class="dt">step</span><span class="op">:</span> <span class="fl">1.05</span><span class="op">,</span>  <span class="dt">label</span><span class="op">:</span> <span class="st">"c"</span><span class="op">,</span> <span class="dt">value</span><span class="op">:</span><span class="st">"1.05"</span>})</span>
+<span id="cb7-187"><a href="#cb7-187" aria-hidden="true" tabindex="-1"></a>viewof mu2    <span class="op">=</span> Inputs<span class="op">.</span><span class="fu">range</span>(<span class="fu">minmax</span>(p2<span class="op">,</span><span class="dv">6</span>)<span class="op">,</span> {<span class="dt">step</span><span class="op">:</span> <span class="fl">0.0001</span><span class="op">,</span> <span class="dt">label</span><span class="op">:</span> <span class="st">"μ"</span><span class="op">,</span> <span class="dt">value</span><span class="op">:</span><span class="st">"0.0001"</span>})</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<div>
+<div id="ojs-cell-5-1" data-nodetype="declaration">
+
+</div>
+</div>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+<div id="ojs-cell-5-2" data-nodetype="declaration">
+
+</div>
+</div>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+<div id="ojs-cell-5-3" data-nodetype="declaration">
+
+</div>
+</div>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+<div id="ojs-cell-5-4" data-nodetype="declaration">
+
+</div>
+</div>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+<div id="ojs-cell-5-5" data-nodetype="declaration">
+
+</div>
+</div>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+<div id="ojs-cell-5-6" data-nodetype="declaration">
+
+</div>
+</div>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+<div id="ojs-cell-5-7" data-nodetype="declaration">
+
+</div>
+</div>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code hidden" id="cb8" data-startfrom="190" data-source-offset="0"><pre class="sourceCode js code-with-copy"><code class="sourceCode javascript" style="counter-reset: source-line 189;"><span id="cb8-190"><a href="#cb8-190" aria-hidden="true" tabindex="-1"></a>Plot<span class="op">.</span><span class="fu">plot</span>({</span>
+<span id="cb8-191"><a href="#cb8-191" aria-hidden="true" tabindex="-1"></a>  <span class="dt">x</span><span class="op">:</span> {<span class="dt">type</span><span class="op">:</span><span class="st">"log"</span>}<span class="op">,</span></span>
+<span id="cb8-192"><a href="#cb8-192" aria-hidden="true" tabindex="-1"></a>  <span class="dt">y</span><span class="op">:</span> {<span class="dt">domain</span><span class="op">:</span> [<span class="dv">0</span><span class="op">,</span><span class="dv">1</span>]}<span class="op">,</span></span>
+<span id="cb8-193"><a href="#cb8-193" aria-hidden="true" tabindex="-1"></a>  <span class="dt">color</span><span class="op">:</span> {<span class="dt">scheme</span><span class="op">:</span> <span class="st">"reds"</span><span class="op">,</span> <span class="dt">type</span><span class="op">:</span> <span class="st">"ordinal"</span><span class="op">,</span> <span class="dt">legend</span><span class="op">:</span> <span class="kw">true</span>}<span class="op">,</span></span>
+<span id="cb8-194"><a href="#cb8-194" aria-hidden="true" tabindex="-1"></a>  <span class="dt">marks</span><span class="op">:</span> [</span>
+<span id="cb8-195"><a href="#cb8-195" aria-hidden="true" tabindex="-1"></a>    Plot<span class="op">.</span><span class="fu">line</span>(</span>
+<span id="cb8-196"><a href="#cb8-196" aria-hidden="true" tabindex="-1"></a>      data2[<span class="vs">`</span><span class="sc">${</span><span class="fu">f</span>(beta2)<span class="sc">}</span><span class="vs">_</span><span class="sc">${</span><span class="fu">f</span>(alpha2)<span class="sc">}</span><span class="vs">_</span><span class="sc">${</span><span class="fu">f</span>(gamma2)<span class="sc">}</span><span class="vs">_</span><span class="sc">${</span><span class="fu">f</span>(rho2)<span class="sc">}</span><span class="vs">_</span><span class="sc">${</span><span class="fu">f</span>(b2)<span class="sc">}</span><span class="vs">_</span><span class="sc">${</span><span class="fu">f</span>(c2)<span class="sc">}</span><span class="vs">_</span><span class="sc">${</span><span class="fu">f</span>(mu2)<span class="sc">}</span><span class="vs">`</span>]<span class="op">,</span> {</span>
+<span id="cb8-197"><a href="#cb8-197" aria-hidden="true" tabindex="-1"></a>        <span class="dt">x</span><span class="op">:</span> <span class="st">'timesteps'</span><span class="op">,</span> <span class="dt">y</span><span class="op">:</span> <span class="st">"value"</span><span class="op">,</span> <span class="dt">stroke</span><span class="op">:</span> <span class="st">"L"</span></span>
+<span id="cb8-198"><a href="#cb8-198" aria-hidden="true" tabindex="-1"></a>        })<span class="op">,</span></span>
+<span id="cb8-199"><a href="#cb8-199" aria-hidden="true" tabindex="-1"></a>    Plot<span class="op">.</span><span class="fu">dot</span>(</span>
+<span id="cb8-200"><a href="#cb8-200" aria-hidden="true" tabindex="-1"></a>      data2[<span class="vs">`</span><span class="sc">${</span><span class="fu">f</span>(beta2)<span class="sc">}</span><span class="vs">_</span><span class="sc">${</span><span class="fu">f</span>(alpha2)<span class="sc">}</span><span class="vs">_</span><span class="sc">${</span><span class="fu">f</span>(gamma2)<span class="sc">}</span><span class="vs">_</span><span class="sc">${</span><span class="fu">f</span>(rho2)<span class="sc">}</span><span class="vs">_</span><span class="sc">${</span><span class="fu">f</span>(b2)<span class="sc">}</span><span class="vs">_</span><span class="sc">${</span><span class="fu">f</span>(c2)<span class="sc">}</span><span class="vs">_</span><span class="sc">${</span><span class="fu">f</span>(mu2)<span class="sc">}</span><span class="vs">`</span>]<span class="op">,</span> {</span>
+<span id="cb8-201"><a href="#cb8-201" aria-hidden="true" tabindex="-1"></a>        <span class="dt">x</span><span class="op">:</span> <span class="st">'timesteps'</span><span class="op">,</span> <span class="dt">y</span><span class="op">:</span> <span class="st">"value"</span><span class="op">,</span> <span class="dt">stroke</span><span class="op">:</span> <span class="st">"L"</span></span>
+<span id="cb8-202"><a href="#cb8-202" aria-hidden="true" tabindex="-1"></a>        })</span>
+<span id="cb8-203"><a href="#cb8-203" aria-hidden="true" tabindex="-1"></a>  ]</span>
+<span id="cb8-204"><a href="#cb8-204" aria-hidden="true" tabindex="-1"></a>})</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<div id="ojs-cell-6" data-nodetype="expression">
+
+</div>
+</div>
+</div>
+</div>
 </div>
 </div>
 </section>
@@ -462,7 +562,7 @@ Initialization scheme
 </ol>
 </section></div></main> <!-- /main -->
 <script type="ojs-module-contents">
-{"contents":[{"methodName":"interpret","cellName":"ojs-cell-1","inline":false,"source":"data = FileAttachment(\"data.json\").json()\np = Object.keys(data).map(d => d.split(\"_\")) //unpack params\n"},{"methodName":"interpret","cellName":"ojs-cell-2","inline":false,"source":"\nminmax = (p, i) => d3.extent(p.map(d => parseFloat(d[i])))\n\nviewof beta  = Inputs.range(minmax(p,0), {step: 0.05, label: \"β\", value:\"0.07\"})\nviewof gamma = Inputs.range(minmax(p,1), {step: 0.1,  label: \"γ\", value:\"1.0\"})\nviewof rho   = Inputs.range(minmax(p,2), {step: 0.15, label: \"ρ\", value:\"0.1\"})\nviewof b     = Inputs.range(minmax(p,3), {step: 0.05, label: \"b\", value:\"0.18\"})\nviewof c     = Inputs.range(minmax(p,4), {step: 0.5,  label: \"c\", value:\"1.05\"})\nviewof mu    = Inputs.range(minmax(p,5), {step: 0.03, label: \"μ\", value:\"0.0001\"})\n"},{"methodName":"interpret","cellName":"ojs-cell-3","inline":false,"source":"f = (x) => Number.isInteger(x) ? x.toPrecision(2) : x\n\nPlot.plot({\n  x: {type:\"log\"},\n  y: {domain: [0,1]},\n  color: {scheme: \"reds\", type: \"ordinal\", legend: true},\n  marks: [\n    Plot.line(\n      data[`${f(beta)}_${f(gamma)}_${f(rho)}_${f(b)}_${f(c)}_${f(mu)}`], {\n        x: 'timesteps', y: \"value\", stroke: \"L\"\n        }),\n    Plot.dot(\n      data[`${f(beta)}_${f(gamma)}_${f(rho)}_${f(b)}_${f(c)}_${f(mu)}`], {\n        x: 'timesteps', y: \"value\", stroke: \"L\"\n        })\n  ]\n})\n"},{"methodName":"interpretQuiet","source":"shinyInput('beta')"},{"methodName":"interpretQuiet","source":"shinyInput('gamma')"},{"methodName":"interpretQuiet","source":"shinyInput('rho')"},{"methodName":"interpretQuiet","source":"shinyInput('b')"},{"methodName":"interpretQuiet","source":"shinyInput('c')"},{"methodName":"interpretQuiet","source":"shinyInput('mu')"}]}
+{"contents":[{"methodName":"interpret","cellName":"ojs-cell-1","inline":false,"source":"data = FileAttachment(\"data2.json\").json()\np = Object.keys(data).map(d => d.split(\"_\")) //unpack params\n"},{"methodName":"interpret","cellName":"ojs-cell-2","inline":false,"source":"\nminmax = (p, i) => d3.extent(p.map(d => parseFloat(d[i])))\n\nviewof beta  = Inputs.range(minmax(p,0), {step: 0.05, label: \"β\", value:\"0.07\"})\nviewof gamma = Inputs.range(minmax(p,1), {step: 0.1,  label: \"γ\", value:\"1.0\"})\nviewof rho   = Inputs.range(minmax(p,2), {step: 0.15, label: \"ρ\", value:\"0.1\"})\nviewof b     = Inputs.range(minmax(p,3), {step: 0.05, label: \"b\", value:\"0.18\"})\nviewof c     = Inputs.range(minmax(p,4), {step: 0.5,  label: \"c\", value:\"1.05\"})\nviewof mu    = Inputs.range(minmax(p,5), {step: 0.03, label: \"μ\", value:\"0.0001\"})\n"},{"methodName":"interpret","cellName":"ojs-cell-3","inline":false,"source":"f = (x) => Number.isInteger(x) ? x.toPrecision(2) : x\n\nPlot.plot({\n  x: {type:\"log\"},\n  y: {domain: [0,1]},\n  color: {scheme: \"reds\", type: \"ordinal\", legend: true},\n  marks: [\n    Plot.line(\n      data[`${f(beta)}_${f(gamma)}_${f(rho)}_${f(b)}_${f(c)}_${f(mu)}`], {\n        x: 'timesteps', y: \"value\", stroke: \"L\"\n        }),\n    Plot.dot(\n      data[`${f(beta)}_${f(gamma)}_${f(rho)}_${f(b)}_${f(c)}_${f(mu)}`], {\n        x: 'timesteps', y: \"value\", stroke: \"L\"\n        })\n  ]\n})\n"},{"methodName":"interpret","cellName":"ojs-cell-4","inline":false,"source":"data2 = FileAttachment(\"data2.json\").json()\np2 = Object.keys(data2).map(d => d.split(\"_\")) //unpack params\n"},{"methodName":"interpret","cellName":"ojs-cell-5","inline":false,"source":"// 0.07_0.5_1.0_0.1_0.18_1.05_0.0001\nviewof beta2  = Inputs.range(minmax(p2,0), {step: 0.07, label: \"β\", value:\"0.07\"})\nviewof alpha2 = Inputs.range(minmax(p2,1), {step: 0.5, label: \"β\", value:\"0.5\"})\nviewof gamma2 = Inputs.range(minmax(p2,2), {step: 1.,  label: \"γ\", value:\"1.0\"})\nviewof rho2   = Inputs.range(minmax(p2,3), {step: 0.1, label: \"ρ\", value:\"0.1\"})\nviewof b2     = Inputs.range(minmax(p2,4), {step: 0.18, label: \"b\", value:\"0.18\"})\nviewof c2     = Inputs.range(minmax(p2,5), {step: 1.05,  label: \"c\", value:\"1.05\"})\nviewof mu2    = Inputs.range(minmax(p2,6), {step: 0.0001, label: \"μ\", value:\"0.0001\"})\n"},{"methodName":"interpret","cellName":"ojs-cell-6","inline":false,"source":"Plot.plot({\n  x: {type:\"log\"},\n  y: {domain: [0,1]},\n  color: {scheme: \"reds\", type: \"ordinal\", legend: true},\n  marks: [\n    Plot.line(\n      data2[`${f(beta2)}_${f(alpha2)}_${f(gamma2)}_${f(rho2)}_${f(b2)}_${f(c2)}_${f(mu2)}`], {\n        x: 'timesteps', y: \"value\", stroke: \"L\"\n        }),\n    Plot.dot(\n      data2[`${f(beta2)}_${f(alpha2)}_${f(gamma2)}_${f(rho2)}_${f(b2)}_${f(c2)}_${f(mu2)}`], {\n        x: 'timesteps', y: \"value\", stroke: \"L\"\n        })\n  ]\n})\n"},{"methodName":"interpretQuiet","source":"shinyInput('beta')"},{"methodName":"interpretQuiet","source":"shinyInput('gamma')"},{"methodName":"interpretQuiet","source":"shinyInput('rho')"},{"methodName":"interpretQuiet","source":"shinyInput('b')"},{"methodName":"interpretQuiet","source":"shinyInput('c')"},{"methodName":"interpretQuiet","source":"shinyInput('mu')"},{"methodName":"interpretQuiet","source":"shinyInput('beta2')"},{"methodName":"interpretQuiet","source":"shinyInput('alpha2')"},{"methodName":"interpretQuiet","source":"shinyInput('gamma2')"},{"methodName":"interpretQuiet","source":"shinyInput('rho2')"},{"methodName":"interpretQuiet","source":"shinyInput('b2')"},{"methodName":"interpretQuiet","source":"shinyInput('c2')"},{"methodName":"interpretQuiet","source":"shinyInput('mu2')"}]}
 </script>
 <script type="module">
 window._ojs.paths.runtimeToDoc = "../../posts/source-sink";
