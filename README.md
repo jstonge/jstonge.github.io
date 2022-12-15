@@ -9,13 +9,18 @@ The Teenyverse
  - For each model, we have the following structure:
  
 ```shell
-├── data.json              # data file. Created when new models are ran. 
 ├── index.qmd              # Main file to render the interactive page. There should be only `ojs` cells in it.
 ├── models                 # All models live in their own directory
 │   ├── source-sink1.jl
 │   └── source-sink2.jl
 ├── sourcesink_sketch.jpg  # Sketch of the model
-└── unions.jpg             # Image that is shown at the top level of the blog
+├── source-sink.db         # SQLite DB containing grid of params for the models 
+├── src
+│   ├── 01_source-sinkDB.jl  # Add params to the SQLite DB
+│   ├── 02_script2vacc.jl    # Script to generate bash scripts for params sweep on the VACC
+│   └── 04_processing.jl     # Processing script before passing to index.qmd
+└── unions.jpg
+
 ```
  
 ### Adding new parameter configurations to an existing model
