@@ -39,7 +39,6 @@ function main()
     global OFFSET = 0
 
     function write2db(;LIMIT=0)
-        println((1, OFFSET, LIMIT))
         open(full_script_path, "w") do io
             write(io, "#!/bin/bash\n")
             write(io, "#SBATCH --partition=$(queue)\n")
@@ -48,7 +47,7 @@ function main()
             write(io, "#SBATCH --time=$(wall_time)\n")
             write(io, "#SBATCH --job-name=$(batch_counter)\n")
             write(io, "#SBATCH --output=$(OUTPUT_DIR)/res_$(batch_counter).out \n")
-            write(io, "julia models/$(MODEL_NAME).jl --db 'sourcesink-db' -O $(OFFSET) -L $(LIMIT) -o $(OUTPUT_DIR)")
+            write(io, "julia models/$(MODEL_NAME).jl --db 'source-sink.db' -O $(OFFSET) -L $(LIMIT) -o $(OUTPUT_DIR)")
         end
     end
 
@@ -56,7 +55,6 @@ function main()
     for i=1:nrow(c)       
         global full_script_path = "$(script_folder)/combine_folder_$(batch_counter).sh"
         if (i % NBATCHES) == 0   
-            println((0, OFFSET, i)) 
             write2db(LIMIT=i)
             batch_counter += 1
             OFFSET = i
