@@ -1,58 +1,50 @@
 using Pkg; Pkg.activate("../../");
-using ArgParse, Distributions, StatsBase, OrdinaryDiffEq, RecursiveArrayTools, JLD2
-
-function ArgParse.parse_item(::Type{StepRangeLen}, x::AbstractString) where { StepRangeLen }
-  if tryparse(Float64, x) !== nothing
-    start = parse(Float64, x)
-    stop = parse(Float64, x)
-    step = 1.
-  else
-    start, step, stop = split(x, ":")
-    start = parse(Float64, start)
-    stop =  parse(Float64, stop)
-    step =  parse(Float64, step)
-  end
-  return range(start,stop,step=step)
-end
+using ArgParse, Distributions, StatsBase, OrdinaryDiffEq, RecursiveArrayTools, JLD2, DataFrames, SQLite
 
 function parse_commandline()
-  s = ArgParseSettings()
-
-  @add_arg_table! s begin
-      "--beta"
-      arg_type = StepRangeLen
-      default = 0.07:1.:0.07
-      help = "Spreading rate from non-adopter to adopter beta"
-      "-a"
-      arg_type = StepRangeLen
-      default = 0.05:1.:0.05
-      help = "Negative benefits alpha"
-      "-g"
-      arg_type = StepRangeLen
-      default = 1.:1.:1.
-      help = "Recovery rate gamma, i.e. rate at which adopters loose behavioral trait"
-      "-r"
-      arg_type = StepRangeLen
-      default = 0.1:1.:0.1
-      help = "Global behavioral diffusion rho (allows the behaviour to spread between groups)"
-      "-b"
-      arg_type = StepRangeLen
-      default = 0.18:1.:0.18
-      help = "Group benefits b"
-      "-c"
-      arg_type = StepRangeLen
-      default = 1.05:1.:1.05
-      help = "Institutional cost c"
-      "-m"
-      arg_type = StepRangeLen
-      default = 1e-4:1.:1e-4
-      help = "Noise u"
-      "-o"
-      default = "."
-      help = "Output file for results"
-    end
-
-  return parse_args(s)
+    s = ArgParseSettings()
+  
+    @add_arg_table! s begin
+        "--beta"
+        arg_type = Float64
+        default = 0.07
+        help = "Spreading rate from non-adopter to adopter beta"
+        "-a"
+        arg_type = Float64
+        default = 0.5
+        help = "Negative benefits alpha"
+        "-g"
+        arg_type = Float64
+        default = 1.
+        help = "Recovery rate gamma, i.e. rate at which adopters loose behavioral trait"
+        "-r"
+        arg_type = Float64
+        default = 0.1
+        help = "Global behavioral diffusion rho (allows the behaviour to spread between groups)"
+        "-b"
+        arg_type = Float64
+        default = 0.18
+        help = "Group benefits b"
+        "-c"
+        arg_type = Float64
+        default = 1.05
+        help = "Institutional cost c"
+        "-m"
+        arg_type = Float64
+        default = 1e-4
+        help = "Noise u"
+        "--db"
+        help = "Option Database to query parameters"
+        "-L"
+        help = "LIMITE of rows"
+        "-O" 
+        help = "The OFFSET clause after LIMIT specifies how many rows to skip at the beginning of the result set."
+        "-o"
+        default = "."
+        help = "Output file for results"
+      end
+  
+    return parse_args(s)
 end
 
 function initialize_u0(;n::Int=20, L::Int=6, M::Int=20, p::Float64=0.01)
@@ -95,23 +87,55 @@ function source_sink2!(du, u, p, t)
       end
 end
 
-function main()
-  args = parse_commandline()
-  for β=args["beta"], α=args["a"], γ=args["g"], ρ=args["r"], b=args["b"], c=args["c"], μ=args["m"]
-    # Init
-    # β, α, γ, ρ, b, c = 0.07, 0.5, 1, 0.1, 0.18, 1.05
-    p = [β, α, γ, ρ, b, c, μ]
-    
-    n, M = 20, 1000
-    u₀ = initialize_u0(n=n, L=6, M=M, p=0.01)
-    tspan = (1.0, 4000)
-    
-    # Solve problem
-    prob = ODEProblem(source_sink2!, u₀, tspan, p)
-    sol = solve(prob, DP5(), saveat = 1., reltol=1e-8, abstol=1e-8)
+function run_source_sink2(p)
+  n, M = 20, 1000
+  u₀ = initialize_u0(n=n, L=6, M=M, p=0.01)
+  tspan = (1.0, 4000)
+  
+  # Solve problem
+  prob = ODEProblem(source_sink2!, u₀, tspan, p)
+  return solve(prob, DP5(), saveat = 1., reltol=1e-8, abstol=1e-8)
+end
 
+function main()
+  # β, α, γ, ρ, b, c = 0.07, 0.5, 1, 0.1, 0.18, 1.05
+  args = parse_commandline()
+  
+  # Init
+  if isnothing(args["db"])
+    
+    β = args["beta"]
+    α = args["a"]
+    γ = args["g"]
+    ρ = args["r"]
+    b = args["b"]
+    c = args["c"]
+    μ = args["m"]
+    
+    p = [β, α, γ, ρ, b, c, μ]  
+    sol = run_source_sink2(p)
     @save "$(args["o"])/sourcesink2_$(join(p, "_")).jld2" sol
-  end
+
+  else
+    
+    db = SQLite.DB(args["db"])
+    c = DBInterface.execute(db, """SELECT * from sourcesink2 LIMIT $(args["O"]), $(args["L"])""") |> DataFrame
+    
+    for row in eachrow(c)
+      
+      β = row["beta"]
+      α = row["alpha"]
+      γ = row["gamma"]
+      ρ = row["rho"]
+      b = row["b"]
+      c = row["cost"]
+      μ = row["mu"]
+    
+      p = [β, α, γ, ρ, b, c, μ]
+      sol = run_source_sink2(p)    
+      @save "$(args["o"])/sourcesink2_$(join(p, "_")).jld2" sol
+    end
+  end  
 end
 
 main()

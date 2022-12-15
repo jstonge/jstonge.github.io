@@ -45,8 +45,8 @@ CREATE TABLE sourcesink2 (
 """)
 
 counter = 1
-for α=0.5:0.1:0.6, γ=0.9:0.1:1.1, ρ=0.1:0.15:0.40, b=0.12:0.05:0.22, c=.55:0.5:2.05
-  params = ("sim$(counter)", "0.07:0.05:0.22", α, γ, ρ, b, c, 1e-4, "sourcesink2_res$(counter).jld2")
+for β=0.07:0.05:0.22, α=0.5:0.1:0.6, γ=0.9:0.1:1.1, ρ=0.1:0.15:0.40, b=0.12:0.05:0.22, c=.55:0.5:2.05
+  params = ("sim$(counter)", β, α, γ, ρ, b, c, 1e-4, "sourcesink2_res$(counter).jld2")
   SQLite.execute(db, """INSERT INTO sourcesink2 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)""", params)
   counter += 1
 end

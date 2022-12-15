@@ -4,4 +4,5 @@
 #SBATCH --mem=8gb
 #SBATCH --time=02:59:59
 #SBATCH --job-name=22
-julia models/sourcesink2.jl --beta 0.07:0.05:0.22 -a 0.5 -g 0.9 -r 0.25 -b 0.22 -c 1.05 -m 0.0001 -o sourcesink2_output
+#SBATCH --output=sourcesink2_output/res_22.out 
+julia models/sourcesink2.jl --db 'sourcesink-db' -O 840 -L 864 -o sourcesink2_output
