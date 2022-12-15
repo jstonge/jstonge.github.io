@@ -97,6 +97,18 @@ function run_source_sink2(p)
   return solve(prob, DP5(), saveat = 1., reltol=1e-8, abstol=1e-8)
 end
 
+function write_sol2txt(path, sol)
+  L = length(sol.u[1].x)
+  open(path, "a") do io
+    for t=1:length(sol.u), ℓ=1:L
+      for val in sol.u[t].x[ℓ]      
+          write(io, "$(t) $(ℓ) $(round(val, digits=6))\n")
+      end
+    end
+  end
+end
+
+
 function main()
   # β, α, γ, ρ, b, c = 0.07, 0.5, 1, 0.1, 0.18, 1.05
   args = parse_commandline()
@@ -114,8 +126,7 @@ function main()
     
     p = [β, α, γ, ρ, b, c, μ]  
     sol = run_source_sink2(p)
-    @save "$(args["o"])/sourcesink2_$(join(p, "_")).jld2" sol
-
+    write_sol2txt("$(args["o"])/sourcesink2_$(join(p, "_")).txt", sol) 
   else
     
     db = SQLite.DB(args["db"])
@@ -133,7 +144,7 @@ function main()
     
       p = [β, α, γ, ρ, b, c, μ]
       sol = run_source_sink2(p)    
-      @save "$(args["o"])/sourcesink2_$(join(p, "_")).jld2" sol
+      write_sol2txt("$(args["o"])/sourcesink2_$(join(p, "_")).txt", sol) 
     end
   end  
 end

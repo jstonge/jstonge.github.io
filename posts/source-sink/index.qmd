@@ -127,8 +127,17 @@ end
 
 ## Output
 
+```{ojs}
+db = FileAttachment("source-sink.db").sqlite()
+```
+
 ::: panel-tabset
 ## Plot 1
+
+
+```{ojs}
+res = db.query(`SELECT * FROM sourcesink1`)
+```
 
 ```{ojs}
 data = FileAttachment("data2.json").json()
