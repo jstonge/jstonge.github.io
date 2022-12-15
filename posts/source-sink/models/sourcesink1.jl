@@ -5,27 +5,42 @@ function parse_commandline()
   s = ArgParseSettings()
 
   @add_arg_table! s begin
+      "--db"
+      help = "Use Database to query parameters"
+      "-L"
+      arg_type = Int
+      default = 5
+      help = "LIMIT of rows"
+      "-O"
+      arg_type = Int
+      default = 0
+      help = "The OFFSET clause after LIMIT specifies how many rows to skip at the beginning of the result set."
       "--beta"
       arg_type = Float64
       default = 0.07
-      help = "Spreading rate from non-adopter to adopter"
-      "--gamma"
+      help = "Spreading rate from non-adopter to adopter beta"
+      "-g"
       arg_type = Float64
       default = 1.
-      help = "Recovery rate, i.e. rate at which adopters loose behavioral trait"
-      "--rho"
+      help = "Recovery rate gamma, i.e. rate at which adopters loose behavioral trait"
+      "-r"
       arg_type = Float64
       default = 0.1
-      help = "Global behavioral diffusion (allows the behaviour to spread between groups)"
+      help = "Global behavioral diffusion rho (allows the behaviour to spread between groups)"
       "-b"
       arg_type = Float64
       default = 0.18
-      help = "Group benefits"
+      help = "Group benefits b"
       "-c"
       arg_type = Float64
       default = 1.05
-      help = "Institutional cost"
-      "--output_file" "-o"
+      help = "Institutional cost c"
+      "-m"
+      arg_type = Float64
+      default = 1e-4
+      help = "Noise u"
+      "-o"
+      default = "."
       help = "Output file for results"
     end
 
@@ -75,28 +90,49 @@ function source_sink!(du, u, p, t)
     end
 end
 
-function main()
+function run_source_sink(p)
+  n, M = 20, 1000
+  u₀ = initialize_u0(n=n, L=6, M=M, p=0.01)
+  tspan = (1.0, 4000)
   
+  # Solve problem
+  prob = ODEProblem(source_sink!, u₀, tspan, p)
+  return solve(prob, DP5(), saveat = 1., reltol=1e-8, abstol=1e-8)
+end
+
+function main()
     args = parse_commandline()
     
-    # Init
-    # β, γ, ρ, b, c = 0.07,  1, 0.1, 0.18, 1.05 # base case from the paper
-    β = args["beta"]
-    γ = args["gamma"]
-    ρ = args["rho"]
-    b = args["b"]
-    c = args["c"]
-    μ = 1e-4
-    p = [β, γ, ρ, b, c, μ]
-        
-    n, M = 20, 1000
-    u₀ = initialize_u0(n=n, L=6, M=M, p=0.01)
-    tspan = (1.0, 4000)
+    if isnothing(args["db"])
+      β = args["beta"]
+      γ = args["g"]
+      ρ = args["r"]
+      b = args["b"]
+      c = args["c"]
+      μ = args["m"]
+      
+      p = [β, γ, ρ, b, c, μ]  
+      sol = run_source_sink(p)
+      @save "$(args["o"])/sourcesink1_$(join(p, "_")).jld2" sol
+  
+    else
+      
+      db = SQLite.DB(args["db"])
+      c = DBInterface.execute(db, """SELECT * from sourcesink LIMIT $(args["O"]), $(args["L"])""") |> DataFrame
     
-    # Solve problem
-    prob = ODEProblem(source_sink!, u₀, tspan, p)
-    sol = solve(prob, DP5(), saveat = 1., reltol=1e-8, abstol=1e-8)
-    @save "sourcesink1_$(join(p, "_")).jld2" sol
+      for row in eachrow(c)
+        β = row["beta"]
+        γ = row["gamma"]
+        ρ = row["rho"]
+        b = row["b"]
+        c = row["cost"]
+        μ = row["mu"]
+      
+        p = [β,  γ, ρ, b, c, μ]
+        sol = run_source_sink(p)    
+        @save "$(args["o"])/sourcesink1_$(join(p, "_")).jld2" sol
+      end
+    end  
 end
 
 main()
