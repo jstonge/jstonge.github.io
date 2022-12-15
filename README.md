@@ -21,14 +21,14 @@ The Teenyverse
 ### Adding new parameter configurations to an existing model
  
  - Have the model rendered somewhere, either directly on the [blog page](https://jstonge.github.io/teenyverse/posts/source-sink/) or knitting the `.qmd` document  (on VScode, this is `ctrl-shift k` when you are in the `index.qmd` file). 
- - Move in model directory (`/models`), and run new configurations as needed. For example, if you want to add `beta` values [0.27, 0.3, 0.33], you can do:
+ - Run new configurations as needed from the root dir of the blog page (e.g. `source-sink/`). For example, if you want to add `beta` values 0.27, `gamma` values 1.1., and the rest is the default,  you can do:
  
  ```shell
  # the rest of the params will be the default below
- julia source-sink1.jl --beta 0.27 -g 1.1 
+ julia models/source-sink1.jl --beta 0.27 -g 1.1 
  ```
  
- Running `julia source-sink1.jl --help` will give you the argument names and current default values:
+ Running `julia models/source-sink1.jl --help` will give you the argument names and current default values:
  
  ```shell
  usage: sourcesink1.jl [--db DB] [-L L] [-O O] [--beta BETA] [-g G]
