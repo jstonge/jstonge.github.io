@@ -24,30 +24,33 @@ The Teenyverse
  - Move in model directory (`/models`), and run new configurations as needed. For example, if you want to add `beta` values [0.27, 0.3, 0.33], you can do:
  
  ```shell
- julia source-sink1.jl --b "0.27:0.03:0.33" # range(0.27, 0.33, step=0.03)
+ # the rest of the params will be the default below
+ julia source-sink1.jl --beta 0.27 -g 1.1 
  ```
  
  Running `julia source-sink1.jl --help` will give you the argument names and current default values:
  
  ```shell
- usage: source-sink1.jl [--beta BETA] [--gamma GAMMA] [--rho RHO]
-                       [-b B] [-c C] [-h]
+ usage: sourcesink1.jl [--db DB] [-L L] [-O O] [--beta BETA] [-g G]
+                      [-r R] [-b B] [-c C] [-m M] [-o O] [-h]
 
 optional arguments:
-  --beta BETA    Spreading rate from non-adopter to adopter (type:
-                 StepRangeLen, default: 0.07:0.05:0.22)
-  --gamma GAMMA  Recovery rate, i.e. rate at which adopters loose
-                 behavioral trait (type: StepRangeLen, default:
-                 0.9:0.1:1.1)
-  --rho RHO      Global behavioral diffusion (allows the behaviour to
-                 spread between groups) (type: StepRangeLen, default:
-                 0.1:0.15:0.4)
-  -b B           Group benefits (type: StepRangeLen, default:
-                 0.12:0.05:0.22)
-  -c C           Institutional cost (type: StepRangeLen, default:
-                 0.55:0.5:2.05)
-  -h, --help     show this help message and exit
- .
+  --db DB      Use Database to query parameters
+  -L L         LIMIT of rows (type: Int64, default: 5)
+  -O O         The OFFSET clause after LIMIT specifies how many rows
+               to skip at the beginning of the result set. (type:
+               Int64, default: 0)
+  --beta BETA  Spreading rate from non-adopter to adopter beta (type:
+               Float64, default: 0.07)
+  -g G         Recovery rate gamma, i.e. rate at which adopters loose
+               behavioral trait (type: Float64, default: 1.0)
+  -r R         Global behavioral diffusion rho (allows the behaviour
+               to spread between groups) (type: Float64, default: 0.1)
+  -b B         Group benefits b (type: Float64, default: 0.18)
+  -c C         Institutional cost c (type: Float64, default: 1.05)
+  -m M         Noise u (type: Float64, default: 0.0001)
+  -o O         Output file for results (default: ".")
+  -h, --help   show this help message and exit
  ```
  Once this is done running, the rendered file should reflect the changes. To see the changes on the web page, we need to push the changes on Github. Then Github action will take care of update the web page.
 
