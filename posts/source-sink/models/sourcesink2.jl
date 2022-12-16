@@ -108,7 +108,6 @@ function write_sol2txt(path, sol)
   end
 end
 
-
 function main()
   # β, α, γ, ρ, b, c = 0.07, 0.5, 1, 0.1, 0.18, 1.05
   args = parse_commandline()
@@ -130,7 +129,7 @@ function main()
   else
     
     db = SQLite.DB(args["db"])
-    c = DBInterface.execute(db, """SELECT * from sourcesink2 LIMIT $(args["O"]), $(args["L"])""") |> DataFrame
+    c = DBInterface.execute(db, """SELECT * from sourcesink2 LIMIT $(args["L"]) OFFSET $(args["O"])""") |> DataFrame
     
     for row in eachrow(c)
       
