@@ -5,6 +5,16 @@ function parse_commandline()
     s = ArgParseSettings()
   
     @add_arg_table! s begin
+        "--db"
+        help = "Use Database to query parameters"
+        "-L"
+        arg_type = Int
+        default = 5
+        help = "LIMIT of rows"
+        "-O"
+        arg_type = Int
+        default = 0
+        help = "The OFFSET clause after LIMIT specifies how many rows to skip at the beginning of the result set."
         "--beta"
         arg_type = Float64
         default = 0.07
@@ -33,12 +43,6 @@ function parse_commandline()
         arg_type = Float64
         default = 1e-4
         help = "Noise u"
-        "--db"
-        help = "Option Database to query parameters"
-        "-L"
-        help = "LIMITE of rows"
-        "-O" 
-        help = "The OFFSET clause after LIMIT specifies how many rows to skip at the beginning of the result set."
         "-o"
         default = "."
         help = "Output file for results"

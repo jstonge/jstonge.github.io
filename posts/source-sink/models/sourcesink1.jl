@@ -111,7 +111,6 @@ function write_sol2txt(path, sol)
   end
 end
 
-
 function main()
     # β, γ, ρ, b, c, μ = 0.07, 1., 0.1, 0.18, 1.05, 0.0001
     args = parse_commandline()
