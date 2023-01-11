@@ -125,94 +125,71 @@ end
 ```
 :::
 
-## Output
+```{ojs load results db}
+resdb = FileAttachment("source-sink-res.db").sqlite()
+```
 
-```{ojs}
+```{ojs helpers}
+f = (x) => Number.isInteger(x) ? x.toPrecision(2) : x
+minmax = (p, i) => d3.extent(p.map(d => parseFloat(d[i])))
+s = (p,i) => { 
+  const unique_vals = Array.from(new Set(p.map(d => parseFloat(d[i]))))
+                           .sort((a,b) => a - b)
+  const out = []
+  for (let i=1; i < unique_vals.length; i++ ) {
+    out.push(+(unique_vals[i]-unique_vals[i-1]).toPrecision(1))
+  } // return whatev if length is zero
+  return out.length === 0 ? 0.1 : out[0]
+}
 ```
 
 ::: panel-tabset
-## Plot 1
-
-
-```{ojs}
-db2 = FileAttachment("sourcesink2-res.db").sqlite()
-res2 = db2.query(`SELECT * FROM $(p)`)
-```
-
-```{ojs}
-data = FileAttachment("data2.json").json()
-p = Object.keys(data).map(d => d.split("_")) //unpack params
-```
-
-```{ojs}
-//| panel: sidebar
-
-minmax = (p, i) => d3.extent(p.map(d => parseFloat(d[i])))
-
-viewof beta  = Inputs.range(minmax(p,0), {step: 0.05, label: "β", value:"0.07"})
-viewof gamma = Inputs.range(minmax(p,1), {step: 0.1,  label: "γ", value:"1.0"})
-viewof rho   = Inputs.range(minmax(p,2), {step: 0.15, label: "ρ", value:"0.1"})
-viewof b     = Inputs.range(minmax(p,3), {step: 0.05, label: "b", value:"0.18"})
-viewof c     = Inputs.range(minmax(p,4), {step: 0.5,  label: "c", value:"1.05"})
-viewof mu    = Inputs.range(minmax(p,5), {step: 0.03, label: "μ", value:"0.0001"})
-```
-
-```{ojs}
-f = (x) => Number.isInteger(x) ? x.toPrecision(2) : x
-
-Plot.plot({
-  x: {type:"log"},
-  y: {domain: [0,1]},
-  color: {scheme: "reds", type: "ordinal", legend: true},
-  marks: [
-    Plot.line(
-      data[`${f(beta)}_${f(gamma)}_${f(rho)}_${f(b)}_${f(c)}_${f(mu)}`], {
-        x: 'timesteps', y: "value", stroke: "L"
-        }),
-    Plot.dot(
-      data[`${f(beta)}_${f(gamma)}_${f(rho)}_${f(b)}_${f(c)}_${f(mu)}`], {
-        x: 'timesteps', y: "value", stroke: "L"
-        })
-  ]
-})
-```
 
 ## Plot 2
 
-```{ojs}
-data2 = FileAttachment("data2.json").json()
-p2 = Object.keys(data2).map(d => d.split("_")) //unpack params
-```
 
 ```{ojs}
 //| panel: sidebar
-// 0.07_0.5_1.0_0.1_0.18_1.05_0.0001
-viewof beta2  = Inputs.range(minmax(p2,0), {step: 0.07, label: "β", value:"0.07"})
-viewof alpha2 = Inputs.range(minmax(p2,1), {step: 0.5, label: "β", value:"0.5"})
-viewof gamma2 = Inputs.range(minmax(p2,2), {step: 1.,  label: "γ", value:"1.0"})
-viewof rho2   = Inputs.range(minmax(p2,3), {step: 0.1, label: "ρ", value:"0.1"})
-viewof b2     = Inputs.range(minmax(p2,4), {step: 0.18, label: "b", value:"0.18"})
-viewof c2     = Inputs.range(minmax(p2,5), {step: 1.05,  label: "c", value:"1.05"})
-viewof mu2    = Inputs.range(minmax(p2,6), {step: 0.0001, label: "μ", value:"0.0001"})
+unique_name = resdb.query(`SELECT DISTINCT name FROM sourcesink2`)
+p = unique_name.map(d => d.name.split("_"))
+
+viewof beta  = Inputs.range(minmax(p,0), {step: s(p,0),  label: "β", value:p[0][0]})
+viewof alpha = Inputs.range(minmax(p,1), {step: s(p,1),  label: "α", value:p[0][1]})
+viewof gamma = Inputs.range(minmax(p,2), {step: s(p,2),  label: "γ", value:p[0][2]})
+viewof rho   = Inputs.range(minmax(p,3), {step: s(p,3),  label: "ρ", value:p[0][3]})
+viewof b     = Inputs.range(minmax(p,4), {step: s(p,4),  label: "b", value:p[0][4]})
+viewof c     = Inputs.range(minmax(p,5), {step: s(p,5),  label: "c", value:p[0][5]})
+viewof mu    = Inputs.range(minmax(p,6), {step: s(p,6),  label: "μ", value:p[0][6]})
+
+// use sql query to filter
+data2 = resdb.query(`
+  SELECT * 
+  FROM sourcesink2
+  WHERE
+  name = '${f(beta)}_${f(alpha)}_${f(gamma)}_${f(rho)}_${f(b)}_${f(c)}_${f(mu)}'
+`)
+
 ```
 
 ```{ojs}
+//| panel: fill
 Plot.plot({
   x: {type:"log"},
-  y: {domain: [0,1]},
+  // y: {domain: [0,1]},
   color: {scheme: "reds", type: "ordinal", legend: true},
   marks: [
     Plot.line(
-      data2[`${f(beta2)}_${f(alpha2)}_${f(gamma2)}_${f(rho2)}_${f(b2)}_${f(c2)}_${f(mu2)}`], {
-        x: 'timesteps', y: "value", stroke: "L"
+      data2, {
+        x: 'timestep', y: "value", stroke: "L"
         }),
     Plot.dot(
-      data2[`${f(beta2)}_${f(alpha2)}_${f(gamma2)}_${f(rho2)}_${f(b2)}_${f(c2)}_${f(mu2)}`], {
-        x: 'timesteps', y: "value", stroke: "L"
+      data2, {
+        x: 'timestep', y: "value", stroke: "L"
         })
   ]
 })
 ```
+
 
 :::
 

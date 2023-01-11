@@ -101,6 +101,14 @@ function run_source_sink2(p)
   return solve(prob, DP5(), saveat = 1., reltol=1e-8, abstol=1e-8)
 end
 
+"""
+write_sol2txt
+=============
+We write the solution as raw output in a long text files where
+each row is a timestep at that level for that group size, e.g. 
+value for group size = 3 for level 6 at time 1.
+Each timestep is separated by the number of levels x and group size (21 x 6 here).
+"""
 function write_sol2txt(path, sol)
   L = length(sol.u[1].x)
   open(path, "a") do io
@@ -127,15 +135,16 @@ function main()
     c = args["c"]
     μ = args["m"]
     
-    p = [β, α, γ, ρ, b, c, μ]  
+    p = [β, α, γ, ρ, b, c, μ]
     sol = run_source_sink2(p)
     write_sol2txt("$(args["o"])/sourcesink2_$(join(p, "_")).txt", sol) 
   else
     
+    # db = SQLite.DB("source-sink.db")
     db = SQLite.DB(args["db"])
-    c = DBInterface.execute(db, """SELECT * from sourcesink2 LIMIT $(args["L"]) OFFSET $(args["O"])""") |> DataFrame
+    con = DBInterface.execute(db, """SELECT * from sourcesink2 LIMIT $(args["L"]) OFFSET $(args["O"])""") |> DataFrame
     
-    for row in eachrow(c)
+    for row in eachrow(con)
       
       β = row["beta"]
       α = row["alpha"]
@@ -144,10 +153,10 @@ function main()
       b = row["b"]
       c = row["cost"]
       μ = row["mu"]
-    
+      
       p = [β, α, γ, ρ, b, c, μ]
       sol = run_source_sink2(p)    
-      write_sol2txt("$(args["o"])/sourcesink2_$(join(p, "_")).txt", sol) 
+      write_sol2txt("$(args["o"])/sourcesink2_$(join(p, "_")).txt", sol)
     end
   end  
 end

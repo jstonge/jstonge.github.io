@@ -130,9 +130,9 @@ function main()
     else
       
       db = SQLite.DB(args["db"])
-      c = DBInterface.execute(db, """SELECT * from sourcesink LIMIT $(args["O"]), $(args["L"])""") |> DataFrame
+      con = DBInterface.execute(db, """SELECT * from sourcesink LIMIT $(args["O"]), $(args["L"])""") |> DataFrame
     
-      for row in eachrow(c)
+      for row in eachrow(con)
         β = row["beta"]
         γ = row["gamma"]
         ρ = row["rho"]

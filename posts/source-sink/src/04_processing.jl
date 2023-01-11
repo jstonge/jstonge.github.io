@@ -18,40 +18,76 @@ function parse_commandline()
   return parse_args(s)
 end
 
+function create_res_db()
+  SQLite.execute(db, """
+  CREATE TABLE sourcesink2 (
+    name STRING,
+    timestep INT,
+    L INT,
+    value REAL,
+    PRIMARY KEY (name, timestep, L)
+  )
+  """)
+end
+
+"""
+Combine all sols in `sourcesink2_output/`, using only unique value, into database.
+"""
 function main()
   args = parse_commandline()
-
+  
   DATA_DIR = args["d"]
   fnames = filter(x -> endswith(x, "txt"),  readdir(DATA_DIR, join=true))
 
-  dfs = []
-  counter = 1
+  @assert length(fnames) > 0 println("There are no data files at the given directory")
+
+  db = SQLite.DB(args["o"])
+  # modelname = split(fnames[1], "_")[1]
+  
+  if isfile("source-sink-res.db") == false
+    create_res_db()
+  end 
+  
+  already_done = DBInterface.execute(db, """SELECT DISTINCT name FROM sourcesink2""") |> DataFrame
+
   @showprogress for fname in fnames
     sol = CSV.read(fname, DataFrame; header=["timestep", "L", "value"])
-
-    p_str = replace(join(split(fname, "_")[2:end], "-"), ".txt" => "")
-
-    gd = groupby(sol, [:timestep, :L])
-    n = nrow(gd[1])
-
-    df_agg = combine(gd, :value => x -> iszero(sum(x)) ? 0.0 : sum((collect(0:(n-1)) / n) .* x) / sum(x)) 
-    rename!(df_agg, Dict(:value_function => "value")) 
-    unique!(df_agg, :value)
-    df_agg[!, :name] .= p_str
-    push!(dfs, df_agg)
-    counter += 1
-  end
-
-  fname = replace(fnames[1], "$(DATA_DIR)/" => "")
-  modelname = split(fnames[1], "_")[1]
+    fname = split(fname, "/")[end]
+    p_str = replace(join(split(fname, "_")[2:end], "_"), ".txt" => "")
+    
+    if p_str ∉ already_done.name
+      
+      gd = groupby(sol, [:timestep, :L])
+      
+      # Each combination of timestep and level must have the same number of rows. 
+      # If not, we are unable to combine them. To ensure this is the case,
+      # we take the min of each combination. 
+      #!TODO Verify that this will not throw away important information down the line
+      n = nrow(gd[1])
+      # n = minimum([nrow(g) for g in gd])
+      
+      df_agg = combine(gd, :value => x -> iszero(sum(x)) ? 0.0 : sum((collect(0:(n-1)) / n) .* x) / sum(x)) 
+      rename!(df_agg, Dict(:value_function => "value")) 
+      unique!(df_agg, :value)
   
-  db = SQLite.DB(args["o"])
-  all_dfs = vcat(dfs...) 
-  all_dfs |> SQLite.load!(db,"$(modelname)") 
+      # write to db
+      for row in eachrow(df_agg)
+        params = (p_str, row["timestep"], row["L"], row["value"])
+        SQLite.execute(db, """INSERT INTO sourcesink2 VALUES (?, ?, ?, ?)""", params)
+      end
+      
+    end
 
+  end
 end
 
 main()
+
+
+
+# SQLite.execute(db, """
+# DROP TABLE sourcesink2
+# """)
 
 # OUTPUT_DIR = "/home/jstonge/OneDrive/teenyverse/sourcesink2/sourcesink2_output"
 
