@@ -22,8 +22,8 @@ The Teenyverse
 └── unions.jpg
 
 ```
- 
-### Adding new parameter configurations to an existing model
+
+### Adding a new parameter configurations to an existing model
  
  - Have the model rendered somewhere, either directly on the [blog page](https://jstonge.github.io/teenyverse/posts/source-sink/) or knitting the `.qmd` document  (on VScode, this is `ctrl-shift k` when you are in the `index.qmd` file). 
  - Run new configurations as needed from the root dir of the blog page (e.g. `source-sink/`). For example, if you want to add `beta` values 0.27, `gamma` values 1.1., and the rest is the default,  you can do:
@@ -58,6 +58,23 @@ optional arguments:
   -h, --help   show this help message and exit
  ```
  Once this is done running, the rendered file should reflect the changes. To see the changes on the web page, we need to push the changes on Github. Then Github action will take care of update the web page.
+
+### Adding a parameter sweep
+
+ - Update manually the parameter database of the model, using `src/01_source-sinkDB.jl`
+ - Run `src/02_script2vacc.jl` to create the bash scripts we will run in parallel on the vacc, e.g.
+```shell
+julia src/02_script2vacc.jl --db "source-sink.db" -m "sourcesink2" -b 30
+```
+ - Send everything though the vacc via the github repo.
+ - Move in the model directory, then run the following command:
+```shell
+for file in $(ls sourcesink2_output/vacc_script/*.sh); do sbatch $file; done;
+```
+ - Send back the output to local directory using `rsync`
+ - Process the raw output using `04_processing.jl`
+
+
 
 ### Modify/add new models
 
