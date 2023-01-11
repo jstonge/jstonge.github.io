@@ -36,6 +36,7 @@ Combine all sols in `sourcesink2_output/`, using only unique value, into databas
 function main()
   args = parse_commandline()
   
+  # DATA_DIR = "sourcesink2_output"
   DATA_DIR = args["d"]
   fnames = filter(x -> endswith(x, "txt"),  readdir(DATA_DIR, join=true))
 
@@ -44,11 +45,14 @@ function main()
   db = SQLite.DB(args["o"])
   # modelname = split(fnames[1], "_")[1]
   
-  if isfile("source-sink-res.db") == false
+  try
     create_res_db()
-  end 
+  catch
+    println("DB already exists")
+  finally
+    already_done = DBInterface.execute(db, """SELECT DISTINCT name FROM sourcesink2""") |> DataFrame
+  end
   
-  already_done = DBInterface.execute(db, """SELECT DISTINCT name FROM sourcesink2""") |> DataFrame
 
   @showprogress for fname in fnames
     sol = CSV.read(fname, DataFrame; header=["timestep", "L", "value"])
