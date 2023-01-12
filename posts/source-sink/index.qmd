@@ -216,7 +216,7 @@ Plot.plot({
 })
 ```
 
-## Takeaways:
+#### Takeaways:
 
 -   Frequency of behaviour in groups with different institutional strength.
 -   Within groups, the frequency of cooperative behaviour follows the strength of institutions (with ℓ = 1 in light beige and ℓ = 6 in dark red).
@@ -227,23 +227,23 @@ Plot.plot({
 
 ```{ojs}
 //| panel: sidebar
-unique_name = resdb.query(`SELECT DISTINCT name FROM sourcesink2`)
-p = unique_name.map(d => d.name.split("_"))
+unique_name2 = resdb.query(`SELECT DISTINCT name FROM sourcesink2`)
+p2 = unique_name.map(d => d.name.split("_"))
 
-viewof beta  = Inputs.range(minmax(p,0), {step: s(p,0),  label: "β", value:p[0][0]})
-viewof alpha = Inputs.range(minmax(p,1), {step: s(p,1),  label: "α", value:p[0][1]})
-viewof gamma = Inputs.range(minmax(p,2), {step: s(p,2),  label: "γ", value:p[0][2]})
-viewof rho   = Inputs.range(minmax(p,3), {step: s(p,3),  label: "ρ", value:p[0][3]})
-viewof b     = Inputs.range(minmax(p,4), {step: s(p,4),  label: "b", value:p[0][4]})
-viewof c     = Inputs.range(minmax(p,5), {step: s(p,5),  label: "c", value:p[0][5]})
-viewof mu    = Inputs.range(minmax(p,6), {step: s(p,6),  label: "μ", value:p[0][6]})
+viewof beta2  = Inputs.range(minmax(p2,0), {step: s(p2,0),  label: "β", value:p2[0][0]})
+viewof alpha  = Inputs.range(minmax(p2,1), {step: s(p2,1),  label: "α", value:p2[0][1]})
+viewof gamma2 = Inputs.range(minmax(p2,2), {step: s(p2,2),  label: "γ", value:p2[0][2]})
+viewof rho2   = Inputs.range(minmax(p2,3), {step: s(p2,3),  label: "ρ", value:p2[0][3]})
+viewof b2     = Inputs.range(minmax(p2,4), {step: s(p2,4),  label: "b", value:p2[0][4]})
+viewof c2     = Inputs.range(minmax(p2,5), {step: s(p2,5),  label: "c", value:p2[0][5]})
+viewof mu2    = Inputs.range(minmax(p2,6), {step: s(p2,6),  label: "μ", value:p2[0][6]})
 
 // use sql query to filter
 data2 = resdb.query(`
   SELECT * 
   FROM sourcesink2
   WHERE
-  name = '${f(beta)}_${f(alpha)}_${f(gamma)}_${f(rho)}_${f(b)}_${f(c)}_${f(mu)}'
+  name = '${f(beta2)}_${f(alpha)}_${f(gamma2)}_${f(rho2)}_${f(b2)}_${f(c2)}_${f(mu2)}'
 `)
 
 ```
@@ -266,6 +266,8 @@ Plot.plot({
   ]
 })
 ```
+
+#### Takeaways:
 
 :::
 
