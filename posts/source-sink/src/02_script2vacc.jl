@@ -42,7 +42,7 @@ function main()
     global batch_counter = 1
     global OFFSET = 0
 
-    function write2db(;LIMIT=0)
+    function write2db()
         open(full_script_path, "w") do io
             write(io, "#!/bin/bash\n")
             write(io, "#SBATCH --partition=$(queue)\n")
@@ -51,19 +51,19 @@ function main()
             write(io, "#SBATCH --time=$(wall_time)\n")
             write(io, "#SBATCH --job-name=$(batch_counter)\n")
             write(io, "#SBATCH --output=$(OUTPUT_DIR)/res_$(batch_counter).out \n")
-            write(io, "julia models/$(MODEL_NAME).jl --db $(DB_NAME) -O $(OFFSET) -L $(LIMIT) -o $(OUTPUT_DIR)")
+            write(io, "julia models/$(MODEL_NAME).jl --db $(DB_NAME) -O $(OFFSET) -L $(NBATCHES) -o $(OUTPUT_DIR)")
         end
     end
 
-    for i=1:nrow(c)       
+    for i=1:nrow(c)
         global full_script_path = "$(script_folder)/combine_folder_$(batch_counter).sh"
         if (i % NBATCHES) == 0   
-            write2db(LIMIT=i)
+            write2db()
             batch_counter += 1
             OFFSET = i
         end
     end
-    write2db(LIMIT=NBATCHES)
+    write2db()
 end
   
 main()

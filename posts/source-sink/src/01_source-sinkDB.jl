@@ -55,24 +55,24 @@ end
 
 SQLite.execute(db, """
 CREATE TABLE sourcesink2 (
-    name REAL PRIMARY KEY,
     beta REAL,
     alpha REAL,
     gamma REAL,
     rho REAL,
     b REAL,
     cost REAL,
-    mu REAL 
+    mu REAL,
+    PRIMARY KEY (beta, alpha, gamma, rho, b, cost, mu)
 )
 """)
 
 counter = 1
 for β=0.01:0.01:0.25, b=0.0:0.2:1.0, c=0.5:0.5:2.0
-  params = ("sim$(counter)", β, 1.0, 1.0, 0.2, -b, c, 1e-4)
-  SQLite.execute(db, """INSERT INTO sourcesink2 VALUES (?, ?, ?, ?, ?, ?, ?, ?)""", params)
+  params = (β, 1.0, 1.0, 0.2, -b, c, 1e-4)
+  SQLite.execute(db, """INSERT INTO sourcesink2 VALUES (?, ?, ?, ?, ?, ?, ?)""", params)
   counter += 1
 end
 
-SQLite.execute(db, """
-DROP TABLE sourcesink2
-""")
+# SQLite.execute(db, """
+# DROP TABLE sourcesink2
+# """)

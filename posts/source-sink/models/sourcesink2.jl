@@ -139,11 +139,9 @@ function main()
     sol = run_source_sink2(p)
     write_sol2txt("$(args["o"])/sourcesink2_$(join(p, "_")).txt", sol) 
   else
-    
-    # db = SQLite.DB("source-sink.db")
     db = SQLite.DB(args["db"])
     con = DBInterface.execute(db, """SELECT * from sourcesink2 LIMIT $(args["L"]) OFFSET $(args["O"])""") |> DataFrame
-    
+
     for row in eachrow(con)
       
       β = row["beta"]
