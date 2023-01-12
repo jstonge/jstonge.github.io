@@ -190,7 +190,6 @@ Plot.plot({
 })
 ```
 
-
 :::
 
 ## Takeaways:
