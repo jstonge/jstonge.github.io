@@ -252,6 +252,7 @@ data2 = resdb.query(`
 //| panel: fill
 Plot.plot({
   x: {type:"log"},
+  marginLeft: 50,
   // y: {domain: [0,1]},
   color: {scheme: "reds", type: "ordinal", legend: true},
   marks: [
