@@ -12,7 +12,7 @@ website:
         href: https://twitter.com
 format:
   html:
-    theme: sketchy
+    theme: spacelab
     css: styles.css
 
 execute:
