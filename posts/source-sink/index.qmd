@@ -190,11 +190,12 @@ Plot.plot({
 })
 ```
 
-:::
-
 ## Takeaways:
 
 -   Frequency of behaviour in groups with different institutional strength.
 -   Within groups, the frequency of cooperative behaviour follows the strength of institutions (with ℓ = 1 in light beige and ℓ = 6 in dark red).
 -   Qualitatively, no institutions are possible if institutional costs are too high, and the behaviour never spreads.
 -   The time dynamics of global behavioural frequency and behaviour in groups can include patterns of surge and collapse.
+
+:::
+

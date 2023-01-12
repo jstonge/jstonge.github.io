@@ -20,10 +20,7 @@ end
 function main()
     args = parse_commandline()
 
-    # NBATCHES = 30
-    # DB_NAME = "source-sink.db"
-    # MODEL_NAME = "sourcesink2"
-    NBATCHES = args["b"]
+    global batch_size = args["b"]
     global DB_NAME = args["db"]
     global MODEL_NAME = args["m"]
     global OUTPUT_DIR = "$(MODEL_NAME)_output"
@@ -51,13 +48,13 @@ function main()
             write(io, "#SBATCH --time=$(wall_time)\n")
             write(io, "#SBATCH --job-name=$(batch_counter)\n")
             write(io, "#SBATCH --output=$(OUTPUT_DIR)/res_$(batch_counter).out \n")
-            write(io, "julia models/$(MODEL_NAME).jl --db $(DB_NAME) -O $(OFFSET) -L $(NBATCHES) -o $(OUTPUT_DIR)")
+            write(io, "julia models/$(MODEL_NAME).jl --db $(DB_NAME) -O $(OFFSET) -L $(batch_size) -o $(OUTPUT_DIR)")
         end
     end
 
     for i=1:nrow(c)
         global full_script_path = "$(script_folder)/combine_folder_$(batch_counter).sh"
-        if (i % NBATCHES) == 0   
+        if (i % batch_size) == 0   
             write2db()
             batch_counter += 1
             OFFSET = i
