@@ -1,5 +1,5 @@
 using Pkg; Pkg.activate("../../");
-using ArgParse, Distributions, StatsBase, OrdinaryDiffEq, RecursiveArrayTools, JLD2, DataFrames, SQLite
+using ArgParse, Distributions, StatsBase, OrdinaryDiffEq, RecursiveArrayTools, DataFrames, SQLite
 
 function parse_commandline()
     s = ArgParseSettings()
@@ -49,6 +49,17 @@ function parse_commandline()
       end
   
     return parse_args(s)
+end
+
+function write_sol2txt(path, sol)
+  L = length(sol.u[1].x)
+  open(path, "a") do io
+    for t=1:length(sol.u), ℓ=1:L
+      for val in sol.u[t].x[ℓ]      
+          write(io, "$(t) $(ℓ) $(round(val, digits=6))\n")
+      end
+    end
+  end
 end
 
 function initialize_u0(;n::Int=20, L::Int=6, M::Int=20, p::Float64=0.01)
@@ -101,24 +112,6 @@ function run_source_sink2(p)
   return solve(prob, DP5(), saveat = 1., reltol=1e-8, abstol=1e-8)
 end
 
-"""
-write_sol2txt
-=============
-We write the solution as raw output in a long text files where
-each row is a timestep at that level for that group size, e.g. 
-value for group size = 3 for level 6 at time 1.
-Each timestep is separated by the number of levels x and group size (21 x 6 here).
-"""
-function write_sol2txt(path, sol)
-  L = length(sol.u[1].x)
-  open(path, "a") do io
-    for t=1:length(sol.u), ℓ=1:L
-      for val in sol.u[t].x[ℓ]      
-          write(io, "$(t) $(ℓ) $(round(val, digits=6))\n")
-      end
-    end
-  end
-end
 
 function main()
   # β, α, γ, ρ, b, c = 0.07, 0.5, 1, 0.1, 0.18, 1.05

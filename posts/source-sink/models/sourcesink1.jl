@@ -1,5 +1,5 @@
 using Pkg; Pkg.activate("../../");
-using ArgParse, Distributions, StatsBase, OrdinaryDiffEq, RecursiveArrayTools, JLD2
+using ArgParse, Distributions, StatsBase, OrdinaryDiffEq, RecursiveArrayTools, DataFrames, SQLite
 
 function parse_commandline()
   s = ArgParseSettings()
@@ -19,6 +19,10 @@ function parse_commandline()
       arg_type = Float64
       default = 0.07
       help = "Spreading rate from non-adopter to adopter beta"
+      "-a"
+      arg_type = Float64
+      default = 0.5
+      help = "Negative benefits alpha"
       "-g"
       arg_type = Float64
       default = 1.
@@ -45,6 +49,17 @@ function parse_commandline()
     end
 
   return parse_args(s)
+end
+
+function write_sol2txt(path, sol)
+  L = length(sol.u[1].x)
+  open(path, "a") do io
+    for t=1:length(sol.u), ℓ=1:L
+      for val in sol.u[t].x[ℓ]      
+          write(io, "$(t) $(ℓ) $(round(val, digits=6))\n")
+      end
+    end
+  end
 end
 
 function initialize_u0(;n::Int=20, L::Int=6, M::Int=20, p::Float64=0.01)
@@ -100,16 +115,6 @@ function run_source_sink(p)
   return solve(prob, DP5(), saveat = 1., reltol=1e-8, abstol=1e-8)
 end
 
-function write_sol2txt(path, sol)
-  L = length(sol.u[1].x)
-  open(path, "a") do io
-    for t=1:length(sol.u), ℓ=1:L
-      for val in sol.u[t].x[ℓ]      
-          write(io, "$(t) $(ℓ) $(round(val, digits=6))\n")
-      end
-    end
-  end
-end
 
 function main()
     # β, γ, ρ, b, c, μ = 0.07, 1., 0.1, 0.18, 1.05, 0.0001
@@ -130,7 +135,7 @@ function main()
     else
       
       db = SQLite.DB(args["db"])
-      con = DBInterface.execute(db, """SELECT * from sourcesink LIMIT $(args["O"]), $(args["L"])""") |> DataFrame
+      con = DBInterface.execute(db, """SELECT * from sourcesink1 LIMIT $(args["O"]), $(args["L"])""") |> DataFrame
     
       for row in eachrow(con)
         β = row["beta"]
