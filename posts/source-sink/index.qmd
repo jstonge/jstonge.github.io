@@ -228,7 +228,7 @@ Plot.plot({
 ```{ojs}
 //| panel: sidebar
 unique_name2 = resdb.query(`SELECT DISTINCT name FROM sourcesink2`)
-p2 = unique_name.map(d => d.name.split("_"))
+p2 = unique_name2.map(d => d.name.split("_"))
 
 viewof beta2  = Inputs.range(minmax(p2,0), {step: s(p2,0),  label: "β", value:p2[0][0]})
 viewof alpha  = Inputs.range(minmax(p2,1), {step: s(p2,1),  label: "α", value:p2[0][1]})
