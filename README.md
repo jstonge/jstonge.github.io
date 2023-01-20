@@ -22,6 +22,12 @@ The Teenyverse
 ├── source-sink.db         # SQLite DB containing grid of params for the models 
 └── source-sink-res.db     # SQLite DB containing data to visualize
 ```
+### Trying out a new model
+
+ - In the model repo, there is a template file (e.g. `teenyverse/posts/source-sink/models/sourcesink_template.jl`)
+ - Make a copy of the template, numbering the file as the next iteration.
+ - Follow the script TODOs.
+ - Use the section at the bottom to protoype dynamically your file.
 
 ### Adding a parameter sweep
 
