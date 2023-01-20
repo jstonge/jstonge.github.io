@@ -25,8 +25,10 @@ function create_res_db(db, modelname)
   """)
 end
 
+
+
 """
-Combine all sols in `sourcesink2_output/`, using only unique value, into database.
+Combine all sols in `sci-group-life-cycle1/`, using only unique value, into database.
 """
 function main()
   args = parse_commandline()

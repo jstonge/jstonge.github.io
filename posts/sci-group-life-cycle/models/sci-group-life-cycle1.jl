@@ -196,23 +196,27 @@ for t=1:length(sol.t)
   end
 end
 
-# for i=1:160
-#   dist_gsize[:,i] = dist_gsize[:,i] / sum(dist_gsize[:,i])
-# end
+# Plotting -------------------------------------------------------------
 
-# scatter(dist_gsize[1,1:100], legendtitle="grsize", legend=:outertopright, label="1")
-# for i=2:6
-#   scatter!(dist_gsize[i,1:100], label="$(i)")
-# end
-# vline!([10], label="")
-# xlabel!("time")
-# ylabel!("Fraction of gsize (%)")
+for i=1:160
+  dist_gsize[:,i] = dist_gsize[:,i] / sum(dist_gsize[:,i])
+end
+
+scatter(dist_gsize[1,1:100], legendtitle="grsize", legend=:outertopright, label="1")
+for i=2:6
+  scatter!(dist_gsize[i,1:100], label="$(i)")
+end
+vline!([10], label="")
+xlabel!("time")
+ylabel!("Fraction of gsize (%)")
 
 
 # heatmap(sommeGNI)
 # xlabel!("time")
 # ylabel!("grsize")
 # title!("Couleur: (coder+noncoder)*G_nil[i] ")
+
+# Writing to file -------------------------------------------------------------
 
 
 old_run = isfile("data.json") ? JSON.parsefile("data.json") : Dict()
