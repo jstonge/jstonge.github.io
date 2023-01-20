@@ -63,11 +63,12 @@ function write_sol2txt(path, sol)
 end
 
 function initialize_u0(;n::Int=20, L::Int=6, M::Int=20, p::Float64=0.01)
+    n, L, M, p = 20, 6, 20, 0.01
     G = zeros(L, n+1)
     for _ in 1:M
-      ℓ = rand(1:L) # pick a level
-      i = sum(collect(rand(Binomial(1, p), n))[1]) # how many total adopters?
-      G[ℓ, i+1] += 1 # everytime combination G[ℓ,i], count +1
+      ℓ = rand(1:L)                    # pick a level
+      i = sum(rand(Binomial(1, p), n)) # how many total adopters?
+      G[ℓ, i+1] += 1                   # everytime combination G[ℓ,i], count +1
     end
   
     G = G ./ M # normalized by tot number of groups
@@ -77,7 +78,7 @@ function initialize_u0(;n::Int=20, L::Int=6, M::Int=20, p::Float64=0.01)
 end
 
 function source_sink!(du, u, p, t)
-    G, L, n = u, length(u.x), length(first(u.x))
+    G, L, n = u, length(u.x), size(foo.x[1])[1]
     β, γ, ρ, b, c, μ = p
     Z, pop, R = zeros(L), zeros(L), 0.
 
