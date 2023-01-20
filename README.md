@@ -11,9 +11,10 @@ The [Teenyverse](https://rickandmorty.fandom.com/wiki/Teenyverse). See [project 
 ```shell
 ├── index.qmd              # Main file to render the interactive page. There should be only `ojs` cells in it.
 ├── models                 # All models live in their own directory
-│   ├── source-sink1.jl
-│   ├── source-sink2.jl
-|   └── ...
+│   ├── sourcesink1.jl
+│   ├── sourcesink2.jl
+|   ├── ...
+|   └── sourcesink_template.jl
 ├── sourcesink_sketch.jpg  # Sketch of the model
 ├── src
 │   ├── 01_source-sinkDB.jl  # Add params to the SQLite DB
