@@ -78,7 +78,7 @@ function initialize_u0(;n::Int=20, L::Int=6, M::Int=20, p::Float64=0.01)
 end
 
 function source_sink!(du, u, p, t)
-    G, L, n = u, length(u.x), size(foo.x[1])[1]
+    G, L, n = u, length(u.x), size(u.x[1])[1]
     β, γ, ρ, b, c, μ = p
     Z, pop, R = zeros(L), zeros(L), 0.
 
