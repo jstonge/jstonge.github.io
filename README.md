@@ -5,8 +5,12 @@ The [Teenyverse](https://rickandmorty.fandom.com/wiki/Teenyverse). See [project 
 
  - Make sure you have [quarto](https://quarto.org/docs/get-started/) and [julia](https://julialang.org/downloads/) installed on your machine.
  - Clone this repo.
- - You'll need to instantiate the virtual environment. From the command line, you can run `using Pkg; Pkg.instantiate()`
- - Move to the directory of interests, e.g. `teenyverse/posts/source-sink` for the `source-sink` model.
+ - You'll need to instantiate the virtual environment. From the command line, you can run:
+```julia
+julia> ] 
+(@1.8) pkg> instantiate
+``` 
+- Move to the directory of interests, e.g. `teenyverse/posts/source-sink` for the `source-sink` model.
  - For each model, we have the following structure:
  
 ```shell
