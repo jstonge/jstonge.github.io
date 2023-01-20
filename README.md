@@ -1,5 +1,5 @@
 # teenyverse
-The Teenyverse
+The [Teenyverse](https://rickandmorty.fandom.com/wiki/Teenyverse). See [project status](https://github.com/users/jstonge/projects/7) for the ongoing development work.
 
 ## Workflow 
 
