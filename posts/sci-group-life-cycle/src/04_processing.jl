@@ -25,8 +25,10 @@ function create_res_db(db, modelname)
   """)
 end
 
+
+
 """
-Combine all sols in `sourcesink2_output/`, using only unique value, into database.
+Combine all sols in `sci-group-life-cycle1/`, using only unique value, into database.
 """
 function main()
   args = parse_commandline()
@@ -41,7 +43,7 @@ function main()
   modelname = split(fnames[1], "_")[1]
   
   create_res_db(db, modelname)
-  already_done = DBInterface.execute(db, """SELECT DISTINCT name FROM sourcesink""") |> DataFrame
+  already_done = DBInterface.execute(db, """SELECT DISTINCT name FROM sourcesink2""") |> DataFrame
 
   dfs = []
   @showprogress for fname in fnames

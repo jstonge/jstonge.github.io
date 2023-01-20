@@ -1,5 +1,58 @@
-using Pkg; Pkg.activate("../..")
-using OrdinaryDiffEq, Plots, Distributions, RecursiveArrayTools, JSON
+using Pkg; Pkg.activate("../../");
+using ArgParse, Distributions, StatsBase, OrdinaryDiffEq, RecursiveArrayTools, DataFrames, SQLite
+
+function parse_commandline()
+  s = ArgParseSettings()
+
+  @add_arg_table! s begin
+      "--db"
+      help = "Use Database to query parameters"
+      "-L"
+      arg_type = Int
+      default = 5
+      help = "LIMIT of rows"
+      "-O"
+      arg_type = Int
+      default = 0
+      help = "The OFFSET clause after LIMIT specifies how many rows to skip at the beginning of the result set."
+      "-m"
+      arg_type = Float64
+      default = 1e-4
+      help = "inflow new students-non coders"
+      "--nn"
+      arg_type = Float64
+      default = 1.
+      help = "death rate non-coders"
+      "--np"
+      arg_type = Float64
+      default = 0.1
+      help = "death rate coders"
+      "-b"
+      arg_type = Float64
+      default = 0.18
+      help = "benefits non coders"
+      "-a"
+      arg_type = Float64
+      default = 0.5
+      help = "benefits coders"
+      "-o"
+      default = "."
+      help = "Output file for results"
+    end
+
+  return parse_args(s)
+end
+
+function write_sol2txt(path, sol)
+  L = length(sol.u[1].x)
+  open(path, "a") do io
+    for t=1:length(sol.u), ℓ=1:L
+      for val in sol.u[t].x[ℓ]      
+          write(io, "$(t) $(ℓ) $(round(val, digits=6))\n")
+      end
+    end
+  end
+end
 
 function initialize_u0(;N::Int=20)
   N_plus_1 = N + 1 # add column for zeroth case
@@ -9,16 +62,6 @@ function initialize_u0(;N::Int=20)
   end
   return ArrayPartition(Tuple([G[n,:] for n=1:N_plus_1]))
 end
-
-μ  = 0.001   # inflow new students-non coders
-νₙ = 0.01    # death rate non-coders
-νₚ = 0.05    # death rate coders
-α  = 0.01    # benefits non coders
-β  = 0.1     # benefits coders
-p  = [μ, νₙ, νₚ, α, β]
-
-u₀ = initialize_u0(N=3)
-tspan = (0., 160.)
 
 c(n, i) = 0.95 * exp(-i / n)                # cost function
 τ(n, i, α, β) = n*exp(-α + β*(1 - c(n, i))) # group benefits
@@ -61,6 +104,65 @@ function life_cycle_research_groups!(du, u, p, t)
   end
 end
 
+function run_life_cycle_research_groups(p)
+  u₀ = initialize_u0(N=3)
+  tspan = (1.0, 4000)
+  
+  # Solve problem
+  prob = ODEProblem(life_cycle_research_groups!, u₀, tspan, p)
+  return solve(prob, DP5(), saveat = 1., reltol=1e-8, abstol=1e-8)
+end
+
+
+function main()
+    # β, γ, ρ, b, c, μ = 0.07, 1., 0.1, 0.18, 1.05, 0.0001
+    args = parse_commandline()
+    
+    if isnothing(args["db"])
+      μ  = args["mu"] 
+      νₙ = args["nn"] 
+      νₚ = args["np"] 
+      α  = args["a"]  
+      β  = args["b"]  
+      
+      p  = [μ, νₙ, νₚ, α, β]
+      sol = run_life_cycle_research_groups(p)
+      write_sol2txt("$(args["o"])/sci-group-life-cycle1_$(join(p, "_")).txt", sol) 
+
+    else
+      
+      db = SQLite.DB(args["db"])
+      con = DBInterface.execute(db, """SELECT * from sci-group-life-cycle1 LIMIT $(args["O"]), $(args["L"])""") |> DataFrame
+    
+      for row in eachrow(con)
+        μ  = args["mu"]   # inflow new students-non coders
+        νₙ = args["nn"]   # death rate non-coders
+        νₚ = args["np"]    # death rate coders
+        α  = args["a"]   # benefits non coders
+        β  = args["b"]     # benefits coders
+        
+        p  = [μ, νₙ, νₚ, α, β]
+        sol = run_life_cycle_research_groups(p)    
+        write_sol2txt("$(args["o"])/sci-group-life-cycle1_$(join(p, "_")).txt", sol) 
+      end
+    end  
+end
+
+main()
+
+
+# prototyping -------------------------------------------------------------------------------
+
+μ  = 0.001   # inflow new students-non coders
+νₙ = 0.01    # death rate non-coders
+νₚ = 0.05    # death rate coders
+α  = 0.01    # benefits non coders
+β  = 0.1     # benefits coders
+p  = [μ, νₙ, νₚ, α, β]
+
+u₀ = initialize_u0(N=3)
+tspan = (0., 160.)
+
 prob = ODEProblem(life_cycle_research_groups!, u₀, tspan, p)
 sol = solve(prob, Tsit5(), saveat=1, reltol=1e-8, abstol=1e-8)
 
@@ -94,23 +196,27 @@ for t=1:length(sol.t)
   end
 end
 
-# for i=1:160
-#   dist_gsize[:,i] = dist_gsize[:,i] / sum(dist_gsize[:,i])
-# end
+# Plotting -------------------------------------------------------------
 
-# scatter(dist_gsize[1,1:100], legendtitle="grsize", legend=:outertopright, label="1")
-# for i=2:6
-#   scatter!(dist_gsize[i,1:100], label="$(i)")
-# end
-# vline!([10], label="")
-# xlabel!("time")
-# ylabel!("Fraction of gsize (%)")
+for i=1:160
+  dist_gsize[:,i] = dist_gsize[:,i] / sum(dist_gsize[:,i])
+end
+
+scatter(dist_gsize[1,1:100], legendtitle="grsize", legend=:outertopright, label="1")
+for i=2:6
+  scatter!(dist_gsize[i,1:100], label="$(i)")
+end
+vline!([10], label="")
+xlabel!("time")
+ylabel!("Fraction of gsize (%)")
 
 
 # heatmap(sommeGNI)
 # xlabel!("time")
 # ylabel!("grsize")
 # title!("Couleur: (coder+noncoder)*G_nil[i] ")
+
+# Writing to file -------------------------------------------------------------
 
 
 old_run = isfile("data.json") ? JSON.parsefile("data.json") : Dict()

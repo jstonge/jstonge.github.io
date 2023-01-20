@@ -1,5 +1,5 @@
 # teenyverse
-The Teenyverse
+The [Teenyverse](https://rickandmorty.fandom.com/wiki/Teenyverse). See [project status](https://github.com/users/jstonge/projects/7) for the ongoing development work.
 
 ## Workflow 
 
@@ -11,17 +11,44 @@ The Teenyverse
 ```shell
 ├── index.qmd              # Main file to render the interactive page. There should be only `ojs` cells in it.
 ├── models                 # All models live in their own directory
-│   ├── source-sink1.jl
-│   └── source-sink2.jl
+│   ├── sourcesink1.jl
+│   ├── sourcesink2.jl
+|   ├── ...
+|   └── sourcesink_template.jl
 ├── sourcesink_sketch.jpg  # Sketch of the model
-├── source-sink.db         # SQLite DB containing grid of params for the models 
 ├── src
 │   ├── 01_source-sinkDB.jl  # Add params to the SQLite DB
 │   ├── 02_script2vacc.jl    # Script to generate bash scripts for params sweep on the VACC
 │   └── 04_processing.jl     # Processing script before passing to index.qmd
-└── unions.jpg
-
+├── source-sink.db         # SQLite DB containing grid of params for the models 
+└── source-sink-res.db     # SQLite DB containing data to visualize
 ```
+### Trying out a new model
+
+ - In the model repo, there is a template file (e.g. `teenyverse/posts/source-sink/models/sourcesink_template.jl`)
+ - Make a copy of the template, numbering the file as the next iteration.
+ - Follow the script TODOs.
+ - Use the section at the bottom to protoype dynamically your file.
+
+### Adding a parameter sweep
+
+ - Update manually the parameter database of the model, using `src/01_source-sinkDB.jl`
+ - Run `src/02_script2vacc.jl` to create the bash scripts we will run in parallel on the vacc, e.g.
+```shell
+julia src/02_script2vacc.jl --db "source-sink.db" -m "sourcesink2" -b 30
+```
+ - Send everything though the vacc via the github repo.
+ - Move in the model directory, then run the following command:
+```shell
+for file in $(ls sourcesink2_output/vacc_script/*.sh); do sbatch $file; done;
+```
+ - Process the data, e.g.
+```
+julia src/04_processing.jl -d "sourcesink2_output"
+```
+ - Push back to github the `source-sink-res.db`, the dashboard should update itself.
+ - Backup the raw data somewhere.
+
 
 ### Adding a new parameter configurations to an existing model
  
@@ -58,23 +85,6 @@ optional arguments:
   -h, --help   show this help message and exit
  ```
  Once this is done running, the rendered file should reflect the changes. To see the changes on the web page, we need to push the changes on Github. Then Github action will take care of update the web page.
-
-### Adding a parameter sweep
-
- - Update manually the parameter database of the model, using `src/01_source-sinkDB.jl`
- - Run `src/02_script2vacc.jl` to create the bash scripts we will run in parallel on the vacc, e.g.
-```shell
-julia src/02_script2vacc.jl --db "source-sink.db" -m "sourcesink2" -b 30
-```
- - Send everything though the vacc via the github repo.
- - Move in the model directory, then run the following command:
-```shell
-for file in $(ls sourcesink2_output/vacc_script/*.sh); do sbatch $file; done;
-```
- - Send back the output to local directory using `rsync`
- - Process the raw output using `04_processing.jl`
-
-
 
 ### Modify/add new models
 
