@@ -4,11 +4,11 @@ using ArgParse, Distributions, StatsBase, OrdinaryDiffEq, RecursiveArrayTools, D
 """
     parse_commandline()
 
-Function for the commandline interface. 
+Function for the commandline interface.
 """
 function parse_commandline()
   s = ArgParseSettings()
-  
+
   #!TODO: Update the params and defaults as needed.
   @add_arg_table! s begin
       "--db"
@@ -53,7 +53,7 @@ function parse_commandline()
       default = "."
       help = "Output file for results"
     end
-  
+
   return parse_args(s)
 end
 
@@ -66,7 +66,7 @@ function write_sol2txt(path, sol)
   L = length(sol.u[1].x)
   open(path, "a") do io
     for t=1:length(sol.u), ℓ=1:L
-      for val in sol.u[t].x[ℓ]      
+      for val in sol.u[t].x[ℓ]
           write(io, "$(t) $(ℓ) $(round(val, digits=6))\n")
       end
     end
@@ -79,40 +79,34 @@ end
 Function to initialize the model.
 """
 function initialize_u0(;n::Int=20, L::Int=6, M::Int=20, p::Float64=0.01)::ArrayPartition
-  #!TODO: You need to write your own initialization function;
-  # For example, here is init function for the source-sink model.
-  # G = zeros(L, n+1)
-  # for _ in 1:M
-  #   ℓ = rand(1:L)
-  #   i = sum(collect(rand(Binomial(1, p), n))[1])
-  #   G[ℓ, i+1] += 1
-  # end
-  
-  # G = G ./ M 
-  
+  G = zeros(L, n+1)
+  for _ in 1:M
+    ℓ = rand(1:L)
+    i = sum(rand(Binomial(1, p), n))
+    G[ℓ, i+1] += 1
+  end
+
+  G = G ./ M
+
   # ArrayPartition are nice because we can still access the level such as x[ℓ][i]
   # see https://docs.sciml.ai/DiffEqDocs/stable/features/diffeq_arrays/
-  # return ArrayPartition(Tuple([G[ℓ,:] for ℓ=1:L]))
+  return ArrayPartition(Tuple([G[ℓ,:] for ℓ=1:L]))
 end
 
 function source_sink!(du, u, p, t)
-  #!TODO: You need to write your own model with the number corresponding to the next iteration in the repo;
-  # For example, here is base function for the first source-sink model.
-  G, L, n = u, length(u.x), length(first(u.x))
-  #!TODO: adding your own param list in the same order of the input
-  # β, α, γ, ρ, b, c, μ = p
+  G, L, n = u, length(u.x), length(u.x[1])
+  β, α, γ, ρ, b, c, μ = p
   Z, pop, R = zeros(L), zeros(L), 0.
 
   # Calculate mean-field coupling and observed fitness landscape
-  #!TODO: Add your own part
   for ℓ in 1:L
-      # n_adopt = collect(0:(n-1))
-      # Z[ℓ]    = sum(exp.(b*n_adopt .- c*(ℓ-1)) .* G.x[ℓ]) 
+      n_adopt = collect(0:(n-1))
+      Z[ℓ]    = sum(exp.(b*n_adopt .- c*(ℓ-1)) .* G.x[ℓ])
       # pop[ℓ]  = sum(G.x[ℓ])
       # R      += sum(ρ * n_adopt .* G.x[ℓ]) # Global diffusion
-      # pop[ℓ] > 0.0 && ( Z[ℓ] /= pop[ℓ] ) 
+      # pop[ℓ] > 0.0 && ( Z[ℓ] /= pop[ℓ] )
   end
-    
+
     for ℓ = 1:L, i = 1:n
   #     n_adopt, gr_size = i-1, n-1
   #     # Diffusion events
@@ -130,7 +124,7 @@ function run_source_sink(p)
   # n, M = 20, 1000
   # u₀ = initialize_u0(n=n, L=6, M=M, p=0.01)
   # tspan = (1.0, 4000)
-  
+
   # # Solve problem
   # prob = ODEProblem(source_sink!, u₀, tspan, p)
   # return solve(prob, DP5(), saveat = 1., reltol=1e-8, abstol=1e-8)
@@ -140,7 +134,7 @@ end
 function main()
   # β, α, γ, ρ, b, c = 0.07, 0.5, 1, 0.1, 0.18, 1.05
   args = parse_commandline()
-  
+
   #TODO: Add your model name here.
   modelname = ""
 
@@ -154,17 +148,17 @@ function main()
     b = args["b"]
     c = args["c"]
     μ = args["m"]
-    
+
     p = [β, α, γ, ρ, b, c, μ]
     #TODO: Update function name
     sol = run_source_sink(p)
-    write_sol2txt("$(args["o"])$(modelname)_$(join(p, "_")).txt", sol) 
+    write_sol2txt("$(args["o"])$(modelname)_$(join(p, "_")).txt", sol)
   else
     db = SQLite.DB(args["db"])
     con = DBInterface.execute(db, """SELECT * from $(modelname) LIMIT $(args["L"]) OFFSET $(args["O"])""") |> DataFrame
 
     for row in eachrow(con)
-      
+
       β = row["beta"]
       α = row["alpha"]
       γ = row["gamma"]
@@ -172,12 +166,12 @@ function main()
       b = row["b"]
       c = row["cost"]
       μ = row["mu"]
-      
+
       p = [β, α, γ, ρ, b, c, μ]
-      sol = run_source_sink(p)    
+      sol = run_source_sink(p)
       write_sol2txt("$(args["o"])/$(modelname)_$(join(p, "_")).txt", sol)
     end
-  end  
+  end
 end
 
 main()
