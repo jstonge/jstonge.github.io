@@ -102,15 +102,16 @@ function source_sink!(du, u, p, t)
   for ℓ in 1:L
       n_adopt = collect(0:(n-1))
       Z[ℓ]    = sum(exp.(b*n_adopt .- c*(ℓ-1)) .* G.x[ℓ])
-      # pop[ℓ]  = sum(G.x[ℓ])
-      # R      += sum(ρ * n_adopt .* G.x[ℓ]) # Global diffusion
-      # pop[ℓ] > 0.0 && ( Z[ℓ] /= pop[ℓ] )
+      pop[ℓ]  = sum(G.x[ℓ])
+      R      += sum(n_adopt .* G.x[ℓ]) # Global diffusion
+      pop[ℓ] > 0.0 && ( Z[ℓ] /= pop[ℓ] )
   end
 
     for ℓ = 1:L, i = 1:n
-  #     n_adopt, gr_size = i-1, n-1
-  #     # Diffusion events
-  #     du.x[ℓ][i] = -γ*n_adopt*G.x[ℓ][i] - β*(ℓ^-α)*(n_adopt+R)*(gr_size-n_adopt)*G.x[ℓ][i]
+      n_adopt, gr_size = i-1, n-1
+      # Individuals' events
+      du.x[ℓ][i] = -γ*n_adopt*(gr_size-n_adopt + ρ*(gr_size-R))G.x[ℓ][i] - β*(gr_size-n_adopt)*(n_adopt+ρ*R)*G.x[ℓ][i]
+      du.x[ℓ][i] += - n_adopt*f(1.-α[l])*G.x[ℓ][i] - (gr_size-n_adopt)*f(α[l].-1)*G.x[ℓ][i]
   #     n_adopt > 0 && ( du.x[ℓ][i] += β*(ℓ^-α)*(n_adopt-1+R)*(gr_size-n_adopt+1)*G.x[ℓ][i-1])
   #     n_adopt < gr_size && ( du.x[ℓ][i] +=  γ*(n_adopt+1)*G.x[ℓ][i+1] )
   #     # Group selection process
