@@ -30,7 +30,7 @@ function parse_commandline()
       "-r"
       arg_type = Float64
       default = 0.1
-      help = "Global behavioral diffusion rho (allows the behaviour to spread between groups)"
+      help = "Global behavioral diffusion ρ (allows the behaviour to spread between groups)"
       "-b"
       arg_type = Float64
       default = 0.18

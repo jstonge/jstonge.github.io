@@ -25,14 +25,10 @@ function parse_commandline()
       arg_type = Float64
       default = 0.07
       help = "Spreading rate from non-adopter to adopter beta"
-      "-a"
-      arg_type = Float64
-      default = 0.5
-      help = "Negative benefits alpha"
       "-g"
       arg_type = Float64
       default = 1.
-      help = "Recovery rate gamma, i.e. rate at which adopters loose behavioral trait"
+      help = "Spreading rate from adopters to non adopters"
       "-r"
       arg_type = Float64
       default = 0.1
@@ -48,7 +44,7 @@ function parse_commandline()
       "-m"
       arg_type = Float64
       default = 1e-4
-      help = "Noise u"
+      help = "Relative rate between individual and group evolution, μ"
       "-o"
       default = "."
       help = "Output file for results"
@@ -88,14 +84,15 @@ function initialize_u0(;n::Int=20, L::Int=6, M::Int=20, p::Float64=0.01)::ArrayP
 
   G = G ./ M
 
-  # ArrayPartition are nice because we can still access the level such as x[ℓ][i]
-  # see https://docs.sciml.ai/DiffEqDocs/stable/features/diffeq_arrays/
   return ArrayPartition(Tuple([G[ℓ,:] for ℓ=1:L]))
 end
 
-function source_sink!(du, u, p, t)
+f(x; a1=1) = 1 / (1 + exp(-a1*x)) 
+h(x; a2=1) = (1 - exp(-a2*x)) / (1 - exp(-a2))
+
+function source_sink3!(du, u, p, t)
   G, L, n = u, length(u.x), length(u.x[1])
-  β, α, γ, ρ, b, c, μ = p
+  β, γ, ρ, b, c, μ = p
   Z, pop, R = zeros(L), zeros(L), 0.
 
   # Calculate mean-field coupling and observed fitness landscape
@@ -109,26 +106,27 @@ function source_sink!(du, u, p, t)
 
     for ℓ = 1:L, i = 1:n
       n_adopt, gr_size = i-1, n-1
-      # Individuals' events
-      du.x[ℓ][i] = -γ*n_adopt*(gr_size-n_adopt + ρ*(gr_size-R))G.x[ℓ][i] - β*(gr_size-n_adopt)*(n_adopt+ρ*R)*G.x[ℓ][i]
-      du.x[ℓ][i] += - n_adopt*f(1.-α[l])*G.x[ℓ][i] - (gr_size-n_adopt)*f(α[l].-1)*G.x[ℓ][i]
-  #     n_adopt > 0 && ( du.x[ℓ][i] += β*(ℓ^-α)*(n_adopt-1+R)*(gr_size-n_adopt+1)*G.x[ℓ][i-1])
-  #     n_adopt < gr_size && ( du.x[ℓ][i] +=  γ*(n_adopt+1)*G.x[ℓ][i+1] )
-  #     # Group selection process
-  #     ℓ > 1 && ( du.x[ℓ][i] += ρ*G.x[ℓ-1][i]*(Z[ℓ] / Z[ℓ-1] + μ) - ρ*G.x[ℓ][i]*(Z[ℓ-1] / Z[ℓ]+μ) )
-  #     ℓ < L && ( du.x[ℓ][i] += ρ*G.x[ℓ+1][i]*(Z[ℓ] / Z[ℓ+1] + μ) - ρ*G.x[ℓ][i]*(Z[ℓ+1] / Z[ℓ]+μ) )
+      # Imitation 
+      du.x[ℓ][i] = -γ*n_adopt*(gr_size-n_adopt + ρ*(gr_size-R))*G.x[ℓ][i] - β*(gr_size-n_adopt)*(n_adopt+ρ*R)*G.x[ℓ][i]
+      # Cost-benefits
+      du.x[ℓ][i] += -n_adopt*f(1-h(ℓ))*G.x[ℓ][i] - (gr_size-n_adopt)*f(h(ℓ)-1)*G.x[ℓ][i]
+      # n_adopt > 0 && ( du.x[ℓ][i] += β*(ℓ^-α)*(n_adopt-1+R)*(gr_size-n_adopt+1)*G.x[ℓ][i-1])
+      # n_adopt < gr_size && ( du.x[ℓ][i] +=  γ*(n_adopt+1)*G.x[ℓ][i+1] )
+      # # Group selection process
+      # ℓ > 1 && ( du.x[ℓ][i] += ρ*G.x[ℓ-1][i]*(Z[ℓ] / Z[ℓ-1] + μ) - ρ*G.x[ℓ][i]*(Z[ℓ-1] / Z[ℓ]+μ) )
+      # ℓ < L && ( du.x[ℓ][i] += ρ*G.x[ℓ+1][i]*(Z[ℓ] / Z[ℓ+1] + μ) - ρ*G.x[ℓ][i]*(Z[ℓ+1] / Z[ℓ]+μ) )
     end
 end
 
 #!TODO: Modify the function where needed. Fct name should correspond to the same number of your model.
 function run_source_sink(p)
-  # n, M = 20, 1000
-  # u₀ = initialize_u0(n=n, L=6, M=M, p=0.01)
-  # tspan = (1.0, 4000)
+  n, M = 20, 1000
+  u₀ = initialize_u0(n=n, L=6, M=M, p=0.01)
+  tspan = (1.0, 4000)
 
-  # # Solve problem
-  # prob = ODEProblem(source_sink!, u₀, tspan, p)
-  # return solve(prob, DP5(), saveat = 1., reltol=1e-8, abstol=1e-8)
+  # Solve problem
+  prob = ODEProblem(source_sink3!, u₀, tspan, p)
+  return solve(prob, DP5(), saveat = 1., reltol=1e-8, abstol=1e-8)
 end
 
 
@@ -182,32 +180,34 @@ main()
 
 # When you are developping your model
 
-μ  = 0.001   # inflow new students-non coders
-νₙ = 0.01    # death rate non-coders
-νₚ = 0.05    # death rate coders
-α  = 0.01    # benefits non coders
-β  = 0.1     # benefits coders
-p  = [μ, νₙ, νₚ, α, β]
+β, γ, ρ, b, c, μ = 0.07, 1., 0.1, 0.18, 1.05, 0.0001
+p  = [β, γ, ρ, b, c, μ]
 
-u₀ = initialize_u0(N=3)
-tspan = (0., 160.)
+n, M = 20, 1000
+u₀ = initialize_u0(n=n, L=6, M=M, p=0.01)
+tspan = (0., 4000.)
 
-prob = ODEProblem(source, u₀, tspan, p)
+prob = ODEProblem(source_sink3!, u₀, tspan, p)
 sol = solve(prob, DP5(), saveat=1, reltol=1e-8, abstol=1e-8)
 
-#!TODO: Write your own wrangling function to visualize
-# something like that
-# for i=1:160
-#   dist_gsize[:,i] = dist_gsize[:,i] / sum(dist_gsize[:,i])
-# end
+L = length(sol.u[1].x)
+inst_level = Dict()
+for ℓ=1:L
+  values = []
+  for t=1:200
+    n = length(sol.u[t].x[ℓ])
+    x = sol.u[t].x[ℓ]
+    out = sum((collect(0:(n-1)) / n) .* x) / sum(x)
+    push!(values, out)
+  end
+  inst_level[ℓ] = values
+end
 
+p =scatter(1:200, inst_level[1], xaxis = :log, legendtitle="grsize", 
+        legend=:outertopright, label="0")
+for i=2:6
+  scatter!(1:200, inst_level[i], label="$(i-1)")
+end
 
-#!TODO: Write your own visualization code
-# something like that
-# scatter(dist_gsize[1,1:100], legendtitle="grsize", legend=:outertopright, label="1")
-# for i=2:6
-#   scatter!(dist_gsize[i,1:100], label="$(i)")
-# end
-# vline!([10], label="")
-# xlabel!("time")
-# ylabel!("Fraction of gsize (%)")
+p
+ylims!(0,0.3)
