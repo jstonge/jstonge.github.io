@@ -24,15 +24,15 @@ function parse_commandline()
       "--beta"
       arg_type = Float64
       default = 0.07
-      help = "Spreading rate from non-adopter to adopter beta"
+      help = "Imitation rate from non-adopter to adopter β"
       "-g"
       arg_type = Float64
       default = 1.
-      help = "Spreading rate from adopters to non adopters"
+      help = "Imitation rate from adopter to non-adopter γ"
       "-r"
       arg_type = Float64
       default = 0.1
-      help = "Global behavioral diffusion rho (allows the behaviour to spread between groups)"
+      help = "Global behavioral imitation ρ (allows a behaviour to spread between groups)"
       "-b"
       arg_type = Float64
       default = 0.18
@@ -44,7 +44,7 @@ function parse_commandline()
       "-m"
       arg_type = Float64
       default = 1e-4
-      help = "Relative rate between individual and group evolution, μ"
+      help = "Endogenous rate of institutional change μ"
       "-o"
       default = "."
       help = "Output file for results"
@@ -87,18 +87,19 @@ function initialize_u0(;n::Int=20, L::Int=6, M::Int=20, p::Float64=0.01)::ArrayP
   return ArrayPartition(Tuple([G[ℓ,:] for ℓ=1:L]))
 end
 
-f(x; a1=1) = 1 / (1 + exp(-a1*x)) 
-h(x; a2=1) = (1 - exp(-a2*x)) / (1 - exp(-a2))
+f(x; a1=2.2) = 1 / (1 + exp(-a1*x)) # cost-benefits for individuals
+h(x; a2=0.3) = (1 - exp(-a2*x)) / (1 - exp(-a2)) # dependency of synergy on institutional level
 
-function source_sink3!(du, u, p, t)
+function source_sink3!(du, u, p)
   G, L, n = u, length(u.x), length(u.x[1])
   β, γ, ρ, b, c, μ = p
   Z, pop, R = zeros(L), zeros(L), 0.
 
   # Calculate mean-field coupling and observed fitness landscape
-  for ℓ in 1:L
+  # In the following, the functions g (cost-benefits for groups) and g̃ (fitness function) are taken equal to function f. The three have similar properties.
+    for ℓ in 1:L
       n_adopt = collect(0:(n-1))
-      Z[ℓ]    = sum(exp.(b*n_adopt .- c*(ℓ-1)) .* G.x[ℓ])
+      Z[ℓ]    = sum(f.(b*n_adopt. - c*(ℓ-1)) .* G.x[ℓ])
       pop[ℓ]  = sum(G.x[ℓ])
       R      += sum(n_adopt .* G.x[ℓ]) # Global diffusion
       pop[ℓ] > 0.0 && ( Z[ℓ] /= pop[ℓ] )
@@ -107,14 +108,14 @@ function source_sink3!(du, u, p, t)
     for ℓ = 1:L, i = 1:n
       n_adopt, gr_size = i-1, n-1
       # Imitation 
-      du.x[ℓ][i] = -γ*n_adopt*(gr_size-n_adopt + ρ*(gr_size-R))*G.x[ℓ][i] - β*(gr_size-n_adopt)*(n_adopt+ρ*R)*G.x[ℓ][i]
+      du.x[ℓ][i] = -n_adopt*(gr_size-n_adopt)*(β+γ)*G.x[ℓ][i] - ρ*(gr_size-n_adopt)*β*R*G.x[ℓ][i] - ρ*n_adopt*γ*(gr_size-R)*G.x[ℓ][i]
       # Cost-benefits
       du.x[ℓ][i] += -n_adopt*f(1-h(ℓ))*G.x[ℓ][i] - (gr_size-n_adopt)*f(h(ℓ)-1)*G.x[ℓ][i]
-      # n_adopt > 0 && ( du.x[ℓ][i] += β*(ℓ^-α)*(n_adopt-1+R)*(gr_size-n_adopt+1)*G.x[ℓ][i-1])
-      # n_adopt < gr_size && ( du.x[ℓ][i] +=  γ*(n_adopt+1)*G.x[ℓ][i+1] )
-      # # Group selection process
-      # ℓ > 1 && ( du.x[ℓ][i] += ρ*G.x[ℓ-1][i]*(Z[ℓ] / Z[ℓ-1] + μ) - ρ*G.x[ℓ][i]*(Z[ℓ-1] / Z[ℓ]+μ) )
-      # ℓ < L && ( du.x[ℓ][i] += ρ*G.x[ℓ+1][i]*(Z[ℓ] / Z[ℓ+1] + μ) - ρ*G.x[ℓ][i]*(Z[ℓ+1] / Z[ℓ]+μ) )
+      n_adopt > 0 && ( du.x[ℓ][i] += β*(n_adopt-1+ρ*R)*(gr_size-n_adopt+1)*G.x[ℓ][i-1])
+      n_adopt < gr_size && ( du.x[ℓ][i] +=  γ*(gr_size-n_adopt-1+ρ*(gr_size-R))*(n_adopt+1)*G.x[ℓ][i+1] )
+      # Group selection process
+      ℓ > 1 && ( du.x[ℓ][i] += f(b*n_adopt-c*(ℓ-1))*(μ+ρ*Z[ℓ]/Z[ℓ-1])*G.x[ℓ-1][i] - (μ*f(c*(ℓ-1)-b*n_adopt)+ρ*f(b*n_adopt-c*(ℓ-2))*Z[ℓ-1]/Z[ℓ])*G.x[ℓ][i] )
+      ℓ < L && ( du.x[ℓ][i] += (μ*f(c*ℓ-b*n_adopt)+ρ*f(b*n_adopt-c*(ℓ-1))*Z[ℓ]/Z[ℓ+1])*G.x[ℓ+1][i] - f(b*n_adopt-c*ℓ)*(μ+ρ*Z[ℓ+1]/Z[ℓ])*G.x[ℓ][i])
     end
 end
 
