@@ -28,12 +28,12 @@ end
 processing1(x, n) = sum((collect(0:(n-1)) / n) .* x) / sum(x)
 
 """
-Combine all sols in `sourcesink2_output/`, using only unique value, into database.
+Combine all sols in `sourcesink_output/`, using only unique value, into database.
 """
 function main()
   args = parse_commandline()
   
-  # DATA_DIR = "sourcesink1_output"
+  # DATA_DIR = "sourcesink3_output"
   DATA_DIR = args["d"]
   fnames = filter(x -> endswith(x, "txt"),  readdir(DATA_DIR, join=true))
 
@@ -58,7 +58,8 @@ function main()
       gd = groupby(sol, [:timestep, :L])
       n = nrow(gd[1])
       
-      df_agg = combine(gd, :value => x -> iszero(sum(x)) ? 0.0 : processing1(x,n)) 
+      # df_agg_mean = combine(gd, :value => x -> iszero(sum(x)) ? 0.0 : mean(x,n)) 
+      df_agg = combine(gd, :value => x -> iszero(sum(x)) ? 0.0 : processing1(x,n))
       rename!(df_agg, Dict(:value_function => "value")) 
       unique!(df_agg, :value)
 

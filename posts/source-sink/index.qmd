@@ -304,11 +304,11 @@ Plot.plot({
   color: {scheme: "reds", type: "ordinal", legend: true},
   marks: [
     Plot.line(
-      data2, {
+      data3, {
         x: 'timestep', y: "value", stroke: "L"
         }),
     Plot.dot(
-      data2, {
+      data3, {
         x: 'timestep', y: "value", stroke: "L"
         })
   ]
