@@ -143,6 +143,7 @@ function main()
     c = args["c"]
     μ = args["m"]
 
+    #!TODO: don't forget to change run_source_sink
     p = [β, γ, ρ, b, c, μ]
     sol = run_source_sink3(p)
     write_sol2txt("$(args["o"])$(modelname)_$(join(p, "_")).txt", sol)
@@ -159,8 +160,9 @@ function main()
       c = row["cost"]
       μ = row["mu"]
 
+      #!TODO: don't forget to change run_source_sink
       p = [β, γ, ρ, b, c, μ]
-      sol = run_source_sink(p)
+      sol = run_source_sink3(p)
       write_sol2txt("$(args["o"])/$(modelname)_$(join(p, "_")).txt", sol)
     end
   end

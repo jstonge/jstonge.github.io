@@ -25,6 +25,8 @@ function create_res_db(db, modelname)
   """)
 end
 
+processing1(x, n) = sum((collect(0:(n-1)) / n) .* x) / sum(x)
+
 """
 Combine all sols in `sourcesink2_output/`, using only unique value, into database.
 """
@@ -41,7 +43,8 @@ function main()
   modelname = split(fnames[1], "_")[1]
   
   create_res_db(db, modelname)
-  already_done = DBInterface.execute(db, """SELECT DISTINCT name FROM sourcesink""") |> DataFrame
+  #!TODO: Change to correct name
+  already_done = DBInterface.execute(db, """SELECT DISTINCT name FROM $(modelname)""") |> DataFrame
 
   dfs = []
   @showprogress for fname in fnames
@@ -55,7 +58,7 @@ function main()
       gd = groupby(sol, [:timestep, :L])
       n = nrow(gd[1])
       
-      df_agg = combine(gd, :value => x -> iszero(sum(x)) ? 0.0 : sum((collect(0:(n-1)) / n) .* x) / sum(x)) 
+      df_agg = combine(gd, :value => x -> iszero(sum(x)) ? 0.0 : processing1(x,n)) 
       rename!(df_agg, Dict(:value_function => "value")) 
       unique!(df_agg, :value)
 
