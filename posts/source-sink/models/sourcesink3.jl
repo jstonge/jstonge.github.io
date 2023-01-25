@@ -99,7 +99,7 @@ function source_sink3!(du, u, p)
   # In the following, the functions g (cost-benefits for groups) and g̃ (fitness function) are taken equal to function f. The three have similar properties.
     for ℓ in 1:L
       n_adopt = collect(0:(n-1))
-      Z[ℓ]    = sum(f.(b*n_adopt. - c*(ℓ-1)) .* G.x[ℓ])
+      Z[ℓ]    = sum(f.(b*n_adopt .- c*(ℓ-1)) .* G.x[ℓ])
       pop[ℓ]  = sum(G.x[ℓ])
       R      += sum(n_adopt .* G.x[ℓ]) # Global diffusion
       pop[ℓ] > 0.0 && ( Z[ℓ] /= pop[ℓ] )
