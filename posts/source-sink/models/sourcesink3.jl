@@ -90,7 +90,7 @@ end
 f(x; a1=2.2) = 1 / (1 + exp(-a1*x)) # cost-benefits for individuals
 h(x; a2=0.3) = (1 - exp(-a2*x)) / (1 - exp(-a2)) # dependency of synergy on institutional level
 
-function source_sink3!(du, u, p)
+function source_sink3!(du, u, p, t)
   G, L, n = u, length(u.x), length(u.x[1])
   β, γ, ρ, b, c, μ = p
   Z, pop, R = zeros(L), zeros(L), 0.
@@ -107,20 +107,18 @@ function source_sink3!(du, u, p)
 
     for ℓ = 1:L, i = 1:n
       n_adopt, gr_size = i-1, n-1
-      # Imitation 
-      du.x[ℓ][i] = -n_adopt*(gr_size-n_adopt)*(β+γ)*G.x[ℓ][i] - ρ*(gr_size-n_adopt)*β*R*G.x[ℓ][i] - ρ*n_adopt*γ*(gr_size-R)*G.x[ℓ][i]
-      # Cost-benefits
-      du.x[ℓ][i] += -n_adopt*f(1-h(ℓ))*G.x[ℓ][i] - (gr_size-n_adopt)*f(h(ℓ)-1)*G.x[ℓ][i]
-      n_adopt > 0 && ( du.x[ℓ][i] += β*(n_adopt-1+ρ*R)*(gr_size-n_adopt+1)*G.x[ℓ][i-1])
-      n_adopt < gr_size && ( du.x[ℓ][i] +=  γ*(gr_size-n_adopt-1+ρ*(gr_size-R))*(n_adopt+1)*G.x[ℓ][i+1] )
+      # Inndividual selection process
+      du.x[ℓ][i] = -n_adopt*f(1-h(ℓ))*G.x[ℓ][i] - (gr_size-n_adopt)*f(h(ℓ)-1)*G.x[ℓ][i]
+      du.x[ℓ][i] += -n_adopt*(gr_size-n_adopt)*(β+γ)*G.x[ℓ][i] - ρ*(gr_size-n_adopt)*β*R*G.x[ℓ][i] - ρ*n_adopt*γ*(gr_size-R)*G.x[ℓ][i]
+      n_adopt > 0 && ( du.x[ℓ][i] += (gr_size-n_adopt+1)*f(h(ℓ)-1)*G.x[ℓ][i-1] + β*(n_adopt-1+ρ*R)*(gr_size-n_adopt+1)*G.x[ℓ][i-1] )
+      n_adopt < gr_size && ( du.x[ℓ][i] += (n_adopt+1)*f(1-h(ℓ))*G.x[ℓ][i+1] + γ*(gr_size-n_adopt-1+ρ*(gr_size-R))*(n_adopt+1)*G.x[ℓ][i+1] )
       # Group selection process
       ℓ > 1 && ( du.x[ℓ][i] += f(b*n_adopt-c*(ℓ-1))*(μ+ρ*Z[ℓ]/Z[ℓ-1])*G.x[ℓ-1][i] - (μ*f(c*(ℓ-1)-b*n_adopt)+ρ*f(b*n_adopt-c*(ℓ-2))*Z[ℓ-1]/Z[ℓ])*G.x[ℓ][i] )
-      ℓ < L && ( du.x[ℓ][i] += (μ*f(c*ℓ-b*n_adopt)+ρ*f(b*n_adopt-c*(ℓ-1))*Z[ℓ]/Z[ℓ+1])*G.x[ℓ+1][i] - f(b*n_adopt-c*ℓ)*(μ+ρ*Z[ℓ+1]/Z[ℓ])*G.x[ℓ][i])
+      ℓ < L && ( du.x[ℓ][i] += (μ*f(c*ℓ-b*n_adopt)+ρ*f(b*n_adopt-c*(ℓ-1))*Z[ℓ]/Z[ℓ+1])*G.x[ℓ+1][i] - f(b*n_adopt-c*ℓ)*(μ+ρ*Z[ℓ+1]/Z[ℓ])*G.x[ℓ][i] )
     end
 end
 
-#!TODO: Modify the function where needed. Fct name should correspond to the same number of your model.
-function run_source_sink(p)
+function run_source_sink3(p)
   n, M = 20, 1000
   u₀ = initialize_u0(n=n, L=6, M=M, p=0.01)
   tspan = (1.0, 4000)
@@ -130,28 +128,23 @@ function run_source_sink(p)
   return solve(prob, DP5(), saveat = 1., reltol=1e-8, abstol=1e-8)
 end
 
-
 function main()
-  # β, α, γ, ρ, b, c = 0.07, 0.5, 1, 0.1, 0.18, 1.05
+  # β, γ, ρ, b, c, μ = 0.07, 0.5, 1, 0.1, 0.18, 1.05, 0.2
   args = parse_commandline()
 
-  #TODO: Add your model name here.
-  modelname = ""
+  modelname = "sourcesink3"
 
   # Init
   if isnothing(args["db"])
-    #TODO: Update param list
     β = args["beta"]
-    α = args["a"]
     γ = args["g"]
     ρ = args["r"]
     b = args["b"]
     c = args["c"]
     μ = args["m"]
 
-    p = [β, α, γ, ρ, b, c, μ]
-    #TODO: Update function name
-    sol = run_source_sink(p)
+    p = [β, γ, ρ, b, c, μ]
+    sol = run_source_sink3(p)
     write_sol2txt("$(args["o"])$(modelname)_$(join(p, "_")).txt", sol)
   else
     db = SQLite.DB(args["db"])
@@ -160,14 +153,13 @@ function main()
     for row in eachrow(con)
 
       β = row["beta"]
-      α = row["alpha"]
       γ = row["gamma"]
       ρ = row["rho"]
       b = row["b"]
       c = row["cost"]
       μ = row["mu"]
 
-      p = [β, α, γ, ρ, b, c, μ]
+      p = [β, γ, ρ, b, c, μ]
       sol = run_source_sink(p)
       write_sol2txt("$(args["o"])/$(modelname)_$(join(p, "_")).txt", sol)
     end
@@ -179,9 +171,7 @@ main()
 
 # prototyping -------------------------------------------------------------------------------
 
-# When you are developping your model
-
-β, γ, ρ, b, c, μ = 0.07, 1., 0.1, 0.18, 1.05, 0.0001
+β, γ, ρ, b, c, μ = 0.7, 0.7, 0.2, 0.1, 3.5, 0.1
 p  = [β, γ, ρ, b, c, μ]
 
 n, M = 20, 1000
@@ -195,7 +185,7 @@ L = length(sol.u[1].x)
 inst_level = Dict()
 for ℓ=1:L
   values = []
-  for t=1:200
+  for t=1:4000
     n = length(sol.u[t].x[ℓ])
     x = sol.u[t].x[ℓ]
     out = sum((collect(0:(n-1)) / n) .* x) / sum(x)
@@ -204,11 +194,6 @@ for ℓ=1:L
   inst_level[ℓ] = values
 end
 
-p =scatter(1:200, inst_level[1], xaxis = :log, legendtitle="grsize", 
-        legend=:outertopright, label="0")
-for i=2:6
-  scatter!(1:200, inst_level[i], label="$(i-1)")
-end
-
-p
-ylims!(0,0.3)
+scatter(1:4000, [inst_level[i] for i in 1:L], xaxis = :log, legendtitle="grsize", 
+      legend=:outertopright, labels=["0" "1" "2" "3" "4" "5"], palette = palette(:Reds)[2:7],
+      markerstrokewidth=0, markersize = 3.)
