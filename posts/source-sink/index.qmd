@@ -282,7 +282,6 @@ unique_name3 = resdb.query(`SELECT DISTINCT name FROM sourcesink3`)
 p3 = unique_name3.map(d => d.name.split("_"))
 
 viewof beta3  = Inputs.range(minmax(p3,0), {step: s(p3,0),  label: "β", value:p3[0][0]})
-viewof gamma3 = Inputs.range(minmax(p3,1), {step: s(p3,1),  label: "γ", value:p3[0][1]})
 viewof rho3   = Inputs.range(minmax(p3,2), {step: s(p3,2),  label: "ρ", value:p3[0][2]})
 viewof b3     = Inputs.range(minmax(p3,3), {step: s(p3,3),  label: "b", value:p3[0][3]})
 viewof c3     = Inputs.range(minmax(p3,4), {step: s(p3,4),  label: "c", value:p3[0][4]})
@@ -292,8 +291,10 @@ data3 = resdb.query(`
   SELECT * 
   FROM sourcesink3
   WHERE
-  name = '${f(beta3)}_${f(gamma3)}_${f(rho3)}_${f(b3)}_${f(c3)}_${f(mu3)}'
+  name = '${f(beta3)}_${f(beta3)}_${f(rho3)}_${f(b3)}_${f(c3)}_${f(mu3)}'
 `)
+
+Inputs.table(data3)
 ```
 
 ```{ojs}
@@ -314,6 +315,8 @@ Plot.plot({
   ]
 })
 ```
+
+Note that $\gamma = \beta$ in all cases.
 
 #### Takeaways:
 
