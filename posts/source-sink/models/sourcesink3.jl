@@ -63,7 +63,7 @@ function write_sol2txt(path, sol)
   open(path, "a") do io
     for t=1:length(sol.u), ℓ=1:L
       for val in sol.u[t].x[ℓ]
-          write(io, "$(t) $(ℓ) $(round(val, digits=6))\n")
+          write(io, "$(t) $(ℓ) $(round(val, 10))\n")
       end
     end
   end
@@ -145,6 +145,7 @@ function main()
 
     #!TODO: don't forget to change run_source_sink
     p = [β, γ, ρ, b, c, μ]
+    println(p)
     sol = run_source_sink3(p)
     write_sol2txt("$(args["o"])$(modelname)_$(join(p, "_")).txt", sol)
   else
@@ -173,29 +174,58 @@ main()
 
 # prototyping -------------------------------------------------------------------------------
 
-β, γ, ρ, b, c, μ = 0.7, 0.7, 0.2, 0.1, 3.5, 0.1
-p  = [β, γ, ρ, b, c, μ]
+# β, γ, ρ, b, c, μ = 0.1, 0.1, 0.2, 0, 2, 0.1
+# p  = [β, γ, ρ, b, c, μ]
 
-n, M = 20, 1000
-u₀ = initialize_u0(n=n, L=6, M=M, p=0.01)
-tspan = (0., 4000.)
+# n, M = 20, 1000
+# u₀ = initialize_u0(n=n, L=6, M=M, p=0.01)
+# tspan = (0., 4000.)
 
-prob = ODEProblem(source_sink3!, u₀, tspan, p)
-sol = solve(prob, DP5(), saveat=1, reltol=1e-8, abstol=1e-8)
+# prob = ODEProblem(source_sink3!, u₀, tspan, p)
+# sol = solve(prob, DP5(), saveat=1, reltol=1e-8, abstol=1e-8)
 
-L = length(sol.u[1].x)
-inst_level = Dict()
-for ℓ=1:L
-  values = []
-  for t=1:4000
-    n = length(sol.u[t].x[ℓ])
-    x = sol.u[t].x[ℓ]
-    out = sum((collect(0:(n-1)) / n) .* x) / sum(x)
-    push!(values, out)
-  end
-  inst_level[ℓ] = values
-end
 
-scatter(1:4000, [inst_level[i] for i in 1:L], xaxis = :log, legendtitle="grsize", 
-      legend=:outertopright, labels=["0" "1" "2" "3" "4" "5"], palette = palette(:Reds)[2:7],
-      markerstrokewidth=0, markersize = 3.)
+# function from_file()
+#   sol = CSV.read(".sourcesink3_0.1_0.1_0.2_0.0_2.0_0.1.txt", DataFrame; header=["timestep", "L", "value"])
+#   L = 6
+#   inst_level = Dict()
+#   lower_limit = 1
+#   upper_limit = 21
+#   for t=1:4000
+#     for ℓ=1:L
+#       myrange = UnitRange(lower_limit:upper_limit)
+#       n = length(sol.value[myrange])
+#       x = sol.value[myrange]
+#       out = sum((collect(0:(n-1)) / n) .* x) / sum(x)
+#       if haskey(inst_level, ℓ)
+#         inst_level[ℓ] = [inst_level[ℓ]; out]
+#       else
+#         inst_level[ℓ] = out
+#       end
+
+#       lower_limit += 21
+#       upper_limit += 21
+
+#     end
+#   end
+#   return inst_level
+# end
+
+# inst_level = from_file()
+
+# when sol is available
+# L = length(sol.u[1].x)
+# for ℓ=1:L
+#   values = []
+#   for t=1:4000
+#     n = length(sol.u[t].x[ℓ])
+#     x = sol.u[t].x[ℓ]
+#     out = sum((collect(0:(n-1)) / n) .* x) / sum(x)
+#     push!(values, out)
+#   end
+#   inst_level[ℓ] = values
+# end
+
+# scatter(1:4000, [inst_level[i] for i in 1:L], xaxis = :log, legendtitle="grsize", 
+#       legend=:outertopright, labels=["0" "1" "2" "3" "4" "5"], palette = palette(:Reds)[2:7],
+#       markerstrokewidth=0, markersize = 3.)

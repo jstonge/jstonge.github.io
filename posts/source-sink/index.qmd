@@ -282,7 +282,7 @@ unique_name3 = resdb.query(`SELECT DISTINCT name FROM sourcesink3`)
 p3 = unique_name3.map(d => d.name.split("_"))
 
 viewof beta3  = Inputs.range(minmax(p3,0), {step: s(p3,0),  label: "β", value:p3[0][0]})
-viewof gamma3 = Inputs.range(minmax(p3,1), {step: s(p3,1),  label: "γ", value:p3[0][1]})
+viewof gamma3 = Inputs.range(minmax(p3,0), {step: s(p3,0),  label: "γ", value:p3[0][0]})
 viewof rho3   = Inputs.range(minmax(p3,2), {step: s(p3,2),  label: "ρ", value:p3[0][2]})
 viewof b3     = Inputs.range(minmax(p3,3), {step: s(p3,3),  label: "b", value:p3[0][3]})
 viewof c3     = Inputs.range(minmax(p3,4), {step: s(p3,4),  label: "c", value:p3[0][4]})
