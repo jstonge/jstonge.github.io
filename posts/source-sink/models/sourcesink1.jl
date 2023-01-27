@@ -1,6 +1,8 @@
 using Pkg; Pkg.activate("../../");
 using ArgParse, Distributions, StatsBase, OrdinaryDiffEq, RecursiveArrayTools, DataFrames, SQLite
 
+include("helpers.jl")
+
 function parse_commandline()
   s = ArgParseSettings()
 
@@ -49,17 +51,6 @@ function parse_commandline()
     end
 
   return parse_args(s)
-end
-
-function write_sol2txt(path, sol)
-  L = length(sol.u[1].x)
-  open(path, "a") do io
-    for t=1:length(sol.u), ℓ=1:L
-      for val in sol.u[t].x[ℓ]      
-          write(io, "$(t) $(ℓ) $(round(val, digits=10))\n")
-      end
-    end
-  end
 end
 
 function initialize_u0(;n::Int=20, L::Int=6, M::Int=20, p::Float64=0.01)

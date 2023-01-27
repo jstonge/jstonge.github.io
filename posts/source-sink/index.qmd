@@ -328,3 +328,69 @@ Note that $\gamma = \beta$ in all cases.
 
 ![](sourcesink_sketch.jpg)
 :::
+
+
+```{ojs}
+param_lookup = {
+  return {'beta': 0,
+  'gamma': 1,
+  'rho': 2,
+  'b': 3,
+  'c': 4,
+  'm': 5}
+}
+
+viewof param1 = Inputs.radio(['beta', 'gamma', 'rho', 'b', 'c', 'm'], {label: 'param1', value: 'beta'})
+
+viewof param2 = Inputs.radio(['beta', 'gamma', 'rho', 'b', 'c', 'm'], {label: 'param2', value: 'b'})
+
+
+data_hm = resdb.query(`
+  SELECT name, L, value
+  FROM sourcesink3
+  WHERE L = 1 and (name, L, timestep) IN (
+    SELECT name, L, MAX(timestep)
+    FROM sourcesink3
+    GROUP BY name, L
+  );
+`)
+
+{
+  const params1 = [];
+  const params2 = [];
+  const values = [];
+  
+  for (let i=0; i < data_hm.length; i++) {
+    const p_split = data_hm[i].name.split('_')
+   
+    if (p_split[1] === "0.01" && p_split[2] === "0.2" && p_split[4] === "0.5" && p_split[5] === "0.1") {
+      
+      console.log()
+        
+      params1.push( parseFloat(p_split[param_lookup[param1]]) )
+      params2.push( parseFloat(p_split[param_lookup[param2]]) )
+      values.push(data_hm[i].value)
+
+    }
+  }
+  return {'param1': params1, 'param2': params2, 'values': values}
+}
+
+
+
+// data_f = data_hm.filter(d => parseFloat(d.name.split("_")[1]))
+
+// data_hm.a
+// Plot.plot({
+//   width: 1200,
+//   facet: {data: data_f, x: "L", marginRight: 90},
+//   marks: [
+//     Plot.cell(data_f, {
+//       x: "season",
+//       y: "number_in_season",
+//       fill: "imdb_rating",
+//     }),
+//   ]
+// })
+```
+
