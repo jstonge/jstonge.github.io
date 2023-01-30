@@ -11,13 +11,18 @@ categories:
 image: unions.jpg
 ---
 
+```{r}
+ojs_define(ss1=arrow::read_parquet("sourcesink1.parquet"))
+ojs_define(ss2=arrow::read_parquet("sourcesink2.parquet"))
+ojs_define(ss3=arrow::read_parquet("sourcesink3.parquet"))
+```
+
 ```{ojs load results db}
 resdb = DuckDBClient.of({
-  sourcesink1: FileAttachment("sourcesink1.parquet")
-  sourcesink2: FileAttachment("sourcesink2.parquet")
-  sourcesink3: FileAttachment("sourcesink3.parquet")
+  sourcesink1: transpose(ss1),
+  sourcesink2: transpose(ss2),
+  sourcesink3: transpose(ss3),
 })
-// resdb = FileAttachment("source-sink-res.db").sqlite()
 ```
 
 ```{ojs helpers}
@@ -299,8 +304,6 @@ data3 = resdb.query(`
   WHERE
   name = '${f(beta3)}_${f(beta3)}_${f(rho3)}_${f(b3)}_${f(c3)}_${f(mu3)}'
 `)
-
-Inputs.table(data3)
 ```
 
 ```{ojs}

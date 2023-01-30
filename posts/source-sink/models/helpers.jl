@@ -10,7 +10,7 @@ function write_sol2txt(path, sol)
     open(path, "a") do io
         for t=1:length(sol.u), ℓ=1:L
             for val in sol.u[t].x[ℓ]
-                write(io, "$(t) $(ℓ) $(round(val, digits=10))\n")
+                write(io, "$(t) $(ℓ) $(round(val, digits=14))\n")
             end
         end
     end
