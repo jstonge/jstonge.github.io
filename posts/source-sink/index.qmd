@@ -12,7 +12,12 @@ image: unions.jpg
 ---
 
 ```{ojs load results db}
-resdb = FileAttachment("source-sink-res.db").sqlite()
+resdb = DuckDBClient.of({
+  sourcesink1: FileAttachment("sourcesink1.parquet")
+  sourcesink2: FileAttachment("sourcesink2.parquet")
+  sourcesink3: FileAttachment("sourcesink3.parquet")
+})
+// resdb = FileAttachment("source-sink-res.db").sqlite()
 ```
 
 ```{ojs helpers}
