@@ -11,21 +11,25 @@ categories:
 image: unions.jpg
 ---
 
-```{r}
-ojs_define(ss1=arrow::read_parquet("sourcesink1.parquet"))
-ojs_define(ss2=arrow::read_parquet("sourcesink2.parquet"))
-ojs_define(ss3=arrow::read_parquet("sourcesink3.parquet"))
-```
 
 ```{ojs load results db}
+// ojs_define(ss1=arrow::read_parquet("sourcesink1.parquet"))
+// ojs_define(ss2=arrow::read_parquet("sourcesink2.parquet"))
+// ojs_define(ss3=arrow::read_parquet("sourcesink3.parquet"))
+
 // import { DuckDBClient } from '@rlesur/quarto-duckdb'
 // stdlibDev = await import("https://esm.sh/@observablehq/stdlib");
 
-resdb = stdlibDev.DuckDBClient.of({
-  sourcesink1: transpose(ss1),
-  sourcesink2: transpose(ss2),
-  sourcesink3: transpose(ss3),
+resdb = DuckDBClient.of({
+  sourcesink1: FileAttachment("sourcesink1.parquet"),
+  sourcesink2: FileAttachment("sourcesink3.parquet"),
+  sourcesink3: FileAttachment("sourcesink3.parquet")
+  // sourcesink1: transpose(ss1),
+  // sourcesink2: transpose(ss2),
+  // sourcesink3: transpose(ss3),
 })
+
+// resdb.query(`SELECT * FROM sourcesink1`)
 ```
 
 ```{ojs helpers}
