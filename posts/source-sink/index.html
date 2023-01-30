@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.2.313">
+<meta name="generator" content="quarto-1.3.142">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -147,16 +147,16 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
           <div class="collapse navbar-collapse" id="navbarCollapse">
             <ul class="navbar-nav navbar-nav-scroll ms-auto">
   <li class="nav-item">
-    <a class="nav-link" href="../../about.html">
+    <a class="nav-link" href="../../about.html" rel="" target="">
  <span class="menu-text">About</span></a>
   </li>  
   <li class="nav-item compact">
-    <a class="nav-link" href="https://github.com/"><i class="bi bi-github" role="img">
+    <a class="nav-link" href="https://github.com/" rel="" target=""><i class="bi bi-github" role="img">
 </i> 
  <span class="menu-text"></span></a>
   </li>  
   <li class="nav-item compact">
-    <a class="nav-link" href="https://twitter.com"><i class="bi bi-twitter" role="img">
+    <a class="nav-link" href="https://twitter.com" rel="" target=""><i class="bi bi-twitter" role="img">
 </i> 
  <span class="menu-text"></span></a>
   </li>  
@@ -732,7 +732,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 </div>
 </div>
 </div>
-<div class="callout-note callout callout-style-default callout-captioned">
+<div class="callout callout-style-default callout-note callout-captioned">
 <div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-1-contents" aria-controls="callout-1" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
@@ -839,6 +839,7 @@ Model 1 Sketch
 {"contents":[{"methodName":"interpret","cellName":"ojs-cell-1","inline":false,"source":"resdb = DuckDBClient.of({\n  sourcesink1: FileAttachment(\"sourcesink1.parquet\"),\n  sourcesink2: FileAttachment(\"sourcesink2.parquet\"),\n  sourcesink3: FileAttachment(\"sourcesink3.parquet\")\n})\n"},{"methodName":"interpret","cellName":"ojs-cell-2","inline":false,"source":"f = (x) => Number.isInteger(x) ? x.toPrecision(2) : x\nminmax = (p, i) => d3.extent(p.map(d => parseFloat(d[i])))\ns = (p,i) => { \n  const unique_vals = Array.from(new Set(p.map(d => parseFloat(d[i]))))\n                           .sort((a,b) => a - b)\n  const out = []\n  for (let i=1; i < unique_vals.length; i++ ) {\n    out.push(+(unique_vals[i]-unique_vals[i-1]).toPrecision(1))\n  } // return whatev if length is zero\n  return out.length === 0 ? 0.1 : out[0]\n}\n"},{"methodName":"interpret","cellName":"ojs-cell-3","inline":false,"source":"unique_name = resdb.query(`SELECT DISTINCT name FROM sourcesink1`)\np = unique_name.map(d => d.name.split(\"_\"))\n\nviewof beta  = Inputs.range(minmax(p,0), {step: s(p,0),  label: \"β\", value:p[0][0]})\nviewof gamma = Inputs.range(minmax(p,1), {step: s(p,1),  label: \"γ\", value:p[0][1]})\nviewof rho   = Inputs.range(minmax(p,2), {step: s(p,2),  label: \"ρ\", value:p[0][2]})\nviewof b     = Inputs.range(minmax(p,3), {step: s(p,3),  label: \"b\", value:p[0][3]})\nviewof c     = Inputs.range(minmax(p,4), {step: s(p,4),  label: \"c\", value:p[0][4]})\nviewof mu    = Inputs.range(minmax(p,5), {step: s(p,5),  label: \"μ\", value:p[0][5]})\n\ndata = resdb.query(`\n  SELECT timestep::INT as timestep, L::INT as L, value, name\n  FROM sourcesink1\n  WHERE\n  name = '${f(beta)}_${f(gamma)}_${f(rho)}_${f(b)}_${f(c)}_${f(mu)}'\n`)\n"},{"methodName":"interpret","cellName":"ojs-cell-4","inline":false,"source":"Plot.plot({\n  x: {type:\"log\"},\n  y: {domain: [0,1]},\n  color: {scheme: \"reds\", type: \"ordinal\", legend: true},\n  marks: [\n    Plot.line(\n      data, {\n        x: 'timestep', y: \"value\", stroke: \"L\"\n        }),\n    Plot.dot(\n      data, {\n        x: 'timestep', y: \"value\", stroke: \"L\"\n        })\n  ]\n})\n"},{"methodName":"interpret","cellName":"ojs-cell-5","inline":false,"source":"unique_name2 = resdb.query(`SELECT DISTINCT name FROM sourcesink2`)\np2 = unique_name2.map(d => d.name.split(\"_\"))\n\nviewof beta2  = Inputs.range(minmax(p2,0), {step: s(p2,0),  label: \"β\", value:p2[0][0]})\nviewof alpha  = Inputs.range(minmax(p2,1), {step: s(p2,1),  label: \"α\", value:p2[0][1]})\nviewof gamma2 = Inputs.range(minmax(p2,2), {step: s(p2,2),  label: \"γ\", value:p2[0][2]})\nviewof rho2   = Inputs.range(minmax(p2,3), {step: s(p2,3),  label: \"ρ\", value:p2[0][3]})\nviewof b2     = Inputs.range(minmax(p2,4), {step: s(p2,4),  label: \"b\", value:p2[0][4]})\nviewof c2     = Inputs.range(minmax(p2,5), {step: s(p2,5),  label: \"c\", value:p2[0][5]})\nviewof mu2    = Inputs.range(minmax(p2,6), {step: s(p2,6),  label: \"μ\", value:p2[0][6]})\n\ndata2 = resdb.query(`\n  SELECT timestep::INT as timestep, L::INT as L, value, name\n  FROM sourcesink2\n  WHERE\n  name = '${f(beta2)}_${f(alpha)}_${f(gamma2)}_${f(rho2)}_${f(b2)}_${f(c2)}_${f(mu2)}'\n`)\n"},{"methodName":"interpret","cellName":"ojs-cell-6","inline":false,"source":"Plot.plot({\n  x: {type:\"log\"},\n  marginLeft: 50,\n  color: {scheme: \"reds\", type: \"ordinal\", legend: true},\n  marks: [\n    Plot.line(\n      data2, {\n        x: 'timestep', y: \"value\", stroke: \"L\"\n        }),\n    Plot.dot(\n      data2, {\n        x: 'timestep', y: \"value\", stroke: \"L\"\n        })\n  ]\n})\n"},{"methodName":"interpret","cellName":"ojs-cell-7","inline":false,"source":"unique_name3 = resdb.query(`SELECT DISTINCT name FROM sourcesink3`)\np3 = unique_name3.map(d => d.name.split(\"_\"))\n\nviewof beta3  = Inputs.range(minmax(p3,0), {step: s(p3,0),  label: \"β\", value:p3[0][0]})\nviewof gamma3 = Inputs.range(minmax(p3,1), {step: s(p3,1),  label: \"γ\", value:p3[0][1]})\nviewof rho3   = Inputs.range(minmax(p3,2), {step: s(p3,2),  label: \"ρ\", value:p3[0][2]})\nviewof b3     = Inputs.range(minmax(p3,3), {step: s(p3,3),  label: \"b\", value:p3[0][3]})\nviewof c3     = Inputs.range(minmax(p3,4), {step: s(p3,4),  label: \"c\", value:p3[0][4]})\nviewof mu3    = Inputs.range(minmax(p3,5), {step: s(p3,5),  label: \"μ\", value:p3[0][5]})\n\ndata3 = resdb.query(`\n  SELECT timestep::INT as timestep, L::INT as L, value, name\n  FROM sourcesink3\n  WHERE\n  name = '${f(beta3)}_${f(beta3)}_${f(rho3)}_${f(b3)}_${f(c3)}_${f(mu3)}'\n`)\n"},{"methodName":"interpret","cellName":"ojs-cell-8","inline":false,"source":"Plot.plot({\n  x: {type:\"log\"},\n  marginLeft: 50,\n  color: {scheme: \"reds\", type: \"ordinal\", legend: true},\n  marks: [\n    Plot.line(\n      data3, {\n        x: 'timestep', y: \"value\", stroke: \"L\"\n        }),\n    Plot.dot(\n      data3, {\n        x: 'timestep', y: \"value\", stroke: \"L\"\n        })\n  ]\n})\n"},{"methodName":"interpret","cellName":"ojs-cell-9","inline":false,"source":"param_lookup = {\n  return {'beta': 0, 'gamma': 1, 'rho': 2, 'b': 3,\n          'c': 4, 'm': 5}\n}\n\n// viewof param1 = Inputs.radio(['beta', 'gamma', 'rho', 'b', 'c', 'm'], {label: 'param1', value: 'beta'})\n\n// viewof param2 = Inputs.radio(['beta', 'gamma', 'rho', 'b', 'c', 'm'], {label: 'param2', value: 'b'})\n\n\n// data_hm = resdb.query(`\n//   SELECT name, L, value\n//   FROM sourcesink3\n//   WHERE L = 1 and (name, L, timestep) IN (\n//     SELECT name, L, MAX(timestep)\n//     FROM sourcesink3\n//     GROUP BY name, L\n//   );\n// `)\n\n// {\n//   const params1 = [];\n//   const params2 = [];\n//   const values = [];\n  \n//   for (let i=0; i < data_hm.length; i++) {\n//     const p_split = data_hm[i].name.split('_')\n   \n//     if (p_split[1] === \"0.01\" && p_split[2] === \"0.2\" && p_split[4] === \"0.5\" && p_split[5] === \"0.1\") {\n      \n//       console.log()\n        \n//       params1.push( parseFloat(p_split[param_lookup[param1]]) )\n//       params2.push( parseFloat(p_split[param_lookup[param2]]) )\n//       values.push(data_hm[i].value)\n\n//     }\n//   }\n//   return {'param1': params1, 'param2': params2, 'values': values}\n// }\n\n\n\n// data_f = data_hm.filter(d => parseFloat(d.name.split(\"_\")[1]))\n\n// data_hm.a\n// Plot.plot({\n//   width: 1200,\n//   facet: {data: data_f, x: \"L\", marginRight: 90},\n//   marks: [\n//     Plot.cell(data_f, {\n//       x: \"season\",\n//       y: \"number_in_season\",\n//       fill: \"imdb_rating\",\n//     }),\n//   ]\n// })\n"},{"methodName":"interpretQuiet","source":"shinyInput('beta')"},{"methodName":"interpretQuiet","source":"shinyInput('gamma')"},{"methodName":"interpretQuiet","source":"shinyInput('rho')"},{"methodName":"interpretQuiet","source":"shinyInput('b')"},{"methodName":"interpretQuiet","source":"shinyInput('c')"},{"methodName":"interpretQuiet","source":"shinyInput('mu')"},{"methodName":"interpretQuiet","source":"shinyInput('beta2')"},{"methodName":"interpretQuiet","source":"shinyInput('alpha')"},{"methodName":"interpretQuiet","source":"shinyInput('gamma2')"},{"methodName":"interpretQuiet","source":"shinyInput('rho2')"},{"methodName":"interpretQuiet","source":"shinyInput('b2')"},{"methodName":"interpretQuiet","source":"shinyInput('c2')"},{"methodName":"interpretQuiet","source":"shinyInput('mu2')"},{"methodName":"interpretQuiet","source":"shinyInput('beta3')"},{"methodName":"interpretQuiet","source":"shinyInput('gamma3')"},{"methodName":"interpretQuiet","source":"shinyInput('rho3')"},{"methodName":"interpretQuiet","source":"shinyInput('b3')"},{"methodName":"interpretQuiet","source":"shinyInput('c3')"},{"methodName":"interpretQuiet","source":"shinyInput('mu3')"}]}
 </script>
 <script type="module">
+if (window.location.protocol === "file:") { alert("The OJS runtime does not work with file:// URLs. Please use a web server to view this document."); }
 window._ojs.paths.runtimeToDoc = "../../posts/source-sink";
 window._ojs.paths.runtimeToRoot = "../..";
 window._ojs.paths.docToRoot = "../..";
@@ -939,6 +940,92 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
       return note.innerHTML;
     });
   }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
   const findCites = (el) => {
     const parentEl = el.parentElement;
     if (parentEl) {

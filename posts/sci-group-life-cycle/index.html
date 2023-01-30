@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.2.313">
+<meta name="generator" content="quarto-1.3.142">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -147,16 +147,16 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
           <div class="collapse navbar-collapse" id="navbarCollapse">
             <ul class="navbar-nav navbar-nav-scroll ms-auto">
   <li class="nav-item">
-    <a class="nav-link" href="../../about.html">
+    <a class="nav-link" href="../../about.html" rel="" target="">
  <span class="menu-text">About</span></a>
   </li>  
   <li class="nav-item compact">
-    <a class="nav-link" href="https://github.com/"><i class="bi bi-github" role="img">
+    <a class="nav-link" href="https://github.com/" rel="" target=""><i class="bi bi-github" role="img">
 </i> 
  <span class="menu-text"></span></a>
   </li>  
   <li class="nav-item compact">
-    <a class="nav-link" href="https://twitter.com"><i class="bi bi-twitter" role="img">
+    <a class="nav-link" href="https://twitter.com" rel="" target=""><i class="bi bi-twitter" role="img">
 </i> 
  <span class="menu-text"></span></a>
   </li>  
@@ -205,7 +205,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 
 <section id="algebraic-model" class="level2">
 <h2 class="anchored" data-anchor-id="algebraic-model">Algebraic model</h2>
-<div class="callout-note callout callout-style-default callout-captioned">
+<div class="callout callout-style-default callout-note callout-captioned">
 <div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-1-contents" aria-controls="callout-1" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
@@ -238,7 +238,7 @@ Model Sketch
 \end{align*}\]</span></p>
 <p>Note that <span class="math inline">\(\tau_g\)</span> ends up being a function of <span class="math inline">\(n, p\)</span> through the cost function: <span class="math display">\[c(n,p) = c_0*e^{-\frac{p}{n}}\]</span></p>
 <p>You can explore both functions below:</p>
-<div class="callout-tip callout callout-style-default callout-captioned">
+<div class="callout callout-style-default callout-tip callout-captioned">
 <div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-2-contents" aria-controls="callout-2" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
@@ -250,8 +250,7 @@ Cost function
 </div>
 <div id="callout-2" class="callout-2-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<div class="panel-grid layout-sidebar ms-md-0 layout-sidebar-left">
-<div class="cell panel-sidebar card bg-light p-2 g-col-24 g-col-lg-7">
+<div class="cell card bg-light p-2 g-col-24 g-col-lg-7">
 <div class="sourceCode cell-code hidden" id="cb1" data-startfrom="61" data-source-offset="-28"><pre class="sourceCode js code-with-copy"><code class="sourceCode javascript" style="counter-reset: source-line 60;"><span id="cb1-61"><a href="#cb1-61" aria-hidden="true" tabindex="-1"></a><span class="kw">function</span> <span class="fu">cost_prog</span>(n<span class="op">,</span> i<span class="op">,</span> c_0) { <span class="cf">return</span> c_0 <span class="op">*</span> <span class="bu">Math</span><span class="op">.</span><span class="fu">exp</span>(<span class="op">-</span>i<span class="op">/</span>n)<span class="op">;</span> }</span>
 <span id="cb1-62"><a href="#cb1-62" aria-hidden="true" tabindex="-1"></a><span class="kw">function</span> <span class="fu">cost_prog2</span>(n<span class="op">,</span> i<span class="op">,</span> c_0) { <span class="cf">return</span> c_0 <span class="op">*</span> <span class="bu">Math</span><span class="op">.</span><span class="fu">exp</span>(<span class="op">-</span>i<span class="op">/</span>(n<span class="op">+</span>i))<span class="op">;</span> }</span>
 <span id="cb1-63"><a href="#cb1-63" aria-hidden="true" tabindex="-1"></a></span>
@@ -310,7 +309,7 @@ Cost function
 </div>
 </div>
 </div>
-<div class="panel-tabset g-col-24 g-col-lg-17 pt-3 pt-lg-0">
+<div class="panel-tabset">
 <ul class="nav nav-tabs" role="tablist"><li class="nav-item" role="presentation"><a class="nav-link active" id="tabset-1-1-tab" data-bs-toggle="tab" data-bs-target="#tabset-1-1" role="tab" aria-controls="tabset-1-1" aria-selected="true">c(n,p) = c₀ * exp(-p/n)</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-1-2-tab" data-bs-toggle="tab" data-bs-target="#tabset-1-2" role="tab" aria-controls="tabset-1-2" aria-selected="false">c(n,p) = c₀ * exp(-p/(n+p))</a></li></ul>
 <div class="tab-content">
 <div id="tabset-1-1" class="tab-pane active" role="tabpanel" aria-labelledby="tabset-1-1-tab">
@@ -354,7 +353,7 @@ Cost function
 </div>
 </div>
 </div>
-<p><span class="math inline">\(p/n\)</span> <span class="math inline">\(\Rightarrow\)</span> <span><span id="ojs-element-id-1"></span></span><code>/</code> <span><span id="ojs-element-id-2"></span></span> = <span><span id="ojs-element-id-3"></span></span> <br><br> <span class="math inline">\(c(n,p)\)</span> = <span><span id="ojs-element-id-10"></span></span> (c=1 means that non-coders always fail to learn to code; c=0 means non-coders always succeed)<br><br> Non-programmers can still learn to code when <span class="math inline">\(p=0\)</span> because of <span class="math inline">\(c_0\)</span><br><br> I woudl expect a bigger difference when we go from no prorammers in the team to one programmer</p>
+<p><span class="math inline">\(p/n\)</span> <span class="math inline">\(\Rightarrow\)</span> <span><span id="ojs-element-id-1"></span></span><code>/</code> <span><span id="ojs-element-id-2"></span></span> = <span><span id="ojs-element-id-3"></span></span> <br><br> <span class="math inline">\(c(n,p)\)</span> = <span><span id="ojs-element-id-4"></span></span> (c=1 means that non-coders always fail to learn to code; c=0 means non-coders always succeed)<br><br> Non-programmers can still learn to code when <span class="math inline">\(p=0\)</span> because of <span class="math inline">\(c_0\)</span><br><br> I woudl expect a bigger difference when we go from no prorammers in the team to one programmer</p>
 </div>
 <div id="tabset-1-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-1-2-tab">
 <div class="cell">
@@ -388,15 +387,14 @@ Cost function
 </div>
 </div>
 </div>
-<p><span class="math inline">\(p/n\)</span> <span class="math inline">\(\Rightarrow\)</span> <span><span id="ojs-element-id-4"></span></span><code>/</code> <span><span id="ojs-element-id-5"></span></span> = <span><span id="ojs-element-id-6"></span></span> <br><br> <span class="math inline">\(c(n,p)\)</span> = <span><span id="ojs-element-id-11"></span></span> (c=1 means that non-coders always fail to learn to code; c=0 means non-coders always succeed)<br><br> Non-programmers can still learn to code when <span class="math inline">\(p=0\)</span> because of <span class="math inline">\(c_0\)</span><br><br> I woudl expect a bigger difference when we go from no prorammers in the team to one programmer</p>
+<p><span class="math inline">\(p/n\)</span> <span class="math inline">\(\Rightarrow\)</span> <span><span id="ojs-element-id-5"></span></span><code>/</code> <span><span id="ojs-element-id-6"></span></span> = <span><span id="ojs-element-id-7"></span></span> <br><br> <span class="math inline">\(c(n,p)\)</span> = <span><span id="ojs-element-id-8"></span></span> (c=1 means that non-coders always fail to learn to code; c=0 means non-coders always succeed)<br><br> Non-programmers can still learn to code when <span class="math inline">\(p=0\)</span> because of <span class="math inline">\(c_0\)</span><br><br> I woudl expect a bigger difference when we go from no prorammers in the team to one programmer</p>
 </div>
 </div>
 </div>
 </div>
 </div>
 </div>
-</div>
-<div class="callout-tip callout callout-style-default callout-captioned">
+<div class="callout callout-style-default callout-tip callout-captioned">
 <div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-3-contents" aria-controls="callout-3" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
@@ -408,8 +406,7 @@ Group benefits
 </div>
 <div id="callout-3" class="callout-3-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<div class="panel-grid layout-sidebar ms-md-0 layout-sidebar-left">
-<div class="cell panel-sidebar card bg-light p-2 g-col-24 g-col-lg-7">
+<div class="cell card bg-light p-2 g-col-24 g-col-lg-7">
 <div class="sourceCode cell-code hidden" id="cb4" data-startfrom="123" data-source-offset="-28"><pre class="sourceCode js code-with-copy"><code class="sourceCode javascript" style="counter-reset: source-line 122;"><span id="cb4-123"><a href="#cb4-123" aria-hidden="true" tabindex="-1"></a><span class="kw">function</span> <span class="fu">tau</span>(n<span class="op">,</span> i<span class="op">,</span> alpha<span class="op">,</span> beta) {</span>
 <span id="cb4-124"><a href="#cb4-124" aria-hidden="true" tabindex="-1"></a>    <span class="kw">const</span> c <span class="op">=</span> <span class="fu">cost_prog</span>(n<span class="op">,</span> i<span class="op">,</span> <span class="dv">1</span>)</span>
 <span id="cb4-125"><a href="#cb4-125" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="bu">Math</span><span class="op">.</span><span class="fu">exp</span>(<span class="op">-</span>alpha <span class="op">+</span> beta<span class="op">*</span>(<span class="dv">1</span> <span class="op">-</span> c))</span>
@@ -471,7 +468,7 @@ Group benefits
 </div>
 </div>
 </div>
-<div class="panel-tabset g-col-24 g-col-lg-17 pt-3 pt-lg-0">
+<div class="panel-tabset">
 <ul class="nav nav-tabs" role="tablist"><li class="nav-item" role="presentation"><a class="nav-link active" id="tabset-2-1-tab" data-bs-toggle="tab" data-bs-target="#tabset-2-1" role="tab" aria-controls="tabset-2-1" aria-selected="true">τ(n,p) 1</a></li></ul>
 <div class="tab-content">
 <div id="tabset-2-1" class="tab-pane active" role="tabpanel" aria-labelledby="tabset-2-1-tab">
@@ -514,8 +511,7 @@ Group benefits
 </div>
 </div>
 </div>
-<p><span class="math inline">\(p/n\)</span> <span class="math inline">\(\Rightarrow\)</span> <span><span id="ojs-element-id-7"></span></span><code>/</code> <span><span id="ojs-element-id-8"></span></span> = <span><span id="ojs-element-id-9"></span></span></p>
-</div>
+<p><span class="math inline">\(p/n\)</span> <span class="math inline">\(\Rightarrow\)</span> <span><span id="ojs-element-id-9"></span></span><code>/</code> <span><span id="ojs-element-id-10"></span></span> = <span><span id="ojs-element-id-11"></span></span></p>
 </div>
 </div>
 </div>
@@ -525,7 +521,7 @@ Group benefits
 </section>
 <section id="julia-model" class="level2">
 <h2 class="anchored" data-anchor-id="julia-model">Julia model</h2>
-<div class="callout-tip callout callout-style-default callout-captioned">
+<div class="callout callout-style-default callout-tip callout-captioned">
 <div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-4-contents" aria-controls="callout-4" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
@@ -681,7 +677,8 @@ Initialization scheme
 </div>
 </div>
 </div>
-<div class="panel-tabset g-col-24 g-col-lg-17 pt-3 pt-lg-0">
+<div class="panel-fill g-col-24 g-col-lg-17 pt-3 pt-lg-0">
+<div class="panel-tabset">
 <ul class="nav nav-tabs" role="tablist"><li class="nav-item" role="presentation"><a class="nav-link active" id="tabset-3-1-tab" data-bs-toggle="tab" data-bs-target="#tabset-3-1" role="tab" aria-controls="tabset-3-1" aria-selected="true">Plot</a></li></ul>
 <div class="tab-content">
 <div id="tabset-3-1" class="tab-pane active" role="tabpanel" aria-labelledby="tabset-3-1-tab">
@@ -722,6 +719,7 @@ Initialization scheme
 </div>
 </div>
 </div>
+</div>
 </section>
 <section id="takeaways" class="level2">
 <h2 class="anchored" data-anchor-id="takeaways">Takeaways:</h2>
@@ -735,21 +733,21 @@ Initialization scheme
 ,
   {"methodName":"interpret","inline":"true","source":"htl.html`<span>${(coder/(non_coder)).toFixed(2)}</span>`", "cellName":"ojs-element-id-3"}
 ,
-  {"methodName":"interpret","inline":"true","source":"htl.html`<span>${coder}</span>`", "cellName":"ojs-element-id-4"}
+  {"methodName":"interpret","inline":"true","source":"htl.html`<span>${cost_prog(coder, nc, c_0).toFixed(2)}</span>`", "cellName":"ojs-element-id-4"}
 ,
-  {"methodName":"interpret","inline":"true","source":"htl.html`<span>${non_coder}</span>`", "cellName":"ojs-element-id-5"}
+  {"methodName":"interpret","inline":"true","source":"htl.html`<span>${coder}</span>`", "cellName":"ojs-element-id-5"}
 ,
-  {"methodName":"interpret","inline":"true","source":"htl.html`<span>${(coder/(non_coder)).toFixed(2)}</span>`", "cellName":"ojs-element-id-6"}
+  {"methodName":"interpret","inline":"true","source":"htl.html`<span>${non_coder}</span>`", "cellName":"ojs-element-id-6"}
 ,
-  {"methodName":"interpret","inline":"true","source":"htl.html`<span>${coder}</span>`", "cellName":"ojs-element-id-7"}
+  {"methodName":"interpret","inline":"true","source":"htl.html`<span>${(coder/(non_coder)).toFixed(2)}</span>`", "cellName":"ojs-element-id-7"}
 ,
-  {"methodName":"interpret","inline":"true","source":"htl.html`<span>${non_coder}</span>`", "cellName":"ojs-element-id-8"}
+  {"methodName":"interpret","inline":"true","source":"htl.html`<span>${cost_prog2(coder, nc, c_0).toFixed(2)}</span>`", "cellName":"ojs-element-id-8"}
 ,
-  {"methodName":"interpret","inline":"true","source":"htl.html`<span>${(tau_coder/(tau_nc)).toFixed(2)}</span>`", "cellName":"ojs-element-id-9"}
+  {"methodName":"interpret","inline":"true","source":"htl.html`<span>${coder}</span>`", "cellName":"ojs-element-id-9"}
 ,
-  {"methodName":"interpret","inline":"true","source":"htl.html`<span>${cost_prog(coder, nc, c_0).toFixed(2)}</span>`", "cellName":"ojs-element-id-10"}
+  {"methodName":"interpret","inline":"true","source":"htl.html`<span>${non_coder}</span>`", "cellName":"ojs-element-id-10"}
 ,
-  {"methodName":"interpret","inline":"true","source":"htl.html`<span>${cost_prog2(coder, nc, c_0).toFixed(2)}</span>`", "cellName":"ojs-element-id-11"}
+  {"methodName":"interpret","inline":"true","source":"htl.html`<span>${(tau_coder/(tau_nc)).toFixed(2)}</span>`", "cellName":"ojs-element-id-11"}
 ]}
 </script>
 </section>
@@ -759,6 +757,7 @@ Initialization scheme
 {"contents":[{"methodName":"interpret","cellName":"ojs-cell-1","inline":false,"source":"\n// i == p == # programmers\nfunction cost_prog(n, i, c_0) { return c_0 * Math.exp(-i/n); }\nfunction cost_prog2(n, i, c_0) { return c_0 * Math.exp(-i/(n+i)); }\n\nmax_gr_size = 20\nviewof N = Inputs.range([1, max_gr_size], {value: 20, step: 1, label: \"group Size\"})\nviewof coder = Inputs.range([0, (N-1)], {value: 10, step: 1, label: \"# coder\"})\nviewof c_0 = Inputs.range([0, 1], {value: 0.95, step: 0.01, label: \"c₀\"})\nviewof nc = Inputs.range([1, N], {value: (N-coder), step: 1., label: \"# non-coder\", disabled:true})\n"},{"methodName":"interpret","cellName":"ojs-cell-2","inline":false,"source":"non_coder = N - coder\nxs = [...Array(N).keys()];\nys = xs.map(x => cost_prog(non_coder, x, c_0))\n\n\nPlot.lineY(ys).plot({\n    height: 400, width: 450, grid: true,\n    y: { label: \"↑ c(n,p)\", domain:[0,1] },\n    x: { label: \"p/n →\" }\n})\n"},{"methodName":"interpret","cellName":"ojs-cell-3","inline":false,"source":"x2s = [...Array(N).keys()];\ny2s = x2s.map(x => cost_prog2(non_coder, x, c_0))\n\nPlot.lineY(y2s).plot({\n    height: 400, width: 450, grid: true,\n    y: { label: \"↑ c(n,p)\", domain:[0,1] },\n    x: { label: \"p/n →\" }\n})\n"},{"methodName":"interpret","cellName":"ojs-cell-4","inline":false,"source":"\n// i == p == # programmers\nfunction tau(n, i, alpha, beta) {\n    const c = cost_prog(n, i, 1)\n    return Math.exp(-alpha + beta*(1 - c))\n}\n\ntau_max_gr_size = 20\nviewof tau_alpha = Inputs.range([2, 4], {value: 1., step: 1, label: \"α\", format: x => 10**-x})\nviewof tau_beta = Inputs.range([1, 3], {value: 1., step: 1, label: \"β\", format: x => 10**-x})\nviewof tau_N = Inputs.range([0, tau_max_gr_size], {value: 20, step: 1, label: \"group Size\"})\nviewof tau_coder = Inputs.range([1, tau_max_gr_size], {value: 10, step: 1, label: \"# coder\"})\nviewof tau_nc = Inputs.range([1, max_gr_size], {value: (tau_N-tau_coder), step: 1., label: \"# non-coder\", disabled:true})\n"},{"methodName":"interpret","cellName":"ojs-cell-5","inline":false,"source":"tau_non_coder = tau_N - tau_coder\ntau_xs = [...Array(tau_N).keys()];\ntau_ys = tau_xs.map(x => tau(tau_non_coder, x, 10**-tau_alpha, 10**-tau_beta))\n\nPlot.lineY(tau_ys).plot({\n    height: 400, width: 450, grid: true,\n    y: { label: \"↑ τ(α,β;n,p)\" },\n    x: { label: \"p/n →\" }\n})\n"},{"methodName":"interpret","cellName":"ojs-cell-6","inline":false,"source":"data = FileAttachment(\"data.json\").json()\np = Object.keys(data).map(d => d.split(\"_\")) //unpack params\n"},{"methodName":"interpret","cellName":"ojs-cell-7","inline":false,"source":"minmax = (p, i) => d3.extent(p.map(d => parseFloat(d[i])))\n\nviewof N_    = Inputs.range(minmax(p,0), {step: 1, label: \"N\", value:\"4\"})\nviewof mu    = Inputs.range(minmax(p,1), {step: 0.03, label: \"μ\", value:\"0.0001\"})\nviewof nu_n  = Inputs.range(minmax(p,2), {step: 0.05, label: \"νₙ\", value:\"0.01\"})\nviewof nu_p  = Inputs.range(minmax(p,3), {step: 0.1,  label: \"νₚ\", value:\"0.05\"})\nviewof alpha = Inputs.range(minmax(p,4), {step: 0.15, label: \"α\", value:\"0.01\"})\nviewof beta  = Inputs.range(minmax(p,5), {step: 0.05, label: \"β\", value:\"0.1\"})\n"},{"methodName":"interpret","cellName":"ojs-cell-8","inline":false,"source":"\nf = (x) => x.toPrecision() ? x.toPrecision(2) : x\n\nPlot.plot({\n  x: {type:\"log\"},\n  y: {domain: [0,1]},\n  color: {scheme: \"reds\", type: \"ordinal\", legend: true},\n  marks: [\n    Plot.line(\n      data[`${N_}_${mu}_${nu_n}_${nu_p}_${alpha}_${beta}`], {\n        x: 'timesteps', y: \"value\", stroke: \"N\"\n        }),\n    Plot.dot(\n      data[`${N_}_${mu}_${nu_n}_${nu_p}_${alpha}_${beta}`], {\n        x: 'timesteps', y: \"value\", stroke: \"N\"\n        })\n  ]\n})\n"},{"methodName":"interpretQuiet","source":"shinyInput('N')"},{"methodName":"interpretQuiet","source":"shinyInput('coder')"},{"methodName":"interpretQuiet","source":"shinyInput('c_0')"},{"methodName":"interpretQuiet","source":"shinyInput('nc')"},{"methodName":"interpretQuiet","source":"shinyInput('tau_alpha')"},{"methodName":"interpretQuiet","source":"shinyInput('tau_beta')"},{"methodName":"interpretQuiet","source":"shinyInput('tau_N')"},{"methodName":"interpretQuiet","source":"shinyInput('tau_coder')"},{"methodName":"interpretQuiet","source":"shinyInput('tau_nc')"},{"methodName":"interpretQuiet","source":"shinyInput('N_')"},{"methodName":"interpretQuiet","source":"shinyInput('mu')"},{"methodName":"interpretQuiet","source":"shinyInput('nu_n')"},{"methodName":"interpretQuiet","source":"shinyInput('nu_p')"},{"methodName":"interpretQuiet","source":"shinyInput('alpha')"},{"methodName":"interpretQuiet","source":"shinyInput('beta')"}]}
 </script>
 <script type="module">
+if (window.location.protocol === "file:") { alert("The OJS runtime does not work with file:// URLs. Please use a web server to view this document."); }
 window._ojs.paths.runtimeToDoc = "../../posts/sci-group-life-cycle";
 window._ojs.paths.runtimeToRoot = "../..";
 window._ojs.paths.docToRoot = "../..";
@@ -859,6 +858,92 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
       return note.innerHTML;
     });
   }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
   const findCites = (el) => {
     const parentEl = el.parentElement;
     if (parentEl) {
