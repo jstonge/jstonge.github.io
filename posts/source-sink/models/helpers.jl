@@ -67,12 +67,12 @@ function plot_scatter(res::Dict)
             markerstrokewidth=0, markersize = 3.)
 end
 
-using SQLite
+# using SQLite
 
-function plot_phase_diagram(res_db)
+# function plot_phase_diagram(res_db)
     
-    L = length(res)
-    ys = [last(inst_level[i]) for i=1:L]
+#     L = length(res)
+#     ys = [last(inst_level[i]) for i=1:L]
 
-    ps = [heatmap(1:length(res[1]), ys[lvl]) for lvl=1:6]
-end
+#     ps = [heatmap(1:length(res[1]), ys[lvl]) for lvl=1:6]
+# end
