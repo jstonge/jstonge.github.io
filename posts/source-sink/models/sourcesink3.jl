@@ -1,8 +1,11 @@
 using Pkg; Pkg.activate("../../");
 using ArgParse, Distributions, StatsBase, OrdinaryDiffEq, RecursiveArrayTools, DataFrames, SQLite
 
-include("helpers.jl")
+"""
+    parse_commandline()
 
+Function for the commandline interface.
+"""
 function parse_commandline()
   s = ArgParseSettings()
 
@@ -50,6 +53,27 @@ function parse_commandline()
   return parse_args(s)
 end
 
+"""
+  write_sol2txt(path, sol)
+
+Function to write solution to textfile. Nothing to do here.
+"""
+function write_sol2txt(path, sol)
+  L = length(sol.u[1].x)
+  open(path, "a") do io
+    for t=1:length(sol.u), ℓ=1:L
+      for val in sol.u[t].x[ℓ]
+          write(io, "$(t) $(ℓ) $(round(val, 10))\n")
+      end
+    end
+  end
+end
+
+"""
+  initialize_u0(;n, L, M, p)
+
+Function to initialize the model.
+"""
 function initialize_u0(;n::Int=20, L::Int=6, M::Int=20, p::Float64=0.01)::ArrayPartition
   G = zeros(L, n+1)
   for _ in 1:M
@@ -62,7 +86,6 @@ function initialize_u0(;n::Int=20, L::Int=6, M::Int=20, p::Float64=0.01)::ArrayP
 
   return ArrayPartition(Tuple([G[ℓ,:] for ℓ=1:L]))
 end
-
 
 f(x; a1=2.2) = 1 / (1 + exp(-a1*x)) # cost-benefits for individuals
 h(x; a2=0.3) = (1 - exp(-a2*x)) / (1 - exp(-a2)) # dependency of synergy on institutional level
@@ -151,8 +174,7 @@ main()
 
 
 # prototyping -------------------------------------------------------------------------------
-
-# using CSV, Plots
+# using Plots
 
 # # note 1: b/c should be chosen to allow the highest level (hence also all the others) to be worth it at high enough adoption
 # #      --> lower bound for b/c (given n = 20 and max{level} = 5): 20*b - 5*c > 0 ⇒ b/c > 0.25
@@ -174,9 +196,96 @@ main()
 # prob1 = ODEProblem(source_sink3!, u₀, tspan, p)
 # sol1 = solve(prob1, DP5(), saveat=1, reltol=1e-8, abstol=1e-8)
 
-# write_sol2txt("sourcesink3_0.1_0.1_0.2_0.0_2.0_0.1.txt", sol)
 
-# inst_level = parse_sol("sourcesink3_0.1_0.1_0.2_0.0_2.0_0.1.txt")
-# inst_level = parse_sol(sol)
+# # function from_file()
+# #   sol = CSV.read(".sourcesink3_0.1_0.1_0.2_0.0_2.0_0.1.txt", DataFrame; header=["timestep", "L", "value"])
+# #   L = 6
+# #   inst_level = Dict()
+# #   lower_limit = 1
+# #   upper_limit = 21
+# #   for t=1:t_max
+# #     for ℓ=1:L
+# #       myrange = UnitRange(lower_limit:upper_limit)
+# #       n = length(sol.value[myrange])
+# #       x = sol.value[myrange]
+# #       out = sum((collect(0:(n-1)) / n) .* x) / sum(x)
+# #       if haskey(inst_level, ℓ)
+# #         inst_level[ℓ] = [inst_level[ℓ]; out]
+# #       else
+# #         inst_level[ℓ] = out
+# #       end
 
-# plot_scatter_sourcesink(inst_level)
+# #       lower_limit += 21
+# #       upper_limit += 21
+
+# #     end
+# #   end
+# #   return inst_level
+# # end
+
+# # inst_level = from_file()
+
+# # when sol is available
+# # temporal evolution
+
+# inst_level = Dict()
+# inst_level_prop = Dict()
+# L = length(sol.u[1].x)
+# for ℓ=1:L
+#   values = []
+#   values2 = []
+#   for t=1:t_max
+#     n = length(sol.u[t].x[ℓ])
+#     x = sol.u[t].x[ℓ]
+#     out = sum((collect(0:(n-1)) / n) .* x) / sum(x)
+#     push!(values, out)
+#     out = sum(x)
+#     push!(values2, out)
+#   end
+#   inst_level[ℓ] = values
+#   inst_level_prop[ℓ] = values2
+# end
+# global_freq = [sum([inst_level[ℓ][t]*inst_level_prop[ℓ][t] for ℓ in 1:L]) for t in 1:t_max]
+
+# pl = scatter(1:t_max, [inst_level[i] for i in 1:L], xaxis = :log, legendtitle="level", 
+#       legend=:outertopright, labels=["0" "1" "2" "3" "4" "5"], palette = palette(:Reds)[2:7],
+#       markerstrokewidth=0, markersize = 3.);
+# plot!(1:t_max, global_freq, linestyle =:dash, color =:black, width=1.5, label = "global") 
+# pl_prop = scatter(1:t_max, [inst_level_prop[i] for i in 1:L], xaxis = :log, legendtitle="level", 
+#       legend=:outertopright, labels=["0" "1" "2" "3" "4" "5"], palette = palette(:Blues)[2:7],
+#       markerstrokewidth=0, markersize = 3.)
+# # plot!(1:t_max, global_freq, linestyle =:dash, color =:black, width=1.5, label = "global") 
+
+
+# inst_level = Dict()
+# inst_level_prop = Dict()
+# L = length(sol1.u[1].x)
+# for ℓ=1:L
+#   values = []
+#   values2 = []
+#   for t=1:t_max
+#     n = length(sol1.u[t].x[ℓ])
+#     x = sol1.u[t].x[ℓ]
+#     out = sum((collect(0:(n-1)) / n) .* x) / sum(x)
+#     push!(values, out)
+#     out = sum(x)
+#     push!(values2, out)
+#   end
+#   inst_level[ℓ] = values
+#   inst_level_prop[ℓ] = values2
+# end
+# global_freq = [sum([inst_level[ℓ][t]*inst_level_prop[ℓ][t] for ℓ in 1:L]) for t in 1:t_max]
+
+# pl1 = scatter(1:t_max, [inst_level[i] for i in 1:L], xaxis = :log, legendtitle="level", 
+#       legend=:outertopright, labels=["0" "1" "2" "3" "4" "5"], palette = palette(:Reds)[2:7],
+#       markerstrokewidth=0, markersize = 3.);
+# plot!(1:t_max, global_freq, linestyle =:dash, color =:black, width=1.5, label = "global") 
+# pl_prop1 = scatter(1:t_max, [inst_level_prop[i] for i in 1:L], xaxis = :log, legendtitle="level", 
+#       legend=:outertopright, labels=["0" "1" "2" "3" "4" "5"], palette = palette(:Blues)[2:7],
+#       markerstrokewidth=0, markersize = 3.)
+# # plot!(1:t_max, global_freq, linestyle =:dash, color =:black, width=1.5, label = "global") 
+
+# pl
+# pl1
+# pl_prop
+# pl_prop1
