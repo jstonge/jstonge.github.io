@@ -69,7 +69,7 @@ h(x; a2=0.3) = (1 - exp(-a2*x)) / (1 - exp(-a2)) # dependency of synergy on inst
 
 function source_sink3!(du, u, p, t)
   G, L, n = u, length(u.x), length(u.x[1])
-  β, γ, ρ, b, c, μ = p
+  β, γ, ρ, b, c, μ, δ = p # δ = 1 (δ = 0): (no) resource requirement to upgrade institution
   Z, pop, R = zeros(L), zeros(L), 0.
 
   # Calculate mean-field coupling and observed fitness landscape
@@ -80,25 +80,26 @@ function source_sink3!(du, u, p, t)
       pop[ℓ]  = sum(G.x[ℓ])
       R      += sum(n_adopt .* G.x[ℓ]) # Global diffusion
       pop[ℓ] > 0.0 && ( Z[ℓ] /= pop[ℓ] )
-  end
+    end
 
     for ℓ = 1:L, i = 1:n
       n_adopt, gr_size = i-1, n-1
       # Inndividual selection process
       du.x[ℓ][i] = -n_adopt*f(1-h(ℓ))*G.x[ℓ][i] - (gr_size-n_adopt)*f(h(ℓ)-1)*G.x[ℓ][i]
-      du.x[ℓ][i] += -n_adopt*(gr_size-n_adopt)*(β+γ)*G.x[ℓ][i] - ρ*(gr_size-n_adopt)*β*R*G.x[ℓ][i] - ρ*n_adopt*γ*(gr_size-R)*G.x[ℓ][i]
+      du.x[ℓ][i] += - n_adopt*(gr_size-n_adopt)*(β+γ)*G.x[ℓ][i] - ρ*(gr_size-n_adopt)*β*R*G.x[ℓ][i] - ρ*n_adopt*γ*(gr_size-R)*G.x[ℓ][i]
       n_adopt > 0 && ( du.x[ℓ][i] += (gr_size-n_adopt+1)*f(h(ℓ)-1)*G.x[ℓ][i-1] + β*(n_adopt-1+ρ*R)*(gr_size-n_adopt+1)*G.x[ℓ][i-1] )
       n_adopt < gr_size && ( du.x[ℓ][i] += (n_adopt+1)*f(1-h(ℓ))*G.x[ℓ][i+1] + γ*(gr_size-n_adopt-1+ρ*(gr_size-R))*(n_adopt+1)*G.x[ℓ][i+1] )
       # Group selection process
-      ℓ > 1 && ( du.x[ℓ][i] += f(b*n_adopt-c*(ℓ-1))*(μ+ρ*Z[ℓ]/Z[ℓ-1])*G.x[ℓ-1][i] - (μ*f(c*(ℓ-1)-b*n_adopt)+ρ*f(b*n_adopt-c*(ℓ-2))*Z[ℓ-1]/Z[ℓ])*G.x[ℓ][i] )
-      ℓ < L && ( du.x[ℓ][i] += (μ*f(c*ℓ-b*n_adopt)+ρ*f(b*n_adopt-c*(ℓ-1))*Z[ℓ]/Z[ℓ+1])*G.x[ℓ+1][i] - f(b*n_adopt-c*ℓ)*(μ+ρ*Z[ℓ+1]/Z[ℓ])*G.x[ℓ][i] )
+      ℓ > 1 && ( du.x[ℓ][i] += (f(b*n_adopt-c*(ℓ-1))^δ)*(μ+ρ*Z[ℓ]/Z[ℓ-1])*G.x[ℓ-1][i] - (μ*(f(c*(ℓ-1)-b*n_adopt)^δ)+ρ*(f(b*n_adopt-c*(ℓ-2))^δ)*Z[ℓ-1]/Z[ℓ])*G.x[ℓ][i] )
+      ℓ < L && ( du.x[ℓ][i] += (μ*(f(c*ℓ-b*n_adopt)^δ)+ρ*(f(b*n_adopt-c*(ℓ-1))^δ)*Z[ℓ]/Z[ℓ+1])*G.x[ℓ+1][i] - (f(b*n_adopt-c*ℓ)^δ)*(μ+ρ*Z[ℓ+1]/Z[ℓ])*G.x[ℓ][i] )
     end
 end
 
 function run_source_sink3(p)
   n, M = 20, 1000
   u₀ = initialize_u0(n=n, L=6, M=M, p=0.01)
-  tspan = (1.0, 4000)
+  t_max = 500
+  tspan = (1.0, t_max)
 
   # Solve problem
   prob = ODEProblem(source_sink3!, u₀, tspan, p)
@@ -106,7 +107,7 @@ function run_source_sink3(p)
 end
 
 function main()
-  # β, γ, ρ, b, c, μ = 0.07, 0.5, 1, 0.1, 0.18, 1.05, 0.2
+  # β, γ, ρ, b, c, μ, δ = 0.07, 0.5, 1, 0.1, 0.18, 1.05, 0.2, 0
   args = parse_commandline()
 
   modelname = "sourcesink3"
@@ -119,9 +120,9 @@ function main()
     b = args["b"]
     c = args["c"]
     μ = args["m"]
+    δ = args["d"]
 
-    #!TODO: don't forget to change run_source_sink
-    p = [β, γ, ρ, b, c, μ]
+    p = [β, γ, ρ, b, c, μ, δ]
     println(p)
     sol = run_source_sink3(p)
     write_sol2txt("$(args["o"])$(modelname)_$(join(p, "_")).txt", sol)
@@ -137,9 +138,9 @@ function main()
       b = row["b"]
       c = row["cost"]
       μ = row["mu"]
+      δ = row["delta"]
 
-      #!TODO: don't forget to change run_source_sink
-      p = [β, γ, ρ, b, c, μ]
+      p = [β, γ, ρ, b, c, μ, δ]
       sol = run_source_sink3(p)
       write_sol2txt("$(args["o"])/$(modelname)_$(join(p, "_")).txt", sol)
     end
@@ -153,15 +154,25 @@ main()
 
 # using CSV, Plots
 
-# β, γ, ρ, b, c, μ = 0.1, 0.1, 0.2, 0, 2, 0.1
-# p  = [β, γ, ρ, b, c, μ]
+# # note 1: b/c should be chosen to allow the highest level (hence also all the others) to be worth it at high enough adoption
+# #      --> lower bound for b/c (given n = 20 and max{level} = 5): 20*b - 5*c > 0 ⇒ b/c > 0.25
+# # note 2: β/γ and ρ/μ decisive for dominance relations between levels
+# #     --> heatmap β/γ VS ρ/μ for fixed b/c?
 
 # n, M = 20, 1000
 # u₀ = initialize_u0(n=n, L=6, M=M, p=0.01)
-# tspan = (0., 4000.)
+# t_max = 500
+# tspan = (0., t_max)
 
+# β, γ, ρ, b, c, μ = 0.3, 0.3, 0.1, 0.25, 1., 0.1
+# δ = 1
+# p  = [β, γ, ρ, b, c, μ, δ]
 # prob = ODEProblem(source_sink3!, u₀, tspan, p)
 # sol = solve(prob, DP5(), saveat=1, reltol=1e-8, abstol=1e-8)
+# δ = 0
+# p  = [β, γ, ρ, b, c, μ, δ]
+# prob1 = ODEProblem(source_sink3!, u₀, tspan, p)
+# sol1 = solve(prob1, DP5(), saveat=1, reltol=1e-8, abstol=1e-8)
 
 # write_sol2txt("sourcesink3_0.1_0.1_0.2_0.0_2.0_0.1.txt", sol)
 
