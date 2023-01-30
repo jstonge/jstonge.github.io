@@ -18,7 +18,10 @@ ojs_define(ss3=arrow::read_parquet("sourcesink3.parquet"))
 ```
 
 ```{ojs load results db}
-resdb = DuckDBClient.of({
+// import { DuckDBClient } from '@rlesur/quarto-duckdb'
+// stdlibDev = await import("https://esm.sh/@observablehq/stdlib");
+
+resdb = stdlibDev.DuckDBClient.of({
   sourcesink1: transpose(ss1),
   sourcesink2: transpose(ss2),
   sourcesink3: transpose(ss3),
