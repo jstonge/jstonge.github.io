@@ -12,9 +12,6 @@ image: unions.jpg
 ---
 
 ```{ojs load results db}
-// duckdb = import("https://cdn.jsdelivr.net/npm/@duckdb/duckdb-wasm@1.17.0/+esm")
-
-
 resdb = DuckDBClient.of({
   sourcesink1: FileAttachment("sourcesink1.parquet"),
   sourcesink2: FileAttachment("sourcesink2.parquet"),
