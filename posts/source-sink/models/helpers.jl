@@ -22,48 +22,61 @@ processing_sol1(x, n) = sum((collect(0:(n-1)) / n) .* x) / sum(x)
 function parse_sol(s::String)
     
     sol = CSV.read(s, DataFrame; header=["timestep", "L", "value"])
+    tmax = maximum(unique(sol.timestep))
     L = 6
     inst_level = Dict()
+    inst_level_prop = Dict()
     lower_limit, upper_limit = 1, 21
-    for t=1:4000
+    for t=1:tmax
         for ℓ=1:L
             myrange = UnitRange(lower_limit:upper_limit)
             n = length(sol.value[myrange])
             x = sol.value[myrange]
             out = processing_sol1(x, n)
+            out_prop = sum(x)
         if haskey(inst_level, ℓ)
             inst_level[ℓ] = [inst_level[ℓ]; out]
+            inst_level_prop[ℓ] = [inst_level_prop[ℓ]; out_prop]
         else
             inst_level[ℓ] = out
+            inst_level_prop[ℓ] = out_prop
         end
-
+  
         lower_limit += 21
         upper_limit += 21
-
+  
         end
     end
-    return inst_level
-end
+    return inst_level, inst_level_prop
+  end
+  
 
 function parse_sol(s::ODESolution)
     L = length(s.u[1].x)
+    tmax = length(s)-1
+    inst_level = Dict()
+    inst_level_prop = Dict()
     for ℓ=1:L
       values = []
-      for t=1:4000
+      values_prop = []
+      for t=1:tmax
         n = length(s.u[t].x[ℓ])
         x = s.u[t].x[ℓ]
         out = processing_sol1(x,n)
         push!(values, out)
+        out = sum(x)
+        push!(values_prop, out)
       end
       inst_level[ℓ] = values
+      inst_level_prop[ℓ] = values_prop
     end
-    return inst_level
+    return inst_level, inst_level_prop
 end
 
-function plot_scatter(res::Dict)
+function plot_scatter(res::Dict; col = :Reds)
     L = length(res)
     scatter(1:length(res[1]), [res[i] for i in 1:L], xaxis = :log, legendtitle="grsize", 
-            legend=:outertopright, labels=collect(1:L)', palette = palette(:Reds)[2:(L-1)],
+            legend=:outertopright, labels=collect(1:L)', palette = palette(col)[2:(L-1)],
             markerstrokewidth=0, markersize = 3.)
 end
 

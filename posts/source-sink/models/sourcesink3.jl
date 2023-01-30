@@ -1,5 +1,7 @@
 using Pkg; Pkg.activate("../../");
-using ArgParse, Distributions, StatsBase, OrdinaryDiffEq, RecursiveArrayTools, DataFrames, SQLite
+using ArgParse, Distributions, StatsBase, OrdinaryDiffEq, RecursiveArrayTools, DataFrames, SQLite, Plots
+
+include("helpers.jl")
 
 """
     parse_commandline()
@@ -51,22 +53,6 @@ function parse_commandline()
     end
 
   return parse_args(s)
-end
-
-"""
-  write_sol2txt(path, sol)
-
-Function to write solution to textfile. Nothing to do here.
-"""
-function write_sol2txt(path, sol)
-  L = length(sol.u[1].x)
-  open(path, "a") do io
-    for t=1:length(sol.u), ℓ=1:L
-      for val in sol.u[t].x[ℓ]
-          write(io, "$(t) $(ℓ) $(round(val, 10))\n")
-      end
-    end
-  end
 end
 
 """
@@ -197,95 +183,26 @@ main()
 # sol1 = solve(prob1, DP5(), saveat=1, reltol=1e-8, abstol=1e-8)
 
 
-# # function from_file()
-# #   sol = CSV.read(".sourcesink3_0.1_0.1_0.2_0.0_2.0_0.1.txt", DataFrame; header=["timestep", "L", "value"])
-# #   L = 6
-# #   inst_level = Dict()
-# #   lower_limit = 1
-# #   upper_limit = 21
-# #   for t=1:t_max
-# #     for ℓ=1:L
-# #       myrange = UnitRange(lower_limit:upper_limit)
-# #       n = length(sol.value[myrange])
-# #       x = sol.value[myrange]
-# #       out = sum((collect(0:(n-1)) / n) .* x) / sum(x)
-# #       if haskey(inst_level, ℓ)
-# #         inst_level[ℓ] = [inst_level[ℓ]; out]
-# #       else
-# #         inst_level[ℓ] = out
-# #       end
-
-# #       lower_limit += 21
-# #       upper_limit += 21
-
-# #     end
-# #   end
-# #   return inst_level
-# # end
-
-# # inst_level = from_file()
+inst_level, inst_level_prop = parse_sol("sourcesink3_0.2_0.2_0.28_0.4_1.0_0.2_1.0.txt")
 
 # # when sol is available
 # # temporal evolution
 
-# inst_level = Dict()
-# inst_level_prop = Dict()
-# L = length(sol.u[1].x)
-# for ℓ=1:L
-#   values = []
-#   values2 = []
-#   for t=1:t_max
-#     n = length(sol.u[t].x[ℓ])
-#     x = sol.u[t].x[ℓ]
-#     out = sum((collect(0:(n-1)) / n) .* x) / sum(x)
-#     push!(values, out)
-#     out = sum(x)
-#     push!(values2, out)
-#   end
-#   inst_level[ℓ] = values
-#   inst_level_prop[ℓ] = values2
-# end
-# global_freq = [sum([inst_level[ℓ][t]*inst_level_prop[ℓ][t] for ℓ in 1:L]) for t in 1:t_max]
+function plot_scatter(res::Dict, res_prop::Dict; plot_prop=false)
+  L = length(res)
+  tmax = length(res[L[1]])
+  if plot_prop
+    scatter(1:tmax, [res_prop[i] for i in 1:L], xaxis = :log, legendtitle="level", 
+      legend=:outertopright, labels=["0" "1" "2" "3" "4" "5"], palette = palette(:Blues)[2:7],
+      markerstrokewidth=0, markersize = 3.)
+    else 
+      scatter(1:length(res[1]), [res[i] for i in 1:L], xaxis = :log, legendtitle="grsize", 
+      legend=:outertopright, labels=collect(1:L)', palette = palette(:Reds)[2:(L+1)],
+      markerstrokewidth=0, markersize = 3.)
+      global_freq = [sum([res[ℓ][t]*res_prop[ℓ][t] for ℓ in 1:L]) for t in 1:500]
+      plot!(1:tmax, global_freq, linestyle =:dash, color =:black, width=1.5, label = "global") 
+  end
+end
 
-# pl = scatter(1:t_max, [inst_level[i] for i in 1:L], xaxis = :log, legendtitle="level", 
-#       legend=:outertopright, labels=["0" "1" "2" "3" "4" "5"], palette = palette(:Reds)[2:7],
-#       markerstrokewidth=0, markersize = 3.);
-# plot!(1:t_max, global_freq, linestyle =:dash, color =:black, width=1.5, label = "global") 
-# pl_prop = scatter(1:t_max, [inst_level_prop[i] for i in 1:L], xaxis = :log, legendtitle="level", 
-#       legend=:outertopright, labels=["0" "1" "2" "3" "4" "5"], palette = palette(:Blues)[2:7],
-#       markerstrokewidth=0, markersize = 3.)
-# # plot!(1:t_max, global_freq, linestyle =:dash, color =:black, width=1.5, label = "global") 
-
-
-# inst_level = Dict()
-# inst_level_prop = Dict()
-# L = length(sol1.u[1].x)
-# for ℓ=1:L
-#   values = []
-#   values2 = []
-#   for t=1:t_max
-#     n = length(sol1.u[t].x[ℓ])
-#     x = sol1.u[t].x[ℓ]
-#     out = sum((collect(0:(n-1)) / n) .* x) / sum(x)
-#     push!(values, out)
-#     out = sum(x)
-#     push!(values2, out)
-#   end
-#   inst_level[ℓ] = values
-#   inst_level_prop[ℓ] = values2
-# end
-# global_freq = [sum([inst_level[ℓ][t]*inst_level_prop[ℓ][t] for ℓ in 1:L]) for t in 1:t_max]
-
-# pl1 = scatter(1:t_max, [inst_level[i] for i in 1:L], xaxis = :log, legendtitle="level", 
-#       legend=:outertopright, labels=["0" "1" "2" "3" "4" "5"], palette = palette(:Reds)[2:7],
-#       markerstrokewidth=0, markersize = 3.);
-# plot!(1:t_max, global_freq, linestyle =:dash, color =:black, width=1.5, label = "global") 
-# pl_prop1 = scatter(1:t_max, [inst_level_prop[i] for i in 1:L], xaxis = :log, legendtitle="level", 
-#       legend=:outertopright, labels=["0" "1" "2" "3" "4" "5"], palette = palette(:Blues)[2:7],
-#       markerstrokewidth=0, markersize = 3.)
-# # plot!(1:t_max, global_freq, linestyle =:dash, color =:black, width=1.5, label = "global") 
-
-# pl
-# pl1
-# pl_prop
-# pl_prop1
+plot_scatter(inst_level, inst_level_prop)
+plot_scatter(inst_level, inst_level_prop, plot_prop = true)

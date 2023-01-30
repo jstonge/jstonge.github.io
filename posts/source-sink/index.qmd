@@ -304,19 +304,20 @@ viewof rho3   = Inputs.range(minmax(p3,2), {step: s(p3,2),  label: "ρ", value:p
 viewof b3     = Inputs.range(minmax(p3,3), {step: s(p3,3),  label: "b", value:p3[0][3]})
 viewof c3     = Inputs.range(minmax(p3,4), {step: s(p3,4),  label: "c", value:p3[0][4]})
 viewof mu3    = Inputs.range(minmax(p3,5), {step: s(p3,5),  label: "μ", value:p3[0][5]})
+viewof delta3 = Inputs.range(minmax(p3,6), {step: s(p3,6),  label: "δ", value:p3[0][6]})
 
 data3 = resdb.query(`
   SELECT timestep::INT as timestep, L::INT as L, value, name
   FROM sourcesink3
   WHERE
-  name = '${f(beta3)}_${f(beta3)}_${f(rho3)}_${f(b3)}_${f(c3)}_${f(mu3)}'
+  name = '${f(beta3)}_${f(gamma3)}_${f(rho3)}_${f(b3)}_${f(c3)}_${f(mu3)}_${f(delta3)}'
 `)
 ```
 
 ```{ojs}
 //| panel: fill
 Plot.plot({
-  x: {type:"log"},
+  x: { type:"log" },
   marginLeft: 50,
   color: {scheme: "reds", type: "ordinal", legend: true},
   marks: [
