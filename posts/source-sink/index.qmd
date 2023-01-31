@@ -184,6 +184,15 @@ We ask ourselves to what extent the contagion is able to spread with very little
 
 We want institutions to be able to stop contagions but contagion must exist in the first place.
 
+```{=tex}
+\begin{align*}
+\frac{d}{dt}G_{i,\ell}^{\text{epi}} &= \beta {\color{red}{\ell}}^{\color{red}{-\alpha}} [(i-1) + R](n - i + 1)G_{i-1,\ell} \\
+                              &- \beta {\color{red}{\ell}}^{\color{red}{-\alpha}} (i+R)(n-i) G_{i,\ell} \\
+                              &+ \gamma(i+1)G_{i+1,\ell} - \mathbin{\gamma} i G_{i,\ell}
+\end{align*}
+```
+where $R = \mathbin{\rho} \sum_{i',\ell'} i'G_{i',\ell'}$ represents the global diffusion of behaviors and primes denote variable over which we sum to calculate global quantity. The sum over adopters at each level weighted by global behavioural diffusion $\rho$.
+
 ``` julia
 function source_sink2!(du, u, p, t)
     G, L, n = u, length(u.x), length(first(u.x))
