@@ -1,4 +1,4 @@
-using CSV
+using CSV, OrdinaryDiffEq::ODESolution
 
 """
 write_sol2txt(path, sol)
