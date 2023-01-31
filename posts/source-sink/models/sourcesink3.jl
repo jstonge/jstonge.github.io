@@ -182,7 +182,7 @@ main()
 # prob1 = ODEProblem(source_sink3!, u₀, tspan, p)
 # sol1 = solve(prob1, DP5(), saveat=1, reltol=1e-8, abstol=1e-8)
 
-
+# file should be there
 inst_level, inst_level_prop = parse_sol("sourcesink3_0.2_0.2_0.28_0.4_1.0_0.2_1.0.txt")
 
 # # when sol is available
@@ -199,7 +199,7 @@ function plot_scatter(res::Dict, res_prop::Dict; plot_prop=false)
       scatter(1:length(res[1]), [res[i] for i in 1:L], xaxis = :log, legendtitle="grsize", 
       legend=:outertopright, labels=collect(1:L)', palette = palette(:Reds)[2:(L+1)],
       markerstrokewidth=0, markersize = 3.)
-      global_freq = [sum([res[ℓ][t]*res_prop[ℓ][t] for ℓ in 1:L]) for t in 1:500]
+      global_freq = [sum([res[ℓ][t]*res_prop[ℓ][t] for ℓ in 1:L]) for t in 1:tmax]
       plot!(1:tmax, global_freq, linestyle =:dash, color =:black, width=1.5, label = "global") 
   end
 end
