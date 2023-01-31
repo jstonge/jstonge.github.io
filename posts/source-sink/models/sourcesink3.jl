@@ -93,7 +93,7 @@ function source_sink3!(du, u, p, t)
 
     for ℓ = 1:L, i = 1:n
       n_adopt, gr_size = i-1, n-1
-      # Inndividual selection process
+      # Individual selection process
       du.x[ℓ][i] = -n_adopt*f(1-h(ℓ))*G.x[ℓ][i] - (gr_size-n_adopt)*f(h(ℓ)-1)*G.x[ℓ][i]
       du.x[ℓ][i] += - n_adopt*(gr_size-n_adopt)*(β+γ)*G.x[ℓ][i] - ρ*(gr_size-n_adopt)*β*R*G.x[ℓ][i] - ρ*n_adopt*γ*(gr_size-R)*G.x[ℓ][i]
       n_adopt > 0 && ( du.x[ℓ][i] += (gr_size-n_adopt+1)*f(h(ℓ)-1)*G.x[ℓ][i-1] + β*(n_adopt-1+ρ*R)*(gr_size-n_adopt+1)*G.x[ℓ][i-1] )
@@ -160,12 +160,11 @@ main()
 
 
 # prototyping -------------------------------------------------------------------------------
-# using Plots
 
 # # note 1: b/c should be chosen to allow the highest level (hence also all the others) to be worth it at high enough adoption
 # #      --> lower bound for b/c (given n = 20 and max{level} = 5): 20*b - 5*c > 0 ⇒ b/c > 0.25
 # # note 2: β/γ and ρ/μ decisive for dominance relations between levels
-# #     --> heatmap β/γ VS ρ/μ for fixed b/c?
+# #      --> heatmap β/γ VS ρ/μ for fixed b/c?
 
 # n, M = 20, 1000
 # u₀ = initialize_u0(n=n, L=6, M=M, p=0.01)
@@ -183,24 +182,23 @@ main()
 # sol1 = solve(prob1, DP5(), saveat=1, reltol=1e-8, abstol=1e-8)
 
 # file should be there
-inst_level, inst_level_prop = parse_sol("sourcesink3_0.2_0.2_0.28_0.4_1.0_0.2_1.0.txt")
+inst_level, inst_level_prop = parse_sol("sourcesink3_0.2_0.2_0.28_0.4_1.0_0.2_1.0.txt")  # params: β, γ, ρ, b, c, μ, δ
 
-# # when sol is available
 # # temporal evolution
 
 function plot_scatter(res::Dict, res_prop::Dict; plot_prop=false)
   L = length(res)
   tmax = length(res[L[1]])
   if plot_prop
-    scatter(1:tmax, [res_prop[i] for i in 1:L], xaxis = :log, legendtitle="level", 
-      legend=:outertopright, labels=["0" "1" "2" "3" "4" "5"], palette = palette(:Blues)[2:7],
-      markerstrokewidth=0, markersize = 3.)
-    else 
-      scatter(1:length(res[1]), [res[i] for i in 1:L], xaxis = :log, legendtitle="grsize", 
-      legend=:outertopright, labels=collect(1:L)', palette = palette(:Reds)[2:(L+1)],
-      markerstrokewidth=0, markersize = 3.)
-      global_freq = [sum([res[ℓ][t]*res_prop[ℓ][t] for ℓ in 1:L]) for t in 1:tmax]
-      plot!(1:tmax, global_freq, linestyle =:dash, color =:black, width=1.5, label = "global") 
+    scatter(1:tmax, [res_prop[i] for i in 1:L], xaxis=:log, legendtitle= "level", 
+          legend=:outertopright, labels = collect(1:L)', palette = palette(:Blues)[2:(L+1)],
+          markerstrokewidth = 0, markersize = 3.)
+  else 
+    scatter(1:length(res[1]), [res[i] for i in 1:L], xaxis=:log, legendtitle= "level", 
+          legend=:outertopright, labels = collect(1:L)', palette = palette(:Reds)[2:(L+1)],
+          markerstrokewidth = 0, markersize = 3.)
+    global_freq = [sum([res[ℓ][t]*res_prop[ℓ][t] for ℓ in 1:L]) for t in 1:tmax]
+    plot!(1:tmax, global_freq, linestyle=:dash, color=:black, width = 1.5, label = "global") 
   end
 end
 
