@@ -32,7 +32,7 @@ function main()
   dfs = []
   @showprogress for fname in fnames   
     # fname = fnames[1]
-    sol = CSV.read(fname, DataFrame; header=["timestep", "L", "value"])
+    sol = CSV.read(fname, DataFrame; header=["timestep", "L", "value"], types=Dict(:timestep => Int, :L => Int, :value => Float32))
     fname_parts = split(fname, "/")
     fname = fname_parts[end]
     p_str = replace(join(split(fname, "_")[2:end], "_"), ".txt" => "")
@@ -40,8 +40,8 @@ function main()
     gd = groupby(sol, [:timestep, :L])
     n = nrow(gd[1])
 
-    df_agg = combine(gd, :value => (x -> round(sum(x), digits=3)) => :value_prop, 
-                         :value => (x -> iszero(sum(x)) ? 0.0 : round(processing1(x,n), digits=3)) => :value)
+    df_agg = combine(gd, :value => (x -> round(sum(x), digits=8)) => :value_prop, 
+                         :value => (x -> iszero(sum(x)) ? 0.0 : round(processing1(x,n), digits=8)) => :value)
 
     unique!(df_agg, :value)
     
