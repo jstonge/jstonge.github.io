@@ -395,21 +395,18 @@ data_hm = {
     // We only look at values specified by ranges that do not vary.
     if (parseFloat(p_split[1]) === range1 && parseFloat(p_split[4]) === range4 && parseFloat(p_split[5]) === range5) {
 
-        if ((param1 == "β" || param2 == "β") && (param1 == 'b' || param2 == 'b')) {
+        if (param1 == "β" && param2 == 'b') {
            if (parseFloat(p_split[2]) == range2) {
-
              out.push(hm_vals)
 
            }
-        } else if ((param1 == "ρ" || param2 == "ρ") && (param1 == "β" || param2 == "β")) {
+        } else if (param1 == "β" && param2 == "ρ") {
+           if (parseFloat(p_split[3]) == range3) {           
+             out.push(hm_vals)
+
+           }
+        } else if (param1 == 'ρ' && param2 == "b") {
            if (parseFloat(p_split[0]) == range0) {
-             
-             out.push(hm_vals)
-
-           }
-        } else if ((param1 == 'b' || param2 == 'b') && (param1 == "ρ" || param2 == "ρ")) {
-           if (parseFloat(p_split[3]) == range3) {
-             
              out.push(hm_vals)
 
            }
