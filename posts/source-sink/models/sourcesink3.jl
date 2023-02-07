@@ -171,18 +171,18 @@ main()
 # t_max = 500
 # tspan = (0., t_max)
 
-# β, γ, ρ, b, c, μ = 0.3, 0.3, 0.1, 0.25, 1., 0.1
-# δ = 1
-# p  = [β, γ, ρ, b, c, μ, δ]
-# prob = ODEProblem(source_sink3!, u₀, tspan, p)
-# sol = solve(prob, DP5(), saveat=1, reltol=1e-8, abstol=1e-8)
+β, γ, ρ, b, c, μ = 0.2, 0.2, 0.02, 0.3, 1., 0.2
+δ = 1
+p  = [β, γ, ρ, b, c, μ, δ]
+prob = ODEProblem(source_sink3!, u₀, tspan, p)
+sol = solve(prob, DP5(), saveat=1, reltol=1e-8, abstol=1e-8)
 # δ = 0
 # p  = [β, γ, ρ, b, c, μ, δ]
 # prob1 = ODEProblem(source_sink3!, u₀, tspan, p)
 # sol1 = solve(prob1, DP5(), saveat=1, reltol=1e-8, abstol=1e-8)
 
 # file should be there
-inst_level, inst_level_prop = parse_sol("sourcesink3_0.2_0.2_0.28_0.4_1.0_0.2_1.0.txt")  # params: β, γ, ρ, b, c, μ, δ
+inst_level, inst_level_prop = parse_sol(sol)  # params: β, γ, ρ, b, c, μ, δ
 
 # # temporal evolution
 
