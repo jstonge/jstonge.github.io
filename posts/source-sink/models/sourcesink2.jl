@@ -61,12 +61,11 @@ function initialize_u0(;n::Int=20, L::Int=6, M::Int=20, p::Float64=0.01, lvl_1_i
     G = zeros(L, n+1)
     for _ in 1:M
       ℓ = rand(1:L) # pick a level
-      i = sum(collect(rand(Binomial(1, p), n))[1]) # how many total adopters?
+      i = sum(collect(rand(Binomial(1, p), n))) # how many total adopters?
       G[ℓ, i+1] += 1 # everytime combination G[ℓ,i], count +1
     end
   
     G = G ./ M # normalized by tot number of groups
-    
     
     if lvl_1_inf # ("almost" only lowest level populated at t = 0)
       u0 = ArrayPartition(Tuple([G[ℓ,:] for ℓ=1:L]))
@@ -107,10 +106,14 @@ function source_sink2!(du, u, p, t)
       end
 end
 
-function run_source_sink2(p; lvl_1_inf::Bool=false)
+function run_source_sink2(p; lvl_1_inf::Bool=false, susc_pop::Bool=true)
   n, M = 20, 1000
   L = 6
-  u₀ = initialize_u0(n=n, L=L, M=M, p=0.01, lvl_1_inf=lvl_1_inf)
+  if susc_pop
+    u₀ = initialize_u0(n=n, L=L, M=M, p=0.001, lvl_1_inf=lvl_1_inf)
+  else
+    u₀ = initialize_u0(n=n, L=L, M=M, p=0.3, lvl_1_inf=lvl_1_inf)
+  end
 
   tspan = (1.0, 10000)
   
@@ -130,11 +133,12 @@ function main()
     α = args["a"]
     γ = args["g"]
     ρ = args["r"]
+    η = args["e"]
     b = args["b"]
     c = args["c"]
     μ = args["m"]
     
-    p = [β, α, γ, ρ, b, c, μ]
+    p = [β, α, γ, ρ, η, b, c, μ]
     sol = run_source_sink2(p)
     write_sol2txt("$(args["o"])/sourcesink2_$(join(p, "_")).txt", sol) 
   else
@@ -147,12 +151,13 @@ function main()
       α = row["alpha"]
       γ = row["gamma"]
       ρ = row["rho"]
+      η = row["eta"]
       b = row["b"]
       c = row["cost"]
       μ = row["mu"]
       
-      p = [β, α, γ, ρ, b, c, μ]
-      sol = run_source_sink2(p)    
+      p = [β, α, γ, ρ, η, b, c, μ]
+      sol = run_source_sink2(p)
       write_sol2txt("$(args["o"])/sourcesink2_$(join(p, "_")).txt", sol)
     end
   end  
@@ -181,55 +186,75 @@ default(legendfont = ("Computer modern", 12),
 
 # regimes
 
-tmax = 10000
+# tmax = 10000
 
-function plot_regimes(ηs, t_max, lvl_1_inf)
-  # 0.13, 2., 1., 0.05, -1., 1., 0.0001
-  p = [0.13, 2., 1., 0.05, ηs[1], -1., 1., 0.0001]  # β, α, γ, ρ, η, b, c, μ
-  sol = run_source_sink2(p, lvl_1_inf=lvl_1_inf)
-  res, res_prop = parse_sol(sol)
-  L = length(res)
-  global_freq = [sum([res[ℓ][t]*res_prop[ℓ][t] for ℓ in 1:L]) for t in 1:t_max]
-  pl = scatter(1:t_max, global_freq, width = 4, xscale=:log, xlabel = L"\textrm{time}",
-            ylabel = L"\textrm{prevalence}", legend=:right, label = L"\eta/\rho = %$(round(ηs[1]/0.05, digits = 2))",
-            palette = palette(:Greys)[4:(4+size(ηs,1))], grid =:none,
-            xlims = (10,t_max))
+# function plot_regimes(ηs, t_max, lvl_1_inf)
+#   # 0.13, 2., 1., 0.05, -1., 1., 0.0001
+#   p = [0.17, 2., 1., 0.05, ηs[1], -1., 1., 0.0001]  # β, α, γ, ρ, η, b, c, μ
+#   sol = run_source_sink2(p, lvl_1_inf=lvl_1_inf)
+#   res, res_prop = parse_sol(sol)
+#   L = length(res)
+#   global_freq = [sum([res[ℓ][t]*res_prop[ℓ][t] for ℓ in 1:L]) for t in 1:t_max]
+#   pl = scatter(1:t_max, global_freq, width = 4, xscale=:log, xlabel = L"\textrm{time}",
+#             ylabel = L"\textrm{prevalence}", legend=:right, label = L"\eta/\rho = %$(round(ηs[1]/0.05, digits = 2))",
+#             palette = palette(:Greys)[4:(4+size(ηs,1))], grid =:none,
+#             xlims = (2,t_max))
   
-  for i in 2:size(ηs,1)
-    p[5] = ηs[i]
-    sol = run_source_sink2(p, lvl_1_inf=lvl_1_inf)
-    res, res_prop = parse_sol(sol)
-    global_freq = [sum([res[ℓ][t]*res_prop[ℓ][t] for ℓ in 1:L]) for t in 1:t_max]
-    scatter!(1:t_max, global_freq, width = 4, label = L"\eta/\rho = %$(round(ηs[i]/0.05, digits = 2))")
-  end
-  title!(join(["$(p)=$(v)" for (p,v) in zip(["β","α","γ","ρ","η","b","c","μ"], p)], " "))
-  return pl
-end
+#   for i in 2:size(ηs,1)
+#     p[5] = ηs[i]
+#     sol = run_source_sink2(p, lvl_1_inf=lvl_1_inf)
+#     res, res_prop = parse_sol(sol)
+#     global_freq = [sum([res[ℓ][t]*res_prop[ℓ][t] for ℓ in 1:L]) for t in 1:t_max]
+#     scatter!(2:t_max, global_freq, width = 4, label = L"\eta/\rho = %$(round(ηs[i]/0.05, digits = 2))")
+#   end
+#   title!(join([L"%$(p)=%$(v)" for (p,v) in zip(["β","α","γ","ρ","η","b","c","μ"], p)], ", "))
+#   return pl
+# end
 
+# ηs = [5.,0.05,0.0005]
+# p1 = plot_regimes(ηs, 5000, true)
+# p2 = plot_regimes(ηs, 5000, false)
+
+
+t_max = 5500
+# i.c. 1
+lvl_1_inf = true
+susc_pop = true
 ηs = [5.,0.05,0.0005]
-plot_regimes(ηs, 700, true)
+p = [0.17, 2., 1., 0.05, ηs[1], -1., 1., 0.0001]  # β, α, γ, ρ, η, b, c, μ
+sol = run_source_sink2(p, lvl_1_inf=lvl_1_inf, susc_pop=susc_pop)
+res, res_prop = parse_sol(sol)
+L = length(res)
+global_freq = [sum([res[ℓ][t]*res_prop[ℓ][t] for ℓ in 1:L]) for t in 1:t_max]
+pl = plot(1:t_max, global_freq, width = 4, xscale=:log, xlabel = L"\textrm{time}",
+            ylabel = L"\textrm{prevalence}", legend=:right, label = L"\ \eta/\rho = %$(round(ηs[1]/0.05, digits = 2)),\ \textrm{i.c.}\ 1",
+            palette = palette(:Reds)[[3,6,8]], grid =:none);
+for i in 2:size(ηs,1)
+  p[5] = ηs[i]
+  sol = run_source_sink2(p, lvl_1_inf=lvl_1_inf, susc_pop=susc_pop)
+  res, res_prop = parse_sol(sol)
+  global_freq = [sum([res[ℓ][t]*res_prop[ℓ][t] for ℓ in 1:L]) for t in 1:t_max]
+  plot!(1:t_max, global_freq, width = 4, label = L"\ \eta/\rho = %$(round(ηs[i]/0.05, digits = 2)),\ \textrm{i.c.}\ 1");
+end
+# i.c. 2
+lvl_1_inf = false
+susc_pop = true
+p = [0.17, 2., 1., 0.05, ηs[3], -1., 1., 0.0001]  # β, α, γ, ρ, η, b, c, μ
+sol = run_source_sink2(p, lvl_1_inf=lvl_1_inf, susc_pop=susc_pop)
+res, res_prop = parse_sol(sol)
+global_freq = [sum([res[ℓ][t]*res_prop[ℓ][t] for ℓ in 1:L]) for t in 1:t_max]
+plot!(1:t_max, global_freq, width = 4,
+      label = L"\ \eta/\rho = %$(round(ηs[3]/0.05, digits = 2)),\ \textrm{i.c.}\ 2",
+      palette = palette(:Blues)[[8]]);
+# i.c. 3
+lvl_1_inf = false
+susc_pop = false
+p = [0.17, 2., 1., 0.05, ηs[2], -1., 1., 0.0001]  # β, α, γ, ρ, η, b, c, μ
+sol = run_source_sink2(p, lvl_1_inf=lvl_1_inf, susc_pop=susc_pop)
+res, res_prop = parse_sol(sol)
+global_freq = [sum([res[ℓ][t]*res_prop[ℓ][t] for ℓ in 1:L]) for t in 1:t_max]
+plot!(1:t_max, global_freq, width = 4,
+      label = L"\ \eta/\rho = %$(round(ηs[2]/0.05, digits = 2)),\ \textrm{i.c.}\ 3",
+      palette = palette(:Greens)[[8]], grid =:none)
 
-#      β,  α,  γ,   ρ,    η,    b,   c,    μ
-# p = [0.13, 2., 1., 0.05, -1., 1., 0.0001] 
-# plot_regimes(p, ηs, 700)
-
-
-
-# p2 = [0.13, 2., 1., 0.05, ηs[2], 1., 0.0001]
-
-# savefig(pl_abs_new, "NetSci_abstract_fig.pdf")
-
-# pl_abs = plot_regimes(βs, 300)
-
-# savefig(pl_abs, "NetSci_abstract_fig.pdf")
-
-
-# β, α, γ, ρ, η, b, c, μ = 0.13, 2., 1., 0.05, 0.0005, -1., 1., 0.0001
-
-# p = [β, α, γ, ρ, η, b, c, μ]
-# sol = run_source_sink2(p)
-
-# inst_level, inst_level_prop = parse_sol(sol) 
-
-# plot_scatter(inst_level, inst_level_prop)
-# plot_scatter(inst_level, inst_level_prop, plot_prop = true)
+savefig("NetSci_abstract_fig___.pdf")
