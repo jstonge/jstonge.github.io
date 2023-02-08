@@ -74,7 +74,7 @@ function initialize_u0(;n::Int=20, L::Int=6, M::Int=20, p::Float64=0.01)::ArrayP
 end
 
 f(x; a1=2.2) = 1 / (1 + exp(-a1*x)) # cost-benefits for individuals
-h(x; a2=0.3) = (1 - exp(-a2*x)) / (1 - exp(-a2)) # dependency of synergy on institutional level
+h(x; a2=0.3) = a2 > 0 ? (1 - exp(-a2*x)) / (1 - exp(-a2)) : x # dependency of synergy on institutional level
 
 function source_sink3!(du, u, p, t)
   G, L, n = u, length(u.x), length(u.x[1])
