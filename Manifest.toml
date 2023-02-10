@@ -1,8 +1,8 @@
 # This file is machine-generated - editing it directly is not advised
 
-julia_version = "1.8.4"
+julia_version = "1.8.1"
 manifest_format = "2.0"
-project_hash = "80fbb2f76a541a8461fb2d0a53e79d80687f6fd2"
+project_hash = "a382cdf9ea3850549b43bbf5aaa920252fa422ea"
 
 [[deps.ADCME]]
 deps = ["CMake", "FFTW", "LibGit2", "Libdl", "LinearAlgebra", "MAT", "Pkg", "PyCall", "Random", "SparseArrays", "SpecialFunctions", "Statistics"]
@@ -228,7 +228,7 @@ version = "4.5.0"
 [[deps.CompilerSupportLibraries_jll]]
 deps = ["Artifacts", "Libdl"]
 uuid = "e66e0078-7015-5450-92f7-15fbd957f2ae"
-version = "1.0.1+0"
+version = "0.5.2+0"
 
 [[deps.Conda]]
 deps = ["Downloads", "JSON", "VersionParsing"]
@@ -1427,7 +1427,7 @@ version = "1.10.0"
 [[deps.Tar]]
 deps = ["ArgTools", "SHA"]
 uuid = "a4e569a6-e804-4fa4-b0f3-eef7a1d5b13e"
-version = "1.10.1"
+version = "1.10.0"
 
 [[deps.TensorCore]]
 deps = ["LinearAlgebra"]
