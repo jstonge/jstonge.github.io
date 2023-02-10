@@ -27,6 +27,12 @@ end
 
 # ---------------------------------- model 2 --------------------------------- #
 
+# better to drop the current table before reruning
+
+# SQLite.execute(db, """
+# DROP TABLE sourcesink2
+# """)
+
 SQLite.execute(db, """
 CREATE TABLE sourcesink2 (
     beta REAL,
@@ -71,6 +77,6 @@ for β=0.02:0.02:0.4, b=0.20:0.1:1.0, ρ=0.02:0.02:0.4, δ=0:1:1
   counter += 1
 end
 
-# SQLite.execute(db, """
-# DROP TABLE sourcesink
-# """)
+SQLite.execute(db, """
+DROP TABLE sourcesink2
+""")

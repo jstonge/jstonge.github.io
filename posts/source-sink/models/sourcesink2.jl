@@ -155,7 +155,7 @@ function main()
     for row in eachrow(con)
       
       β = row["beta"]
-      ξ = args["xi"]
+      ξ = row["xi"]
       α = row["alpha"]
       γ = row["gamma"]
       ρ = row["rho"]
@@ -175,54 +175,54 @@ main()
 
 # prototyping -------------------------------------------------------------------------------
 
-default(legendfont = ("Computer modern", 12),
-        tickfont = ("Computer modern", 12),
-        guidefontsize = 12, markerstrokewidth=0., markersize = 4.,
-        linewidth=1, framestyle=:axis,
-        titlefontsize=10)
+# default(legendfont = ("Computer modern", 12),
+#         tickfont = ("Computer modern", 12),
+#         guidefontsize = 12, markerstrokewidth=0., markersize = 4.,
+#         linewidth=1, framestyle=:axis,
+#         titlefontsize=10)
 
 
-# abstract figure
+# # abstract figure
 
-t_max = 5500
-# i.c. 1
-lvl_1_inf = true
-susc_pop = true
-ηs = [5.,0.05,0.0005]
-p = [0.17, 1., 2., 1., 0.05, ηs[1], -1., 1., 0.0001]  # β, ξ, α, γ, ρ, η, b, c, μ
-sol = run_source_sink2(p, lvl_1_inf=lvl_1_inf, susc_pop=susc_pop)
-res, res_prop = parse_sol(sol)
-L = length(res)
-global_freq = [sum([res[ℓ][t]*res_prop[ℓ][t] for ℓ in 1:L]) for t in 1:t_max]
-pl = plot(1:t_max, global_freq, width = 4, xscale=:log, xlabel = L"\textrm{time}",
-            ylabel = L"\textrm{prevalence}", legend=:right, label = L"\ \eta/\rho = %$(round(ηs[1]/0.05, digits = 2)),\ \textrm{i.c.}\ 1",
-            palette = palette(:Reds)[[3,6,8]], grid =:none);
-for i in 2:size(ηs,1)
-  p[6] = ηs[i]
-  sol = run_source_sink2(p, lvl_1_inf=lvl_1_inf, susc_pop=susc_pop)
-  res, res_prop = parse_sol(sol)
-  global_freq = [sum([res[ℓ][t]*res_prop[ℓ][t] for ℓ in 1:L]) for t in 1:t_max]
-  plot!(1:t_max, global_freq, width = 4, label = L"\ \eta/\rho = %$(round(ηs[i]/0.05, digits = 2)),\ \textrm{i.c.}\ 1");
-end
-# i.c. 2
-lvl_1_inf = false
-susc_pop = true
-p[6] = ηs[3]
-sol = run_source_sink2(p, lvl_1_inf=lvl_1_inf, susc_pop=susc_pop)
-res, res_prop = parse_sol(sol)
-global_freq = [sum([res[ℓ][t]*res_prop[ℓ][t] for ℓ in 1:L]) for t in 1:t_max]
-plot!(1:t_max, global_freq, width = 4,
-      label = L"\ \eta/\rho = %$(round(ηs[3]/0.05, digits = 2)),\ \textrm{i.c.}\ 2",
-      palette = palette(:Blues)[[8]]);
-# i.c. 3
-lvl_1_inf = false
-susc_pop = false
-p[6] = ηs[2]
-sol = run_source_sink2(p, lvl_1_inf=lvl_1_inf, susc_pop=susc_pop)
-res, res_prop = parse_sol(sol)
-global_freq = [sum([res[ℓ][t]*res_prop[ℓ][t] for ℓ in 1:L]) for t in 1:t_max]
-plot!(1:t_max, global_freq, width = 4,
-      label = L"\ \eta/\rho = %$(round(ηs[2]/0.05, digits = 2)),\ \textrm{i.c.}\ 3",
-      palette = palette(:Greens)[[8]], grid =:none)
+# t_max = 5500
+# # i.c. 1
+# lvl_1_inf = true
+# susc_pop = true
+# ηs = [5.,0.05,0.0005]
+# p = [0.17, 1., 2., 1., 0.05, ηs[1], -1., 1., 0.0001]  # β, ξ, α, γ, ρ, η, b, c, μ
+# sol = run_source_sink2(p, lvl_1_inf=lvl_1_inf, susc_pop=susc_pop)
+# res, res_prop = parse_sol(sol)
+# L = length(res)
+# global_freq = [sum([res[ℓ][t]*res_prop[ℓ][t] for ℓ in 1:L]) for t in 1:t_max]
+# pl = plot(1:t_max, global_freq, width = 4, xscale=:log, xlabel = L"\textrm{time}",
+#             ylabel = L"\textrm{prevalence}", legend=:right, label = L"\ \eta/\rho = %$(round(ηs[1]/0.05, digits = 2)),\ \textrm{i.c.}\ 1",
+#             palette = palette(:Reds)[[3,6,8]], grid =:none);
+# for i in 2:size(ηs,1)
+#   p[6] = ηs[i]
+#   sol = run_source_sink2(p, lvl_1_inf=lvl_1_inf, susc_pop=susc_pop)
+#   res, res_prop = parse_sol(sol)
+#   global_freq = [sum([res[ℓ][t]*res_prop[ℓ][t] for ℓ in 1:L]) for t in 1:t_max]
+#   plot!(1:t_max, global_freq, width = 4, label = L"\ \eta/\rho = %$(round(ηs[i]/0.05, digits = 2)),\ \textrm{i.c.}\ 1");
+# end
+# # i.c. 2
+# lvl_1_inf = false
+# susc_pop = true
+# p[6] = ηs[3]
+# sol = run_source_sink2(p, lvl_1_inf=lvl_1_inf, susc_pop=susc_pop)
+# res, res_prop = parse_sol(sol)
+# global_freq = [sum([res[ℓ][t]*res_prop[ℓ][t] for ℓ in 1:L]) for t in 1:t_max]
+# plot!(1:t_max, global_freq, width = 4,
+#       label = L"\ \eta/\rho = %$(round(ηs[3]/0.05, digits = 2)),\ \textrm{i.c.}\ 2",
+#       palette = palette(:Blues)[[8]]);
+# # i.c. 3
+# lvl_1_inf = false
+# susc_pop = false
+# p[6] = ηs[2]
+# sol = run_source_sink2(p, lvl_1_inf=lvl_1_inf, susc_pop=susc_pop)
+# res, res_prop = parse_sol(sol)
+# global_freq = [sum([res[ℓ][t]*res_prop[ℓ][t] for ℓ in 1:L]) for t in 1:t_max]
+# plot!(1:t_max, global_freq, width = 4,
+#       label = L"\ \eta/\rho = %$(round(ηs[2]/0.05, digits = 2)),\ \textrm{i.c.}\ 3",
+#       palette = palette(:Greens)[[8]], grid =:none)
 
 # savefig("NetSci_abstract_fig.pdf")
