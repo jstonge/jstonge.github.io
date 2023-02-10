@@ -228,18 +228,20 @@ unique_name2 = resdb.query(`SELECT DISTINCT name FROM sourcesink2`)
 p2 = unique_name2.map(d => d.name.split("_"))
 
 viewof beta2  = Inputs.range(minmax(p2,0), {step: s(p2,0),  label: "β", value:p2[0][0]})
-viewof alpha  = Inputs.range(minmax(p2,1), {step: s(p2,1),  label: "α", value:p2[0][1]})
-viewof gamma2 = Inputs.range(minmax(p2,2), {step: s(p2,2),  label: "γ", value:p2[0][2]})
-viewof rho2   = Inputs.range(minmax(p2,3), {step: s(p2,3),  label: "ρ", value:p2[0][3]})
-viewof b2     = Inputs.range(minmax(p2,4), {step: s(p2,4),  label: "b", value:p2[0][4]})
-viewof c2     = Inputs.range(minmax(p2,5), {step: s(p2,5),  label: "c", value:p2[0][5]})
-viewof mu2    = Inputs.range(minmax(p2,6), {step: s(p2,6),  label: "μ", value:p2[0][6]})
+viewof xi     = Inputs.range(minmax(p2,1), {step: s(p2,1),  label: "ξ", value:p2[0][1]})
+viewof alpha  = Inputs.range(minmax(p2,2), {step: s(p2,2),  label: "α", value:p2[0][2]})
+viewof gamma2 = Inputs.range(minmax(p2,3), {step: s(p2,3),  label: "γ", value:p2[0][3]})
+viewof rho2   = Inputs.range(minmax(p2,4), {step: s(p2,4),  label: "ρ", value:p2[0][4]})
+viewof eta    = Inputs.range(minmax(p2,5), {step: s(p2,5),  label: "η", value:p2[0][5]})
+viewof b2     = Inputs.range(minmax(p2,6), {step: s(p2,6),  label: "b", value:p2[0][6]})
+viewof c2     = Inputs.range(minmax(p2,7), {step: s(p2,7),  label: "c", value:p2[0][7]})
+viewof mu2    = Inputs.range(minmax(p2,8), {step: s(p2,8),  label: "μ", value:p2[0][8]})
 
 data2 = resdb.query(`
   SELECT timestep::INT as timestep, L::INT as L, value, name
   FROM sourcesink2
   WHERE
-  name = '${f(beta2)}_${f(alpha)}_${f(gamma2)}_${f(rho2)}_${f(b2)}_${f(c2)}_${f(mu2)}'
+  name = '${f(beta2)}_${f(xi)}_${f(alpha)}_${f(gamma2)}_${f(rho2)}_${f(eta)}_${f(b2)}_${f(c2)}_${f(mu2)}'
 `)
 ```
 
