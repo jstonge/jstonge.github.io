@@ -300,7 +300,10 @@ function source_sink3!(du, u, p, t)
     end
 end
 ```
-#### Plot
+
+::: panel-tabset
+
+## Time evo plot
 
 ```{ojs}
 //| panel: sidebar
@@ -342,9 +345,102 @@ Plot.plot({
 })
 ```
 
-Note that $\gamma = \beta$ in all cases.
+## Phase diagram
 
-#### Takeaways:
+```{ojs}
+//| panel: sidebar
+viewof param1 = Inputs.radio(["β", "ρ", 'b'], {label: 'x', value: "β"})
+viewof param2 = Inputs.radio(["β", "ρ", 'b'], {label: 'y', value: 'b'})
+
+viewof range0 = Inputs.range(minmax(p3,0), {step: s(p3,0), label: "β", disabled: param1 == "β" || param2 == "β"})
+viewof range1 = Inputs.range(minmax(p3,1), {step: s(p3,1), label: "γ", value:p3[0][1], disabled: true})
+viewof range2 = Inputs.range(minmax(p3,2), {step: s(p3,2), label: "ρ", disabled: param1 == "ρ" || param2 == "ρ"})
+viewof range3 = Inputs.range(minmax(p3,3), {step: s(p3,3), label: "b", disabled: param1 == 'b' || param2 == 'b'})
+viewof range4 = Inputs.range(minmax(p3,4), {step: s(p3,4), label: "c", value:p3[0][4], disabled: true})
+viewof range5 = Inputs.range(minmax(p3,5), {step: s(p3,5), label: "μ", value:p3[0][5], disabled: true})
+```
+
+```{ojs}
+//| panel: fill
+d = resdb.query(`
+    WITH tmp as (
+        SELECT name, L, MAX(timestep::INT) as timestep
+        FROM sourcesink3
+        GROUP BY name, L
+    )
+    SELECT s.name, s.value, s.L::INT as L, s.value_prop
+    FROM sourcesink3 s
+    JOIN tmp
+    ON s.name = tmp.name AND s.L = tmp.L AND s.timestep = tmp.timestep 
+`)
+
+param_lookup = {
+    return {"β": 0, 'gamma': 1, "ρ": 2, 'b': 3, 'c': 4, 'm': 5}
+}
+
+data_hm = {
+  const out = [];
+
+  for (let i=0; i < d.length; i++) { 
+    const p_split = d[i].name.split('_')
+
+    const hm_vals = {
+      'L': d[i].L,
+      'delta': p_split[6],
+      'param1': parseFloat(p_split[param_lookup[param1]]),
+      'param2': parseFloat(p_split[param_lookup[param2]]),
+      'value': d[i].value_prop
+    }
+
+    // We only look at values specified by ranges that do not vary.
+    if (parseFloat(p_split[1]) === range1 && parseFloat(p_split[4]) === range4 && parseFloat(p_split[5]) === range5) {
+
+        if (param1 == "β" && param2 == 'b') {
+           if (parseFloat(p_split[2]) == range2) {
+             out.push(hm_vals)
+
+           }
+        } else if (param1 == "β" && param2 == "ρ") {
+           if (parseFloat(p_split[3]) == range3) {           
+             out.push(hm_vals)
+
+           }
+        } else if (param1 == 'ρ' && param2 == "b") {
+           if (parseFloat(p_split[0]) == range0) {
+             out.push(hm_vals)
+
+           }
+        }
+
+    }
+  }
+  return out
+}
+
+PlotDev = await import("https://esm.sh/@observablehq/plot");
+
+PlotDev.plot({
+  width: 400,
+  color: {
+    range: [0, 1],
+    legend: true,
+    scheme: "YlGnBu"
+  },
+  x: { label: param1 },
+  y: { label: param2 },
+  facet: { data: data_hm, y: "L", x: "delta" },
+  marks: [
+    PlotDev.raster(data_hm, {
+      x: "param1",
+      y: "param2",
+      fill: "value",
+      interpolate: "nearest"
+    }),
+  ]
+})
+```
+
+:::
 
 :::
 
@@ -354,64 +450,4 @@ Note that $\gamma = \beta$ in all cases.
 ![](sourcesink_sketch.jpg)
 :::
 
-
-```{ojs}
-param_lookup = {
-  return {'beta': 0, 'gamma': 1, 'rho': 2, 'b': 3,
-          'c': 4, 'm': 5}
-}
-
-// viewof param1 = Inputs.radio(['beta', 'gamma', 'rho', 'b', 'c', 'm'], {label: 'param1', value: 'beta'})
-
-// viewof param2 = Inputs.radio(['beta', 'gamma', 'rho', 'b', 'c', 'm'], {label: 'param2', value: 'b'})
-
-
-// data_hm = resdb.query(`
-//   SELECT name, L, value
-//   FROM sourcesink3
-//   WHERE L = 1 and (name, L, timestep) IN (
-//     SELECT name, L, MAX(timestep)
-//     FROM sourcesink3
-//     GROUP BY name, L
-//   );
-// `)
-
-// {
-//   const params1 = [];
-//   const params2 = [];
-//   const values = [];
-  
-//   for (let i=0; i < data_hm.length; i++) {
-//     const p_split = data_hm[i].name.split('_')
-   
-//     if (p_split[1] === "0.01" && p_split[2] === "0.2" && p_split[4] === "0.5" && p_split[5] === "0.1") {
-      
-//       console.log()
-        
-//       params1.push( parseFloat(p_split[param_lookup[param1]]) )
-//       params2.push( parseFloat(p_split[param_lookup[param2]]) )
-//       values.push(data_hm[i].value)
-
-//     }
-//   }
-//   return {'param1': params1, 'param2': params2, 'values': values}
-// }
-
-
-
-// data_f = data_hm.filter(d => parseFloat(d.name.split("_")[1]))
-
-// data_hm.a
-// Plot.plot({
-//   width: 1200,
-//   facet: {data: data_f, x: "L", marginRight: 90},
-//   marks: [
-//     Plot.cell(data_f, {
-//       x: "season",
-//       y: "number_in_season",
-//       fill: "imdb_rating",
-//     }),
-//   ]
-// })
-```
 

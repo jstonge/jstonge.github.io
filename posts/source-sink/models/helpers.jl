@@ -1,4 +1,5 @@
-using CSV, OrdinaryDiffEq::ODESolution
+using CSV
+using OrdinaryDiffEq:ODESolution
 
 """
 write_sol2txt(path, sol)
@@ -73,12 +74,21 @@ function parse_sol(s::ODESolution)
     return inst_level, inst_level_prop
 end
 
-function plot_scatter(res::Dict; col = :Reds)
+function plot_scatter(res::Dict, res_prop::Dict; plot_prop=false)
     L = length(res)
-    scatter(1:length(res[1]), [res[i] for i in 1:L], xaxis = :log, legendtitle="grsize", 
-            legend=:outertopright, labels=collect(1:L)', palette = palette(col)[2:(L-1)],
-            markerstrokewidth=0, markersize = 3.)
-end
+    tmax = length(res[L[1]])
+    if plot_prop
+      scatter(1:tmax, [res_prop[i] for i in 1:L], xaxis=:log, legendtitle= "level", 
+            legend=:outertopright, labels = collect(1:L)', palette = palette(:Blues)[2:(L+1)],
+            markerstrokewidth = 0, markersize = 3.)
+    else 
+      scatter(1:length(res[1]), [res[i] for i in 1:L], xaxis=:log, legendtitle= "level", 
+            legend=:outertopright, labels = collect(1:L)', palette = palette(:Reds)[2:(L+1)],
+            markerstrokewidth = 0, markersize = 3.)
+      global_freq = [sum([res[ℓ][t]*res_prop[ℓ][t] for ℓ in 1:L]) for t in 1:tmax]
+      plot!(1:tmax, global_freq, linestyle=:dash, color=:black, width = 1.5, label = "global") 
+    end
+  end
 
 # using SQLite
 

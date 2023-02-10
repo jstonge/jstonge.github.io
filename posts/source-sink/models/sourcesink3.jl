@@ -74,7 +74,7 @@ function initialize_u0(;n::Int=20, L::Int=6, M::Int=20, p::Float64=0.01)::ArrayP
 end
 
 f(x; a1=2.2) = 1 / (1 + exp(-a1*x)) # cost-benefits for individuals
-h(x; a2=0.3) = (1 - exp(-a2*x)) / (1 - exp(-a2)) # dependency of synergy on institutional level
+h(x; a2=0.3) = a2 > 0 ? (1 - exp(-a2*x)) / (1 - exp(-a2)) : x # dependency of synergy on institutional level
 
 function source_sink3!(du, u, p, t)
   G, L, n = u, length(u.x), length(u.x[1])
@@ -171,18 +171,18 @@ main()
 # t_max = 500
 # tspan = (0., t_max)
 
-# β, γ, ρ, b, c, μ = 0.3, 0.3, 0.1, 0.25, 1., 0.1
-# δ = 1
-# p  = [β, γ, ρ, b, c, μ, δ]
-# prob = ODEProblem(source_sink3!, u₀, tspan, p)
-# sol = solve(prob, DP5(), saveat=1, reltol=1e-8, abstol=1e-8)
+β, γ, ρ, b, c, μ = 0.2, 0.2, 0.02, 0.3, 1., 0.2
+δ = 1
+p  = [β, γ, ρ, b, c, μ, δ]
+prob = ODEProblem(source_sink3!, u₀, tspan, p)
+sol = solve(prob, DP5(), saveat=1, reltol=1e-8, abstol=1e-8)
 # δ = 0
 # p  = [β, γ, ρ, b, c, μ, δ]
 # prob1 = ODEProblem(source_sink3!, u₀, tspan, p)
 # sol1 = solve(prob1, DP5(), saveat=1, reltol=1e-8, abstol=1e-8)
 
 # file should be there
-inst_level, inst_level_prop = parse_sol("sourcesink3_0.2_0.2_0.28_0.4_1.0_0.2_1.0.txt")  # params: β, γ, ρ, b, c, μ, δ
+inst_level, inst_level_prop = parse_sol(sol)  # params: β, γ, ρ, b, c, μ, δ
 
 # # temporal evolution
 
