@@ -181,17 +181,17 @@ main()
 #         linewidth=1, framestyle=:axis,
 #         titlefontsize=10)
 
-
-# # abstract figure
+# abstract figure
 
 # t_max = 5500
-# # i.c. 1
+# i.c. 1
 # lvl_1_inf = true
 # susc_pop = true
 # ηs = [5.,0.05,0.0005]
 # p = [0.17, 1., 2., 1., 0.05, ηs[1], -1., 1., 0.0001]  # β, ξ, α, γ, ρ, η, b, c, μ
 # sol = run_source_sink2(p, lvl_1_inf=lvl_1_inf, susc_pop=susc_pop)
-# res, res_prop = parse_sol(sol)
+# res, res_prop = parse_sol("sourcesink2_0.4_1.0_1.0_0.1_0.2_0.2_-0.4_2.0_0.1.txt")
+# plot([res[ℓ] for ℓ=1:L], x_scale = :log)
 # L = length(res)
 # global_freq = [sum([res[ℓ][t]*res_prop[ℓ][t] for ℓ in 1:L]) for t in 1:t_max]
 # pl = plot(1:t_max, global_freq, width = 4, xscale=:log, xlabel = L"\textrm{time}",
@@ -204,7 +204,7 @@ main()
 #   global_freq = [sum([res[ℓ][t]*res_prop[ℓ][t] for ℓ in 1:L]) for t in 1:t_max]
 #   plot!(1:t_max, global_freq, width = 4, label = L"\ \eta/\rho = %$(round(ηs[i]/0.05, digits = 2)),\ \textrm{i.c.}\ 1");
 # end
-# # i.c. 2
+# i.c. 2
 # lvl_1_inf = false
 # susc_pop = true
 # p[6] = ηs[3]
