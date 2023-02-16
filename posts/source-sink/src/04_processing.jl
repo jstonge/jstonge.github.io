@@ -21,7 +21,7 @@ Combine all sols and proportion in `sourcesink_output/`, using only unique value
 function main()
   args = parse_commandline()
   
-  # DATA_DIR = "sourcesink3_output"
+  # DATA_DIR = "sourcesink2_output"
   DATA_DIR = args["d"]
   fnames = filter(x -> endswith(x, "txt"),  readdir(DATA_DIR, join=true))
 
@@ -29,24 +29,31 @@ function main()
 
   modelname = split(fnames[1], "_")[1]
   
+  all_dfs = DataFrame(read_parquet("$(modelname).parquet"))
+
   dfs = []
   @showprogress for fname in fnames   
     # fname = fnames[1]
-    sol = CSV.read(fname, DataFrame; header=["timestep", "L", "value"], types=Dict(:timestep => Int, :L => Int, :value => Float32))
-    fname_parts = split(fname, "/")
-    fname = fname_parts[end]
-    p_str = replace(join(split(fname, "_")[2:end], "_"), ".txt" => "")
-   
-    gd = groupby(sol, [:timestep, :L])
-    n = nrow(gd[1])
+    p_str = split(fname, "/")[end]
+    p_str = replace(join(split(p_str, "_")[2:end], "_"), ".txt" => "")
 
-    df_agg = combine(gd, :value => (x -> round(sum(x), digits=8)) => :value_prop, 
-                         :value => (x -> iszero(sum(x)) ? 0.0 : round(processing1(x,n), digits=8)) => :value)
+    if p_str ∈ all_dfs.name
+      df_agg = filter(row -> row.name == p_str, all_dfs)
+    else
+      sol = CSV.read(fname, DataFrame; header=["timestep", "L", "value"], 
+                    types=Dict(:timestep => Int, :L => Int, :value => Float32))
+      
+      gd = groupby(sol, [:timestep, :L])
+      n = nrow(gd[1])
 
-    unique!(df_agg, :value)
-    
-    df_agg[!, :name] .= p_str
-    push!(dfs, df_agg)      
+      df_agg = combine(gd, :value => (x -> round(sum(x), digits=8)) => :value_prop, 
+                          :value => (x -> iszero(sum(x)) ? 0.0 : round(processing1(x,n), digits=8)) => :value)
+
+      unique!(df_agg, :value)
+      
+      df_agg[!, :name] .= p_str
+    end 
+    push!(dfs, df_agg)     
   end
 
   all_dfs = vcat(dfs...) 
