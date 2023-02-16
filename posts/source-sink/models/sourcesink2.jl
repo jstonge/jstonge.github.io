@@ -175,11 +175,6 @@ main()
 
 # prototyping -------------------------------------------------------------------------------
 
-# default(legendfont = ("Computer modern", 12),
-#         tickfont = ("Computer modern", 12),
-#         guidefontsize = 12, markerstrokewidth=0., markersize = 4.,
-#         linewidth=1, framestyle=:axis,
-#         titlefontsize=10)
 default(legendfont = ("Computer modern", 12),
         tickfont = ("Computer modern", 12),
         guidefontsize = 12, markerstrokewidth=0., markersize = 4.,
