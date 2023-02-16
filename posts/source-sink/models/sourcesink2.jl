@@ -66,6 +66,7 @@ function initialize_u0(;n::Int=20, L::Int=6, M::Int=100, p::Float64=0.001,
   G = zeros(L, n+1)
 
   if lvl_1_inf # 99% of population at the lowest level
+    M /= 10
     for _ in 1:99*M
       i = sum(collect(rand(Binomial(1, p), n))) # how many total adopters?
       G[1, i+1] += 1 # everytime combination [1,i], count +1
@@ -118,7 +119,7 @@ function source_sink2!(du, u, p, t)
 end
 
 function run_source_sink2(p; perc_inf::Float64=0.001, lvl_1_inf::Bool=false)
-  n, M = 20, 100
+  n, M = 20, 10000
   L = 6
   u₀ = initialize_u0(n=n, L=L, M=M, p=perc_inf, lvl_1_inf=lvl_1_inf)
 
@@ -241,9 +242,9 @@ main()
 
 # params_name = "β", "ξ", "α", "γ", "ρ", "η", "b", "c", "μ"
 
-# lvl_1_inf = true
+# lvl_1_inf = false
 # perc_inf = 0.001
-# p = [0.08, 1., 1., 1., 0.01, 0.03, -1, 1., 0.0001]  # β, ξ, α, γ, ρ, η, b, c, μ
+# p = [0.1, 1., 1., 1., 0.1, 0.05, -1, 1., 0.0001]  # β, ξ, α, γ, ρ, η, b, c, μ
 # sol = run_source_sink2(p, perc_inf = perc_inf, lvl_1_inf=lvl_1_inf)
 # res, res_prop = parse_sol(sol)
 # t_max = 9999
