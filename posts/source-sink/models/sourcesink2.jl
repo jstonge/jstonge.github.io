@@ -61,21 +61,22 @@ function parse_commandline()
     return parse_args(s)
 end
 
-function initialize_u0(;n::Int=20, L::Int=6, M::Int=20, p::Float64=0.001,
+function initialize_u0(;n::Int=20, L::Int=6, M::Int=100, p::Float64=0.001,
   lvl_1_inf::Bool=false)
   G = zeros(L, n+1)
 
-  if lvl_1_inf # ≈ only (99.995%) lowest level populated at t = 0
-    for _ in 1:M
-      i = sum(collect(rand(Binomial(1, 2*p), n))) # how many total adopters?
-      G[1, i+1] += 1 # everytime combination [ℓ,i], count +1
+  if lvl_1_inf # 99% of population at the lowest level
+    M /= 10
+    for _ in 1:99*M
+      i = sum(collect(rand(Binomial(1, p), n))) # how many total adopters?
+      G[1, i+1] += 1 # everytime combination [1,i], count +1
     end
     for _ in 1:M
       ℓ = rand(2:L) # pick a level
       i = sum(collect(rand(Binomial(1, 0.01*p), n))) # how many total adopters?
       G[ℓ, i+1] += 1 # everytime combination [ℓ,i], count +1
     end
-    G = G ./ (2*M) # normalized by tot number of groups
+    G = G ./ (100*M) # normalized by tot number of groups
     return ArrayPartition(Tuple([G[ℓ,:] for ℓ=1:L]))
   else 
       for _ in 1:M
@@ -118,7 +119,7 @@ function source_sink2!(du, u, p, t)
 end
 
 function run_source_sink2(p; perc_inf::Float64=0.001, lvl_1_inf::Bool=false)
-  n, M = 20, 1000
+  n, M = 20, 10000
   L = 6
   u₀ = initialize_u0(n=n, L=L, M=M, p=perc_inf, lvl_1_inf=lvl_1_inf)
 
@@ -179,14 +180,9 @@ main()
 #         tickfont = ("Computer modern", 12),
 #         guidefontsize = 12, markerstrokewidth=0., markersize = 4.,
 #         linewidth=1, framestyle=:axis,
-#         titlefontsize=10)
-default(legendfont = ("Computer modern", 12),
-        tickfont = ("Computer modern", 12),
-        guidefontsize = 12, markerstrokewidth=0., markersize = 4.,
-        linewidth=1, framestyle=:axis,
-        titlefontsize=10, grid=:none,
-        bottom_margin = 1mm, left_margin = 1mm, right_margin = 0mm)
-gr(size=(650,400))
+#         titlefontsize=10, grid=:none,
+#         bottom_margin = 1mm, left_margin = 1mm, right_margin = 0mm)
+# gr(size=(650,400))
 
 # # abstract figure
 # run_source_sink2(p, lvl_1_inf=lvl_1_inf)
@@ -244,21 +240,21 @@ gr(size=(650,400))
 # savefig("NetSci_abstract_fig.pdf")
 
 
-params_name = "β", "ξ", "α", "γ", "ρ", "η", "b", "c", "μ"
+# params_name = "β", "ξ", "α", "γ", "ρ", "η", "b", "c", "μ"
 
-lvl_1_inf = false
-perc_inf = 0.002
-p = [0.08, 1., 1., 1., 0.01, 0.01, -1., 1., 0.0001]  # β, ξ, α, γ, ρ, η, b, c, μ
-sol = run_source_sink2(p, perc_inf = perc_inf, lvl_1_inf=lvl_1_inf)
-res, res_prop = parse_sol(sol)
-t_max = 6500
-global_freq = [sum([res[ℓ][t]*res_prop[ℓ][t] for ℓ in 1:L]) for t in 1:t_max]
-plot([res[l][1:t_max] for l=1:L], xscale=:log, ylabel = L"\textrm{prevalence}", labels = " " .* string.([1:L;]'),
-      width = 3., legendtitle = L"\textrm{level}", palette = palette(:Reds)[3:9], legend=:left,
-      xticks = 10 .^ [0,1,2,3,4]);
-plot!(1:t_max, global_freq[1:t_max], width = 3, color =:black, ls =:dash, label = L"\textrm{global}",
-      title = join([params_name[i] * "=" * string.(p)[i] for i in 1:length(params_name)], "  "))
-plot([res_prop[l][1:t_max] for l=1:L], xscale=:log, ylabel = L"\textrm{level\ proportion}", labels = " " .* string.([1:L;]'),
-      width = 3., legendtitle = L"\textrm{level}", palette = palette(:Blues)[3:9], legend=:left,
-      title = join([params_name[i] * "=" * string.(p)[i] for i in 1:length(params_name)], "  "),
-      xticks = 10 .^ [0,1,2,3,4])
+# lvl_1_inf = false
+# perc_inf = 0.001
+# p = [0.1, 1., 1., 1., 0.1, 0.05, -1, 1., 0.0001]  # β, ξ, α, γ, ρ, η, b, c, μ
+# sol = run_source_sink2(p, perc_inf = perc_inf, lvl_1_inf=lvl_1_inf)
+# res, res_prop = parse_sol(sol)
+# t_max = 9999
+# global_freq = [sum([res[ℓ][t]*res_prop[ℓ][t] for ℓ in 1:L]) for t in 1:t_max]
+# plot([res[l][1:t_max] for l=1:L], xscale=:log, ylabel = L"\textrm{prevalence}", labels = " " .* string.([1:L;]'),
+#       width = 3., legendtitle = L"\textrm{level}", palette = palette(:Reds)[3:9], legend=:left,
+#       xticks = 10 .^ [0,1,2,3,4]);
+# plot!(1:t_max, global_freq[1:t_max], width = 3, color =:black, ls =:dash, label = L"\textrm{global}",
+#       title = join([params_name[i] * "=" * string.(p)[i] for i in 1:length(params_name)], "  "))
+# plot([res_prop[l][1:t_max] for l=1:L], xscale=:log, ylabel = L"\textrm{level\ proportion}", labels = " " .* string.([1:L;]'),
+#       width = 3., legendtitle = L"\textrm{level}", palette = palette(:Blues)[3:9], legend=:left,
+#       title = join([params_name[i] * "=" * string.(p)[i] for i in 1:length(params_name)], "  "),
+#       xticks = 10 .^ [0,1,2,3,4])
