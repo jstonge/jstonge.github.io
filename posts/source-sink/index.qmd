@@ -50,6 +50,9 @@ function get_param_table(model, lookup) {
 }
 ```
 
+::: {.column-screen-inset}
+
+
 ::: panel-tabset
 
 ## Source-sink model
@@ -146,6 +149,7 @@ end
 
 ```{ojs}
 //| panel: sidebar
+
 sourcesink1 = resdb.query(`SELECT DISTINCT name FROM sourcesink1`)
 lookup1 = {
   const out = {}
@@ -157,12 +161,12 @@ lookup1 = {
 p1 = get_param_table(sourcesink1, lookup1)
 
 viewof s1 = Inputs.form({
-  β: Inputs.range(p1['β']['minmax'], {step: p1['β']['s'], label: "β", width: 500}),
-  γ: Inputs.range(p1['γ']['minmax'], {step: p1['γ']['s'], label: "γ", width: 500}),
-  ρ: Inputs.range(p1['ρ']['minmax'], {step: p1['ρ']['s'], label: "ρ", width: 500}),
-  b: Inputs.range(p1['b']['minmax'], {step: p1['b']['s'], label: "b", width: 500}),
-  c: Inputs.range(p1['c']['minmax'], {step: p1['c']['s'], label: "c", width: 500}),
-  μ: Inputs.range(p1['μ']['minmax'], {step: p1['μ']['s'], label: "μ", width: 500})
+  β: Inputs.range(p1['β']['minmax'], {step: p1['β']['s'], label: "β"}),
+  γ: Inputs.range(p1['γ']['minmax'], {step: p1['γ']['s'], label: "γ"}),
+  ρ: Inputs.range(p1['ρ']['minmax'], {step: p1['ρ']['s'], label: "ρ"}),
+  b: Inputs.range(p1['b']['minmax'], {step: p1['b']['s'], label: "b"}),
+  c: Inputs.range(p1['c']['minmax'], {step: p1['c']['s'], label: "c"}),
+  μ: Inputs.range(p1['μ']['minmax'], {step: p1['μ']['s'], label: "μ"})
 })
 
 data = resdb.query(`
@@ -285,17 +289,19 @@ plot_time_evo(data2)
 //   SQLite.execute(db, """INSERT INTO sourcesink2 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)""", params)
 // end
 
+axis_vars = ["ρ", "η", 'b']
 
 viewof r2 = Inputs.form({
-  x: Inputs.radio(["β", "α", 'b'], {label: "x", value: 'β'}),
-  y: Inputs.radio(["β", "α", 'b'], {label: "y", value: 'α'})
+  x: Inputs.radio(axis_vars, {label: "x", value: axis_vars[0]}),
+  y: Inputs.radio(axis_vars, {label: "y", value: axis_vars[1]})
 })
 
+// If there is a fx var, we can ignore it. Here alpha.
 viewof s2b = Inputs.form({
-  β: Inputs.range(p2['β']['minmax'], {step: p2['β']['s'], label: "β", disabled: r3['x'] == "β" || r3['y'] == "β"}),
-  α: Inputs.range(p2['α']['minmax'], {step: p2['α']['s'], label: "α", disabled: r3['x'] == "α" || r3['y'] == "α"}),
+  ρ: Inputs.range(p2['ρ']['minmax'], {step: p2['ρ']['s'], label: "ρ", disabled: r3['x'] == "ρ" || r3['y'] == "ρ"}),
+  η: Inputs.range(p2['η']['minmax'], {step: p2['η']['s'], label: "η", disabled: r3['x'] == "η" || r3['y'] == "η"}),
   b: Inputs.range(p2['b']['minmax'], {step: p2['b']['s'], label: "b", disabled: r3['x'] == "b" || r3['y'] == "b"}),
-  ρ: Inputs.range(p2['ρ']['minmax'], {label: "ρ", disabled: true, value: p2['ρ']['first_val']}),
+  β: Inputs.range(p2['β']['minmax'], {label: "β", disabled: true, value: p2['β']['first_val']}),
   ξ: Inputs.range(p2['ξ']['minmax'], {label: "ξ", disabled: true, value: p2['ξ']['first_val']}),
   γ: Inputs.range(p2['γ']['minmax'], {label: "γ", disabled: true, value: p2['γ']['first_val']}),
   c: Inputs.range(p2['c']['minmax'], {label: "c", disabled: true, value: p2['c']['first_val']}),
@@ -325,8 +331,8 @@ data_hm2 = {
     const p_split = data2b[i].name.split('_')
        
     const β_val = parseFloat(p_split[lookup2['name2idx']['β']])
-    const α_val = parseFloat(p_split[lookup2['name2idx']['α']])
     const ρ_val = parseFloat(p_split[lookup2['name2idx']['ρ']])
+    const η_val = parseFloat(p_split[lookup2['name2idx']['η']])
     const b_val = parseFloat(p_split[lookup2['name2idx']['b']])
     const ξ_val = parseFloat(p_split[lookup2['name2idx']['ξ']])
     const γ_val = parseFloat(p_split[lookup2['name2idx']['γ']])
@@ -335,21 +341,21 @@ data_hm2 = {
 
     const hm_vals = {
       'L': data2b[i].L,
-      'delta' : null, 
+      'fx' : p_split[lookup2['name2idx']['α']], 
       'param1': parseFloat(p_split[lookup2['name2idx'][r2['x']]]),
       'param2': parseFloat(p_split[lookup2['name2idx'][r2['y']]]),
       'value': data2b[i].value_prop
     }
 
     // The values in the second half of the sliders
-    if (ξ_val === s2b['ξ'] && γ_val === s2b['γ'] && c_val === s2b['c'] && μ_val == s2b['μ'] && ρ_val == s2b['ρ'] ) {
+    if (ξ_val === s2b['ξ'] && γ_val === s2b['γ'] && c_val === s2b['c'] && μ_val == s2b['μ'] && β_val == s2b['β'] ) {
 
         // Depending on our choice of x and y, we want the 'other' value
-        if (r2['x'] == "β" && r2['y'] == 'α' && b_val == s2b['b']) {
+        if (r2['x'] == "ρ" && r2['y'] == 'η' && b_val == s2b['b']) {
              out.push(hm_vals)
-        } else if (r2['x'] == "β" && r2['y'] == "b" && α_val == s2b['α']) {
+        } else if (r2['x'] == "ρ" && r2['y'] == "b" && ξ_val == s2b['η']) {
              out.push(hm_vals)
-        } else if (r2['x'] == 'α' && r2['y'] == "b" && β_val == s2b['β']) {
+        } else if (r2['x'] == 'η' && r2['y'] == "b" && ρ_val == s2b['ρ']) {
              out.push(hm_vals)
         }
     }
@@ -358,25 +364,7 @@ data_hm2 = {
 }
 
 
-PlotDev.plot({
-  width: 400,
-  color: {
-    range: [0, 1],
-    legend: true,
-    scheme: "YlGnBu"
-  },
-  x: { label: r2['x'] },
-  y: { label: r2['y'] },
-  facet: { data: data_hm2, y: "L" },
-  marks: [
-    PlotDev.raster(data_hm2, {
-      x: "param1",
-      y: "param2",
-      fill: "value",
-      interpolate: "nearest"
-    }),
-  ]
-})
+phase_diagram(data_hm2, r2['x'], r2['y'])
 ```
 
 :::
@@ -519,7 +507,7 @@ data_hm3 = {
 
     const hm_vals = {
       'L': data3b[i].L,
-      'delta' : p_split[lookup3['name2idx']['δ']],
+      'fx' : p_split[lookup3['name2idx']['δ']],
       'param1': parseFloat(p_split[lookup3['name2idx'][r3['x']]]),
       'param2': parseFloat(p_split[lookup3['name2idx'][r3['y']]]),
       'value': data3b[i].value_prop
@@ -566,7 +554,7 @@ function plot_time_evo(d) {
   })
 }
 
-function phase_diagram(d, fx, fy) {
+function phase_diagram(d, x, y) {
   return PlotDev.plot({
     width: 400,
     color: {
@@ -574,9 +562,9 @@ function phase_diagram(d, fx, fy) {
       legend: true,
       scheme: "YlGnBu"
     },
-    x: { label: fx },
-    y: { label: fy },
-    facet: { data: d, y: "L", x: "delta" },
+    x: { label: x },
+    y: { label: y },
+    facet: { data: d, y: "L", x: 'fx' },
     marks: [
       PlotDev.raster(d, {
         x: "param1",
@@ -597,6 +585,7 @@ function phase_diagram(d, fx, fy) {
 ## Model 1 Sketch
 
 ![](sourcesink_sketch.jpg)
+:::
 :::
 
 ```{ojs}
