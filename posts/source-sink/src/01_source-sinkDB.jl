@@ -72,11 +72,9 @@ CREATE TABLE sourcesink3 (
 )
 """)
 
-counter = 1
 for β=0.02:0.02:0.4, b=0.20:0.1:1.0, ρ=0.02:0.02:0.4, δ=0:1:1
   params = (β, 0.2, ρ, b, 1.0, 0.2, δ)
   SQLite.execute(db, """INSERT INTO sourcesink3 VALUES (?, ?, ?, ?, ?, ?, ?)""", params)
-  counter += 1
 end
 
 SQLite.execute(db, """
