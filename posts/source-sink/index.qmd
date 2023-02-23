@@ -289,23 +289,38 @@ plot_time_evo(data2)
 //   SQLite.execute(db, """INSERT INTO sourcesink2 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)""", params)
 // end
 
-axis_vars = ["ρ", "η", 'b']
+axis_vars = ["β", "ρ", "η"]
+facet_var = ["α"]
+
+ax0 = axis_vars[0]
+ax1 = axis_vars[1]
+ax2 = axis_vars[2]
 
 viewof r2 = Inputs.form({
-  x: Inputs.radio(axis_vars, {label: "x", value: axis_vars[0]}),
-  y: Inputs.radio(axis_vars, {label: "y", value: axis_vars[1]})
+  x: Inputs.radio(axis_vars, {label: "x", value: ax0}),
+  y: Inputs.radio(axis_vars, {label: "y", value: ax1})
 })
+
+
+function get_fixed_params() {
+  const all_params = [...Object.keys(p2)]
+  const varying_params = new Set(axis_vars.concat(facet_var))
+  const diff_params = new Set(all_params.filter((x) => !varying_params.has(x)))
+  return Array.from(diff_params)
+}
+
+fp2 = get_fixed_params();
 
 // If there is a fx var, we can ignore it. Here alpha.
 viewof s2b = Inputs.form({
-  ρ: Inputs.range(p2['ρ']['minmax'], {step: p2['ρ']['s'], label: "ρ", disabled: r3['x'] == "ρ" || r3['y'] == "ρ"}),
-  η: Inputs.range(p2['η']['minmax'], {step: p2['η']['s'], label: "η", disabled: r3['x'] == "η" || r3['y'] == "η"}),
-  b: Inputs.range(p2['b']['minmax'], {step: p2['b']['s'], label: "b", disabled: r3['x'] == "b" || r3['y'] == "b"}),
-  β: Inputs.range(p2['β']['minmax'], {label: "β", disabled: true, value: p2['β']['first_val']}),
-  ξ: Inputs.range(p2['ξ']['minmax'], {label: "ξ", disabled: true, value: p2['ξ']['first_val']}),
-  γ: Inputs.range(p2['γ']['minmax'], {label: "γ", disabled: true, value: p2['γ']['first_val']}),
-  c: Inputs.range(p2['c']['minmax'], {label: "c", disabled: true, value: p2['c']['first_val']}),
-  μ: Inputs.range(p2['μ']['minmax'], {label: "μ", disabled: true, value: p2['μ']['first_val']})
+  ax0: Inputs.range(p2[ax0]['minmax'], {step: p2[ax0]['s'], label: ax0, disabled: r2['x'] == ax0 || r2['y'] == ax0}),
+  ax1: Inputs.range(p2[ax1]['minmax'], {step: p2[ax1]['s'], label: ax1, disabled: r2['x'] == ax1 || r2['y'] == ax1}),
+  ax2: Inputs.range(p2[ax2]['minmax'], {step: p2[ax2]['s'], label: ax2, disabled: r2['x'] == ax2 || r2['y'] == ax2}),
+  fp0: Inputs.range(p2[fp2[0]]['minmax'], {step: p2[fp2[0]]['s'], label: fp2[0], value: p2[fp2[0]]['first_val']}),
+  fp1: Inputs.range(p2[fp2[1]]['minmax'], {step: p2[fp2[1]]['s'], label: fp2[1], value: p2[fp2[1]]['first_val']}),
+  fp2: Inputs.range(p2[fp2[2]]['minmax'], {step: p2[fp2[2]]['s'], label: fp2[2], value: p2[fp2[2]]['first_val']}),
+  fp3: Inputs.range(p2[fp2[3]]['minmax'], {step: p2[fp2[3]]['s'], label: fp2[3], value: p2[fp2[3]]['first_val']}),
+  fp4: Inputs.range(p2[fp2[4]]['minmax'], {step: p2[fp2[4]]['s'], label: fp2[4], value: p2[fp2[4]]['first_val']})
 })
 
 ```
@@ -328,34 +343,35 @@ data_hm2 = {
   const out = [];
 
   for (let i=0; i < data2b.length; i++) { 
+
     const p_split = data2b[i].name.split('_')
        
-    const β_val = parseFloat(p_split[lookup2['name2idx']['β']])
-    const ρ_val = parseFloat(p_split[lookup2['name2idx']['ρ']])
-    const η_val = parseFloat(p_split[lookup2['name2idx']['η']])
-    const b_val = parseFloat(p_split[lookup2['name2idx']['b']])
-    const ξ_val = parseFloat(p_split[lookup2['name2idx']['ξ']])
-    const γ_val = parseFloat(p_split[lookup2['name2idx']['γ']])
-    const c_val = parseFloat(p_split[lookup2['name2idx']['c']])
-    const μ_val = parseFloat(p_split[lookup2['name2idx']['μ']])
+    const ax0_val = parseFloat(p_split[lookup2['name2idx'][ax0]])
+    const ax1_val = parseFloat(p_split[lookup2['name2idx'][ax1]])
+    const ax2_val = parseFloat(p_split[lookup2['name2idx'][ax2]])
+    const fp0_val = parseFloat(p_split[lookup2['name2idx'][fp2[0]]])
+    const fp1_val = parseFloat(p_split[lookup2['name2idx'][fp2[1]]])
+    const fp2_val = parseFloat(p_split[lookup2['name2idx'][fp2[2]]])
+    const fp3_val = parseFloat(p_split[lookup2['name2idx'][fp2[3]]])
+    const fp4_val = parseFloat(p_split[lookup2['name2idx'][fp2[4]]])
 
     const hm_vals = {
       'L': data2b[i].L,
-      'fx' : p_split[lookup2['name2idx']['α']], 
+      'fx' : p_split[lookup2['name2idx'][facet_var]], 
       'param1': parseFloat(p_split[lookup2['name2idx'][r2['x']]]),
       'param2': parseFloat(p_split[lookup2['name2idx'][r2['y']]]),
       'value': data2b[i].value_prop
     }
 
     // The values in the second half of the sliders
-    if (ξ_val === s2b['ξ'] && γ_val === s2b['γ'] && c_val === s2b['c'] && μ_val == s2b['μ'] && β_val == s2b['β'] ) {
+    if (fp0_val === s2b['fp0'] && fp1_val === s2b['fp1'] && fp2_val === s2b['fp2'] && fp3_val == s2b['fp3'] && fp4_val == s2b['fp4'] ) {
 
-        // Depending on our choice of x and y, we want the 'other' value
-        if (r2['x'] == "ρ" && r2['y'] == 'η' && b_val == s2b['b']) {
+        // if ax1 == x && ax2 ==y, then ax 0 == z
+        if (r2['x'] == ax1 && r2['y'] == ax2 && ax0_val == s2b['ax0']) {
              out.push(hm_vals)
-        } else if (r2['x'] == "ρ" && r2['y'] == "b" && ξ_val == s2b['η']) {
+        } else if (r2['x'] == ax0 && r2['y'] == ax2 && ax1_val == s2b['ax1']) {
              out.push(hm_vals)
-        } else if (r2['x'] == 'η' && r2['y'] == "b" && ρ_val == s2b['ρ']) {
+        } else if (r2['x'] == ax0 && r2['y'] == ax1 && ax2_val == s2b['ax2']) {
              out.push(hm_vals)
         }
     }
