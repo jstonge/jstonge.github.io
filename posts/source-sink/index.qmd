@@ -19,36 +19,6 @@ resdb = DuckDBClient.of({
 })
 ```
 
-```{ojs helpers}
-f = (x) => Number.isInteger(x) ? x.toPrecision(2) : x
-
-// model: resdb output for a specific model
-// lookup: { [0: param1, 1: param2, ...] }
-function get_param_table(model, lookup) {
-  
-  // Extract the step from a list of values for a parameter
-  const s = (p,i) => { 
-    const unique_vals = Array.from(new Set(p.map(d => parseFloat(d[i]))))
-                            .sort((a,b) => a - b)
-    const out = []
-    for (let i=1; i < unique_vals.length; i++ ) {
-      out.push(+(unique_vals[i]-unique_vals[i-1]).toPrecision(2))
-    } // return whatev if length is zero
-    return out.length === 0 ? 0.1 : out[0]
-  }
-
-  const minmax = (p, i) => d3.extent(p.map(d => parseFloat(d[i])))
-  
-  const p = model.map(d => d.name.split("_"))
-  
-  const param_table = {}
-  const first_line_param = p[0]
-  for ( let i=0; i < first_line_param.length; i++ ) {
-    param_table[lookup['idx2name'][i]] = { 's': s(p,i), 'first_val': first_line_param[i], 'minmax': minmax(p,i) }
-  }
-  return param_table
-}
-```
 
 ::: {.column-screen-inset}
 
@@ -282,47 +252,25 @@ plot_time_evo(data2)
 
 ```{ojs}
 //| panel: sidebar
-
-// We vary β, α, ρ, η, b. We don't have a on/off parameter.
-// for β = 0.06:0.02:0.16, α = 1.0:1.0:2.0, ρ = 0.01:0.02:0.11, η = 0.005:0.015:0.08, b = 0.1:0.3:1.0
-//   params = (β, 1.0, α, 1.0, ρ, η, -b, 1.0, 1e-4)
-//   SQLite.execute(db, """INSERT INTO sourcesink2 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)""", params)
-// end
-
-axis_vars = ["β", "ρ", "η"]
-facet_var = ["α"]
-
-ax0 = axis_vars[0]
-ax1 = axis_vars[1]
-ax2 = axis_vars[2]
+ax_vars2 = ["β", "ρ", "η"] // choose the x,y,z axis, i.e. params to vary
+facet_var2 = ["α"]  // choose the facet variable
+fp2 = get_fixed_params(p2, ax_vars2, facet_var2); // fixed params are the rest
 
 viewof r2 = Inputs.form({
-  x: Inputs.radio(axis_vars, {label: "x", value: ax0}),
-  y: Inputs.radio(axis_vars, {label: "y", value: ax1})
+  x: Inputs.radio(ax_vars2, {label: "x", value: ax_vars2[0]}),
+  y: Inputs.radio(ax_vars2, {label: "y", value: ax_vars2[1]})
 })
 
-
-function get_fixed_params() {
-  const all_params = [...Object.keys(p2)]
-  const varying_params = new Set(axis_vars.concat(facet_var))
-  const diff_params = new Set(all_params.filter((x) => !varying_params.has(x)))
-  return Array.from(diff_params)
-}
-
-fp2 = get_fixed_params();
-
-// If there is a fx var, we can ignore it. Here alpha.
 viewof s2b = Inputs.form({
-  ax0: Inputs.range(p2[ax0]['minmax'], {step: p2[ax0]['s'], label: ax0, disabled: r2['x'] == ax0 || r2['y'] == ax0}),
-  ax1: Inputs.range(p2[ax1]['minmax'], {step: p2[ax1]['s'], label: ax1, disabled: r2['x'] == ax1 || r2['y'] == ax1}),
-  ax2: Inputs.range(p2[ax2]['minmax'], {step: p2[ax2]['s'], label: ax2, disabled: r2['x'] == ax2 || r2['y'] == ax2}),
+  ax0: Inputs.range(p2[ax_vars2[0]]['minmax'], {step: p2[ax_vars2[0]]['s'], label: ax_vars2[0], disabled: r2['x'] == ax_vars2[0] || r2['y'] == ax_vars2[0]}),
+  ax1: Inputs.range(p2[ax_vars2[1]]['minmax'], {step: p2[ax_vars2[1]]['s'], label: ax_vars2[1], disabled: r2['x'] == ax_vars2[1] || r2['y'] == ax_vars2[1]}),
+  ax2: Inputs.range(p2[ax_vars2[2]]['minmax'], {step: p2[ax_vars2[2]]['s'], label: ax_vars2[2], disabled: r2['x'] == ax_vars2[2] || r2['y'] == ax_vars2[2]}),
   fp0: Inputs.range(p2[fp2[0]]['minmax'], {step: p2[fp2[0]]['s'], label: fp2[0], value: p2[fp2[0]]['first_val']}),
   fp1: Inputs.range(p2[fp2[1]]['minmax'], {step: p2[fp2[1]]['s'], label: fp2[1], value: p2[fp2[1]]['first_val']}),
   fp2: Inputs.range(p2[fp2[2]]['minmax'], {step: p2[fp2[2]]['s'], label: fp2[2], value: p2[fp2[2]]['first_val']}),
   fp3: Inputs.range(p2[fp2[3]]['minmax'], {step: p2[fp2[3]]['s'], label: fp2[3], value: p2[fp2[3]]['first_val']}),
   fp4: Inputs.range(p2[fp2[4]]['minmax'], {step: p2[fp2[4]]['s'], label: fp2[4], value: p2[fp2[4]]['first_val']})
 })
-
 ```
 
 ```{ojs}
@@ -339,46 +287,7 @@ data2b = resdb.query(`
     ON s.name = tmp.name AND s.L = tmp.L AND s.timestep = tmp.timestep 
 `)
 
-data_hm2 = {
-  const out = [];
-
-  for (let i=0; i < data2b.length; i++) { 
-
-    const p_split = data2b[i].name.split('_')
-       
-    const ax0_val = parseFloat(p_split[lookup2['name2idx'][ax0]])
-    const ax1_val = parseFloat(p_split[lookup2['name2idx'][ax1]])
-    const ax2_val = parseFloat(p_split[lookup2['name2idx'][ax2]])
-    const fp0_val = parseFloat(p_split[lookup2['name2idx'][fp2[0]]])
-    const fp1_val = parseFloat(p_split[lookup2['name2idx'][fp2[1]]])
-    const fp2_val = parseFloat(p_split[lookup2['name2idx'][fp2[2]]])
-    const fp3_val = parseFloat(p_split[lookup2['name2idx'][fp2[3]]])
-    const fp4_val = parseFloat(p_split[lookup2['name2idx'][fp2[4]]])
-
-    const hm_vals = {
-      'L': data2b[i].L,
-      'fx' : p_split[lookup2['name2idx'][facet_var]], 
-      'param1': parseFloat(p_split[lookup2['name2idx'][r2['x']]]),
-      'param2': parseFloat(p_split[lookup2['name2idx'][r2['y']]]),
-      'value': data2b[i].value_prop
-    }
-
-    // The values in the second half of the sliders
-    if (fp0_val === s2b['fp0'] && fp1_val === s2b['fp1'] && fp2_val === s2b['fp2'] && fp3_val == s2b['fp3'] && fp4_val == s2b['fp4'] ) {
-
-        // if ax1 == x && ax2 ==y, then ax 0 == z
-        if (r2['x'] == ax1 && r2['y'] == ax2 && ax0_val == s2b['ax0']) {
-             out.push(hm_vals)
-        } else if (r2['x'] == ax0 && r2['y'] == ax2 && ax1_val == s2b['ax1']) {
-             out.push(hm_vals)
-        } else if (r2['x'] == ax0 && r2['y'] == ax1 && ax2_val == s2b['ax2']) {
-             out.push(hm_vals)
-        }
-    }
-  }
-  return out
-}
-
+data_hm2 = get_data_heatmap(data2b, lookup2, facet_var2, fp2, ax_vars2, r2, s2b)
 
 phase_diagram(data_hm2, r2['x'], r2['y'])
 ```
@@ -468,28 +377,22 @@ plot_time_evo(data3a)
 
 ```{ojs}
 //| panel: sidebar
+ax_vars3 = ["β", "ρ", 'b']
+facet_var3 = ["δ"]
+fp3 = get_fixed_params(p3, ax_vars3, facet_var3);
 
-// We vary beta::Float, rho::Float, and b::Float. δ is a on/off parameter.
-// for β=0.02:0.02:0.4, b=0.20:0.1:1.0, ρ=0.02:0.02:0.4, δ=0:1:1
-//   params = (β, 0.2, ρ, b, 1.0, 0.2, δ)
-//   SQLite.execute(db, """INSERT INTO sourcesink3 VALUES (?, ?, ?, ?, ?, ?, ?)""", params)
-// end
-
-// We put as radio parameters we care: beta, rho, and b.
 viewof r3 = Inputs.form({
-  x: Inputs.radio(["β", "ρ", 'b'], {label: "x", value: 'β'}),
-  y: Inputs.radio(["β", "ρ", 'b'], {label: "y", value: 'b'})
+  x: Inputs.radio(ax_vars3, {label: "x", value: ax_vars3[0]}),
+  y: Inputs.radio(ax_vars3, {label: "y", value: ax_vars3[1]})
 })
 
-// In this set of sliders, beta, rho, and b are disabled when selected.
-// The other params are just disabled by default. For now.
 viewof s3b = Inputs.form({
-  β: Inputs.range(p3['β']['minmax'], {step: p3['β']['s'], label: "β", disabled: r3['x'] == "β" || r3['y'] == "β"}),
-  ρ: Inputs.range(p3['ρ']['minmax'], {step: p3['ρ']['s'], label: "ρ", disabled: r3['x'] == "ρ" || r3['y'] == "ρ"}),
-  b: Inputs.range(p3['b']['minmax'], {step: p3['b']['s'], label: "b", disabled: r3['x'] == "b" || r3['y'] == "b"}),
-  γ: Inputs.range(p3['γ']['minmax'], {label: "γ", disabled: true}),
-  c: Inputs.range(p3['c']['minmax'], {label: "c", disabled: true}),
-  μ: Inputs.range(p3['μ']['minmax'], {label: "μ", disabled: true})
+  ax0: Inputs.range(p3[ax_vars3[0]]['minmax'], {step: p3[ax_vars3[0]]['s'], label: ax_vars3[0], disabled: r3['x'] == ax_vars3[0] || r3['y'] == ax_vars3[0]}),
+  ax1: Inputs.range(p3[ax_vars3[1]]['minmax'], {step: p3[ax_vars3[1]]['s'], label: ax_vars3[1], disabled: r3['x'] == ax_vars3[1] || r3['y'] == ax_vars3[1]}),
+  ax2: Inputs.range(p3[ax_vars3[2]]['minmax'], {step: p3[ax_vars3[2]]['s'], label: ax_vars3[2], disabled: r3['x'] == ax_vars3[2] || r3['y'] == ax_vars3[2]}),
+  fp0: Inputs.range(p3[fp3[0]]['minmax'], {step: p3[fp3[0]]['s'], label: fp3[0], value: p3[fp3[0]]['first_val']}),
+  fp1: Inputs.range(p3[fp3[1]]['minmax'], {step: p3[fp3[1]]['s'], label: fp3[1], value: p3[fp3[1]]['first_val']}),
+  fp2: Inputs.range(p3[fp3[2]]['minmax'], {step: p3[fp3[2]]['s'], label: fp3[2], value: p3[fp3[2]]['first_val']})
 })
 ```
 
@@ -507,51 +410,98 @@ data3b = resdb.query(`
     ON s.name = tmp.name AND s.L = tmp.L AND s.timestep = tmp.timestep 
 `)
 
-data_hm3 = {
-  const out = [];
-
-  for (let i=0; i < data3b.length; i++) { 
-    const p_split = data3b[i].name.split('_')
-   
-    // We only look at values specified by ranges that do not vary.
-    const beta_val = parseFloat(p_split[lookup3['name2idx']['β']])
-    const r_val    = parseFloat(p_split[lookup3['name2idx']['ρ']])
-    const b_val    = parseFloat(p_split[lookup3['name2idx']['b']])
-    const g_val    = parseFloat(p_split[lookup3['name2idx']['γ']])
-    const c_val    = parseFloat(p_split[lookup3['name2idx']['c']])
-    const m_val    = parseFloat(p_split[lookup3['name2idx']['μ']])
-
-    const hm_vals = {
-      'L': data3b[i].L,
-      'fx' : p_split[lookup3['name2idx']['δ']],
-      'param1': parseFloat(p_split[lookup3['name2idx'][r3['x']]]),
-      'param2': parseFloat(p_split[lookup3['name2idx'][r3['y']]]),
-      'value': data3b[i].value_prop
-    }
-
-    // Gamma, c, and mu are parameters we fix b/c we don't care about them.
-    if (g_val === s3b['γ'] && c_val === s3b['c'] && m_val === s3b['μ']) {
-
-        // Depending on our choice of x and y, we want the 'other' value, e.g.
-        // xaxis=beta; yaxis=b, then we get all the values for ρs
-        // So that we can see how ρs vary give all values of βs and bs.
-        if (r3['x'] == "β" && r3['y'] == 'b' && r_val == s3b['ρ']) {
-             out.push(hm_vals)
-        } else if (r3['x'] == "β" && r3['y'] == "ρ" && b_val == s3b['b']) {
-             out.push(hm_vals)
-        } else if (r3['x'] == 'ρ' && r3['y'] == "b" && beta_val == s3b['β']) {
-             out.push(hm_vals)
-        }
-    }
-  }
-  return out
-}
+data_hm3 = get_data_heatmap(data3b, lookup3, facet_var3, fp3, ax_vars3, r3, s3b)
 
 phase_diagram(data_hm3, r3['x'], r3['y'])
 ```
 
 
-```{ojs}
+```{ojs helpers}
+function get_fixed_params(param_table, ax_vars, fx) {
+  const all_params = [...Object.keys(param_table)]
+  const varying_params = new Set(ax_vars.concat(fx))
+  const diff_params = new Set(all_params.filter((x) => !varying_params.has(x)))
+  return Array.from(diff_params)
+}
+
+f = (x) => Number.isInteger(x) ? x.toPrecision(2) : x
+
+// Param table where each key is a parameter, and values 
+// are list of values relevant to 
+// model: resdb output for a specific model
+// lookup: { [0: param1, 1: param2, ...] }
+function get_param_table(model, lookup) {
+  
+  // Extract the step from a list of values for a parameter
+  const s = (p,i) => { 
+    const unique_vals = Array.from(new Set(p.map(d => parseFloat(d[i]))))
+                            .sort((a,b) => a - b)
+    const out = []
+    for (let i=1; i < unique_vals.length; i++ ) {
+      out.push(+(unique_vals[i]-unique_vals[i-1]).toPrecision(2))
+    } // return whatev if length is zero
+    return out.length === 0 ? 0.1 : out[0]
+  }
+
+  const minmax = (p, i) => d3.extent(p.map(d => parseFloat(d[i])))
+  
+  const p = model.map(d => d.name.split("_"))
+  
+  const param_table = {}
+  const first_line_param = p[0]
+  for ( let i=0; i < first_line_param.length; i++ ) {
+    param_table[lookup['idx2name'][i]] = { 's': s(p,i), 'first_val': first_line_param[i], 'minmax': minmax(p,i) }
+  }
+  return param_table
+}
+
+// To get heatmap data, we need
+//   data: data from resdb join `name` and `L`
+//   ax_vars: variables we want as x,y,z
+//   fx: variable to facet
+//   fp: other vars
+//   sliders: set of sliders
+function get_data_heatmap(data, lookup, fx, fp, ax_vars, radios, sliders) {
+  const dat_hm = [];
+  
+  for (let i=0; i < data.length; i++) { 
+    
+    const p_split = data[i].name.split('_')
+    
+    const vs = {} // dictionary containing all the values of selected parameters 
+
+    const [ax0, ax1, ax2] = ax_vars
+    vs[ax0] = parseFloat(p_split[lookup['name2idx'][ax0]])
+    vs[ax1] = parseFloat(p_split[lookup['name2idx'][ax1]])
+    vs[ax2] = parseFloat(p_split[lookup['name2idx'][ax2]])
+
+    for (let i=0; i < fp.length; i++) {
+      vs[fp[i]] = parseFloat(p_split[lookup['name2idx'][fp[i]]])
+    }
+    
+    const hm_vals_i = {
+      'L': data[i].L,
+      'fx' : p_split[lookup['name2idx'][fx]], 
+      'param1': parseFloat(p_split[lookup['name2idx'][radios['x']]]),
+      'param2': parseFloat(p_split[lookup['name2idx'][radios['y']]]),
+      'value': data[i].value_prop
+    }
+
+    if (vs[fp[0]] === sliders['fp0'] && vs[fp[1]] === sliders['fp1'] && vs[fp[2]] === sliders['fp2'] && vs[fp[3]] == sliders['fp3'] && vs[fp[4]] == sliders['fp4']) {
+
+        // if ax1 == x && ax2 ==y, then ax0 == z
+        if (radios['x'] == ax1 && radios['y'] == ax2 && vs[ax0] == sliders['ax0']) {
+             dat_hm.push(hm_vals_i)
+        } else if (radios['x'] == ax0 && radios['y'] == ax2 && vs[ax1] == sliders['ax1']) {
+             dat_hm.push(hm_vals_i)
+        } else if (radios['x'] == ax0 && radios['y'] == ax1 && vs[ax2] == sliders['ax2']) {
+             dat_hm.push(hm_vals_i)
+        }
+    }
+  }
+  return dat_hm
+}
+
 function plot_time_evo(d) {
   return Plot.plot({
     x: {type:"log"},
