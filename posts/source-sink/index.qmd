@@ -205,11 +205,8 @@ function source_sink2!(du, u, p, t)
       end
 end
 ```
-#### Plot
 
-::: panel-tabset
-
-## Time evo plot
+#### Playground
 
 ```{ojs}
 //| panel: sidebar
@@ -248,7 +245,6 @@ data2 = resdb.query(`
 plot_time_evo(data2)
 ```
 
-## Phase diagram
 
 ```{ojs}
 //| panel: sidebar
@@ -289,10 +285,9 @@ data2b = resdb.query(`
 
 data_hm2 = get_data_heatmap(data2b, lookup2, facet_var2, fp2, ax_vars2, r2, s2b)
 
-phase_diagram(data_hm2, r2['x'], r2['y'])
+phase_diagram(data_hm2, r2['x'], r2['y'], facet_var2)
 ```
 
-:::
 
 ## Game-theoretic model
 
@@ -333,10 +328,7 @@ function source_sink3!(du, u, p, t)
     end
 end
 ```
-
-::: panel-tabset
-
-## Time evo plot
+#### Playground
 
 ```{ojs}
 //| panel: sidebar
@@ -372,8 +364,6 @@ data3a = resdb.query(`
 //| panel: fill
 plot_time_evo(data3a)
 ```
-
-## Phase diagram
 
 ```{ojs}
 //| panel: sidebar
@@ -412,9 +402,17 @@ data3b = resdb.query(`
 
 data_hm3 = get_data_heatmap(data3b, lookup3, facet_var3, fp3, ax_vars3, r3, s3b)
 
-phase_diagram(data_hm3, r3['x'], r3['y'])
+phase_diagram(data_hm3, r3['x'], r3['y'], facet_var3)
 ```
 
+:::
+
+::: {.callout-note collapse="true"}
+## Model 1 Sketch
+
+![](sourcesink_sketch.jpg)
+:::
+:::
 
 ```{ojs helpers}
 function get_fixed_params(param_table, ax_vars, fx) {
@@ -434,8 +432,7 @@ function get_param_table(model, lookup) {
   
   // Extract the step from a list of values for a parameter
   const s = (p,i) => { 
-    const unique_vals = Array.from(new Set(p.map(d => parseFloat(d[i]))))
-                            .sort((a,b) => a - b)
+    const unique_vals = Array.from(new Set(p.map(d => parseFloat(d[i])))).sort((a,b) => a - b)
     const out = []
     for (let i=1; i < unique_vals.length; i++ ) {
       out.push(+(unique_vals[i]-unique_vals[i-1]).toPrecision(2))
@@ -450,7 +447,9 @@ function get_param_table(model, lookup) {
   const param_table = {}
   const first_line_param = p[0]
   for ( let i=0; i < first_line_param.length; i++ ) {
-    param_table[lookup['idx2name'][i]] = { 's': s(p,i), 'first_val': first_line_param[i], 'minmax': minmax(p,i) }
+    param_table[lookup['idx2name'][i]] = { 
+      's': s(p,i), 'first_val': first_line_param[i], 'minmax': minmax(p,i) 
+      }
   }
   return param_table
 }
@@ -520,9 +519,9 @@ function plot_time_evo(d) {
   })
 }
 
-function phase_diagram(d, x, y) {
+function phase_diagram(d, x, y, fy) {
   return PlotDev.plot({
-    width: 400,
+    width: 1200,
     color: {
       range: [0, 1],
       legend: true,
@@ -530,7 +529,8 @@ function phase_diagram(d, x, y) {
     },
     x: { label: x },
     y: { label: y },
-    facet: { data: d, y: "L", x: 'fx' },
+    fy: { label: fy },
+    facet: { data: d, x: "L", y: 'fx' },
     marks: [
       PlotDev.raster(d, {
         x: "param1",
@@ -543,16 +543,6 @@ function phase_diagram(d, x, y) {
 }
 ```
 
-:::
-
-:::
-
-::: {.callout-note collapse="true"}
-## Model 1 Sketch
-
-![](sourcesink_sketch.jpg)
-:::
-:::
 
 ```{ojs}
 PlotDev = await import("https://esm.sh/@observablehq/plot");
