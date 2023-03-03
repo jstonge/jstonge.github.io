@@ -357,6 +357,9 @@ phase_diagram(data_hm2, r2['x'], r2['y'])
 ```
 
 <<<<<<< HEAD
+<<<<<<< HEAD
+>>>>>>> parent of 2fbcf92 (putting figures side by side)
+=======
 >>>>>>> parent of 2fbcf92 (putting figures side by side)
 =======
 >>>>>>> parent of 2fbcf92 (putting figures side by side)
@@ -403,7 +406,10 @@ end
 ## Time evo plot
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 
+=======
+>>>>>>> parent of 2fbcf92 (putting figures side by side)
 =======
 >>>>>>> parent of 2fbcf92 (putting figures side by side)
 =======
@@ -520,6 +526,9 @@ phase_diagram(data_hm3, r3['x'], r3['y'])
 ```
 
 <<<<<<< HEAD
+<<<<<<< HEAD
+>>>>>>> parent of 2fbcf92 (putting figures side by side)
+=======
 >>>>>>> parent of 2fbcf92 (putting figures side by side)
 =======
 >>>>>>> parent of 2fbcf92 (putting figures side by side)
@@ -643,8 +652,12 @@ function phase_diagram(d, x, y) {
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
     fy: { label: fy },
     facet: { data: d, x: "L", y: typeof fy !== undefined ? 'fx' : null },
+=======
+    facet: { data: d, y: "L", x: 'fx' },
+>>>>>>> parent of 2fbcf92 (putting figures side by side)
 =======
     facet: { data: d, y: "L", x: 'fx' },
 >>>>>>> parent of 2fbcf92 (putting figures side by side)
