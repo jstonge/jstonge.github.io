@@ -119,10 +119,9 @@ end
 
 ```{ojs}
 //| panel: sidebar
-
 sourcesink1 = resdb.query(`SELECT DISTINCT name FROM sourcesink1`)
 lookup1 = {
-  const out = {}
+  const out = {}s
   out['idx2name'] = {0: "β", 1: 'γ', 2: 'ρ', 3: 'b', 4: 'c', 5: 'μ'}
   out['name2idx'] = {"β": 0, 'γ': 1, 'ρ': 2, 'b': 3, 'c': 4, 'μ': 5}
   return out
