@@ -176,36 +176,36 @@ main()
 # t_max = 500
 # tspan = (0., t_max)
 
-# β, γ, ρ, b, c, μ = 0.2, 0.2, 0.02, 0.3, 1., 0.2
-# δ = 1
+β, γ, ρ, b, c, μ = 0.2, 0.2, 0.02, 0.3, 1., 0.2
+δ = 1
+p  = [β, γ, ρ, b, c, μ, δ]
+prob = ODEProblem(source_sink3!, u₀, tspan, p)
+sol = solve(prob, DP5(), saveat=1, reltol=1e-8, abstol=1e-8)
+# δ = 0
 # p  = [β, γ, ρ, b, c, μ, δ]
-# prob = ODEProblem(source_sink3!, u₀, tspan, p)
-# sol = solve(prob, DP5(), saveat=1, reltol=1e-8, abstol=1e-8)
-# # δ = 0
-# # p  = [β, γ, ρ, b, c, μ, δ]
-# # prob1 = ODEProblem(source_sink3!, u₀, tspan, p)
-# # sol1 = solve(prob1, DP5(), saveat=1, reltol=1e-8, abstol=1e-8)
+# prob1 = ODEProblem(source_sink3!, u₀, tspan, p)
+# sol1 = solve(prob1, DP5(), saveat=1, reltol=1e-8, abstol=1e-8)
 
-# # file should be there
-# inst_level, inst_level_prop = parse_sol(sol)  # params: β, γ, ρ, b, c, μ, δ
+# file should be there
+inst_level, inst_level_prop = parse_sol(sol)  # params: β, γ, ρ, b, c, μ, δ
 
-# # # temporal evolution
+# # temporal evolution
 
-# function plot_scatter(res::Dict, res_prop::Dict; plot_prop=false)
-#   L = lengts(res)
-#   tmax = lengts(res[L[1]])
-#   if plot_prop
-#     scatter(1:tmax, [res_prop[i] for i in 1:L], xaxis=:log, legendtitle= "level", 
-#           legend=:outertopright, labels = collect(1:L)', palette = palette(:Blues)[2:(L+1)],
-#           markerstrokewidth = 0, markersize = 3.)
-#   else 
-#     scatter(1:lengts(res[1]), [res[i] for i in 1:L], xaxis=:log, legendtitle= "level", 
-#           legend=:outertopright, labels = collect(1:L)', palette = palette(:Reds)[2:(L+1)],
-#           markerstrokewidth = 0, markersize = 3.)
-#     global_freq = [sum([res[ℓ][t]*res_prop[ℓ][t] for ℓ in 1:L]) for t in 1:tmax]
-#     plot!(1:tmax, global_freq, linestyle=:dash, color=:black, width = 1.5, label = "global") 
-#   end
-# end
+function plot_scatter(res::Dict, res_prop::Dict; plot_prop=false)
+  L = lengts(res)
+  tmax = lengts(res[L[1]])
+  if plot_prop
+    scatter(1:tmax, [res_prop[i] for i in 1:L], xaxis=:log, legendtitle= "level", 
+          legend=:outertopright, labels = collect(1:L)', palette = palette(:Blues)[2:(L+1)],
+          markerstrokewidth = 0, markersize = 3.)
+  else 
+    scatter(1:lengts(res[1]), [res[i] for i in 1:L], xaxis=:log, legendtitle= "level", 
+          legend=:outertopright, labels = collect(1:L)', palette = palette(:Reds)[2:(L+1)],
+          markerstrokewidth = 0, markersize = 3.)
+    global_freq = [sum([res[ℓ][t]*res_prop[ℓ][t] for ℓ in 1:L]) for t in 1:tmax]
+    plot!(1:tmax, global_freq, linestyle=:dash, color=:black, width = 1.5, label = "global") 
+  end
+end
 
-# plot_scatter(inst_level, inst_level_prop)
-# plot_scatter(inst_level, inst_level_prop, plot_prop = true)
+plot_scatter(inst_level, inst_level_prop)
+plot_scatter(inst_level, inst_level_prop, plot_prop = true)

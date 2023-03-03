@@ -129,57 +129,26 @@ lookup1 = {
 
 p1 = get_param_table(sourcesink1, lookup1)
 
-ax_vars1 = ["β", "c", "b"] // choose the x,y,z axis, i.e. params to vary
-fp1 = get_fixed_params(p1, ax_vars1); // fixed params are the rest
-
 viewof s1 = Inputs.form({
-  ax0: Inputs.range(p1[ax_vars1[0]]['minmax'], {step: p1[ax_vars1[0]]['s'], label: ax_vars1[0]}),
-  ax1: Inputs.range(p1[ax_vars1[1]]['minmax'], {step: p1[ax_vars1[1]]['s'], label: ax_vars1[1]}),
-  ax2: Inputs.range(p1[ax_vars1[2]]['minmax'], {step: p1[ax_vars1[2]]['s'], label: ax_vars1[2]}),
-  fp0: Inputs.range(p1[fp1[0]]['minmax'], {step: p1[fp1[0]]['s'], label: fp1[0], value: p1[fp1[0]]['first_val']}),
-  fp1: Inputs.range(p1[fp1[1]]['minmax'], {step: p1[fp1[1]]['s'], label: fp1[1], value: p1[fp1[1]]['first_val']}),
-  fp2: Inputs.range(p1[fp1[2]]['minmax'], {step: p1[fp1[2]]['s'], label: fp1[2], value: p1[fp1[2]]['first_val']})
-})
-
-viewof r1 = Inputs.form({
-  x: Inputs.radio(ax_vars1, {label: "x", value: ax_vars1[0]}),
-  y: Inputs.radio(ax_vars1, {label: "y", value: ax_vars1[1]})
+  β: Inputs.range(p1['β']['minmax'], {step: p1['β']['s'], label: "β"}),
+  γ: Inputs.range(p1['γ']['minmax'], {step: p1['γ']['s'], label: "γ"}),
+  ρ: Inputs.range(p1['ρ']['minmax'], {step: p1['ρ']['s'], label: "ρ"}),
+  b: Inputs.range(p1['b']['minmax'], {step: p1['b']['s'], label: "b"}),
+  c: Inputs.range(p1['c']['minmax'], {step: p1['c']['s'], label: "c"}),
+  μ: Inputs.range(p1['μ']['minmax'], {step: p1['μ']['s'], label: "μ"})
 })
 
 data = resdb.query(`
-  SELECT timestep::INT as timestep, L::INT as L, value, value_prop, name
+  SELECT timestep::INT as timestep, L::INT as L, value, name
   FROM sourcesink1
   WHERE
-  name = '${f(s1['ax0'])}_${f(s1['fp0'])}_${f(s1['fp1'])}_${f(s1['ax2'])}_${f(s1['ax1'])}_${f(s1['fp2'])}'
-`)
-
-datab = resdb.query(`
-    WITH tmp as (
-        SELECT name, L, MAX(timestep::INT) as timestep
-        FROM sourcesink1
-        GROUP BY name, L
-    )
-    SELECT s.name, s.value, s.L::INT as L, s.value_prop
-    FROM sourcesink1 s
-    JOIN tmp
-    ON s.name = tmp.name AND s.L = tmp.L AND s.timestep = tmp.timestep 
+  name = '${f(s1['β'])}_${f(s1['γ'])}_${f(s1['ρ'])}_${f(s1['b'])}_${f(s1['c'])}_${f(s1['μ'])}'
 `)
 ```
 
 ```{ojs}
 //| panel: fill
-html`
-    <div style="display:flex; ">
-      <div>${ plot_time_evo(data, "value", "reds") }</div>
-      <div>${ plot_time_evo(data, "value_prop", "blues")}</div>
-    </div>
-`
-```
-
-```{ojs}
-data_hm = get_data_heatmap(datab, lookup1, fp1, ax_vars1, r1, s1)
-pd1 = phase_diagram(data_hm, r1['x'], r1['y'])
-pd1.legend('color', {label: "Global Frequency of behavior →", width: 350, marginLeft: 150})
+plot_time_evo(data)
 ```
 
 #### Takeaways:
@@ -253,19 +222,9 @@ lookup2 = {
 
 p2 = get_param_table(sourcesink2, lookup2)
 
-<<<<<<< HEAD
-=======
-viewof s2 = Inputs.form({
-  β: Inputs.range(p2['β']['minmax'], {step: p2['β']['s'], label: "β", value: p2['β']['first_val']}),
-  ξ: Inputs.range(p2['ξ']['minmax'], {step: p2['ξ']['s'], label: "ξ", value: p2['ξ']['first_val']}),
-  α: Inputs.range(p2['α']['minmax'], {step: p2['α']['s'], label: "α", value: p2['α']['first_val']}),
-  γ: Inputs.range(p2['γ']['minmax'], {step: p2['γ']['s'], label: "γ", value: p2['γ']['first_val']}),
-  ρ: Inputs.range(p2['ρ']['minmax'], {step: p2['ρ']['s'], label: "ρ", value: p2['ρ']['first_val']}),
-  η: Inputs.range(p2['η']['minmax'], {step: p2['η']['s'], label: "η", value: p2['η']['first_val']}),
-  b: Inputs.range(p2['b']['minmax'], {step: p2['b']['s'], label: "b", value: p2['b']['first_val']}),
-  c: Inputs.range(p2['c']['minmax'], {step: p2['c']['s'], label: "c", value: p2['c']['first_val']}),
-  μ: Inputs.range(p2['μ']['minmax'], {step: p2['μ']['s'], label: "μ", value: p2['μ']['first_val']})
-})
+ax_vars2 = ["β", "ρ", "η"] // choose the x,y,z axis, i.e. params to vary
+fy2 = "α"  // choose the facet variable
+fp2 = ["ξ", "α", "γ", "b", "c", "μ"]
 
 data2 = resdb.query(`
   SELECT timestep::INT as timestep, L::INT as L, value, name
@@ -280,40 +239,32 @@ data2 = resdb.query(`
 plot_time_evo(data2)
 ```
 
-## Phase diagram
 
 ```{ojs}
 //| panel: sidebar
->>>>>>> parent of 2fbcf92 (putting figures side by side)
 ax_vars2 = ["β", "ρ", "η"] // choose the x,y,z axis, i.e. params to vary
-fy2 = "α"  // choose the facet variable
-fp2 = ["ξ", "α", "γ", "b", "c", "μ"]
-
+facet_var2 = ["α"]  // choose the facet variable
+fp2 = get_fixed_params(p2, ax_vars2, facet_var2); // fixed params are the rest
 
 viewof r2 = Inputs.form({
   x: Inputs.radio(ax_vars2, {label: "x", value: ax_vars2[0]}),
   y: Inputs.radio(ax_vars2, {label: "y", value: ax_vars2[1]})
 })
 
-viewof s2 = Inputs.form({
-  ax0: Inputs.range(p2[ax_vars2[0]]['minmax'], {step: p2[ax_vars2[0]]['s'], label: ax_vars2[0]}),
-  ax1: Inputs.range(p2[ax_vars2[1]]['minmax'], {step: p2[ax_vars2[1]]['s'], label: ax_vars2[1]}),
-  ax2: Inputs.range(p2[ax_vars2[2]]['minmax'], {step: p2[ax_vars2[2]]['s'], label: ax_vars2[2]}),
+viewof s2b = Inputs.form({
+  ax0: Inputs.range(p2[ax_vars2[0]]['minmax'], {step: p2[ax_vars2[0]]['s'], label: ax_vars2[0], disabled: r2['x'] == ax_vars2[0] || r2['y'] == ax_vars2[0]}),
+  ax1: Inputs.range(p2[ax_vars2[1]]['minmax'], {step: p2[ax_vars2[1]]['s'], label: ax_vars2[1], disabled: r2['x'] == ax_vars2[1] || r2['y'] == ax_vars2[1]}),
+  ax2: Inputs.range(p2[ax_vars2[2]]['minmax'], {step: p2[ax_vars2[2]]['s'], label: ax_vars2[2], disabled: r2['x'] == ax_vars2[2] || r2['y'] == ax_vars2[2]}),
   fp0: Inputs.range(p2[fp2[0]]['minmax'], {step: p2[fp2[0]]['s'], label: fp2[0], value: p2[fp2[0]]['first_val']}),
-  fp1: Inputs.range(p2[fy2]['minmax'], {step: p2[fy2]['s'], label: fy2, value: p2[fy2]['first_val']}),
+  fp1: Inputs.range(p2[fp2[1]]['minmax'], {step: p2[fp2[1]]['s'], label: fp2[1], value: p2[fp2[1]]['first_val']}),
   fp2: Inputs.range(p2[fp2[2]]['minmax'], {step: p2[fp2[2]]['s'], label: fp2[2], value: p2[fp2[2]]['first_val']}),
   fp3: Inputs.range(p2[fp2[3]]['minmax'], {step: p2[fp2[3]]['s'], label: fp2[3], value: p2[fp2[3]]['first_val']}),
-  fp4: Inputs.range(p2[fp2[4]]['minmax'], {step: p2[fp2[4]]['s'], label: fp2[4], value: p2[fp2[4]]['first_val']}),
-  fp5: Inputs.range(p2[fp2[5]]['minmax'], {step: p2[fp2[5]]['s'], label: fp2[5], value: p2[fp2[5]]['first_val']}),
+  fp4: Inputs.range(p2[fp2[4]]['minmax'], {step: p2[fp2[4]]['s'], label: fp2[4], value: p2[fp2[4]]['first_val']})
 })
+```
 
-data2 = resdb.query(`
-  SELECT timestep::INT as timestep, L::INT as L, value, value_prop, name
-  FROM sourcesink2
-  WHERE
-  name = '${f(s2['ax0'])}_${f(s2['fp0'])}_${f(s2['fp1'])}_${f(s2['fp2'])}_${f(s2['ax1'])}_${f(s2['ax2'])}_${f(s2['fp3'])}_${f(s2['fp4'])}_${f(s2['fp5'])}'
-`)
-
+```{ojs}
+//| panel: fill
 data2b = resdb.query(`
     WITH tmp as (
         SELECT name, L, MAX(timestep::INT) as timestep
@@ -325,45 +276,17 @@ data2b = resdb.query(`
     JOIN tmp
     ON s.name = tmp.name AND s.L = tmp.L AND s.timestep = tmp.timestep 
 `)
-<<<<<<< HEAD
 ```
 
-```{ojs}
-//| panel: fill
-html`
-    <div style="display:flex; ">
-      <div>${ plot_time_evo(data2, "value", "reds") }</div>
-      <div>${ plot_time_evo(data2, "value_prop", "blues")}</div>
-    </div>
-`
-```
+data_hm2 = get_data_heatmap(data2b, lookup2, facet_var2, fp2, ax_vars2, r2, s2b)
 
-<<<<<<< HEAD
 
 ```{ojs}
 data_hm2 = get_data_heatmap(data2b, lookup2, fp2, ax_vars2, r2, s2, fy2)
 pd2 = phase_diagram(data_hm2, r2['x'], r2['y'], fy2)
 pd2.legend('color', {label: "Global Frequency of behavior →", width: 350, marginLeft: 150})
-=======
-phase_diagram(data_hm2, r2['x'], r2['y'])
->>>>>>> parent of 2fbcf92 (putting figures side by side)
 ```
 
-=======
-
-data_hm2 = get_data_heatmap(data2b, lookup2, facet_var2, fp2, ax_vars2, r2, s2b)
-
-phase_diagram(data_hm2, r2['x'], r2['y'])
-```
-
-<<<<<<< HEAD
-<<<<<<< HEAD
->>>>>>> parent of 2fbcf92 (putting figures side by side)
-=======
->>>>>>> parent of 2fbcf92 (putting figures side by side)
-=======
->>>>>>> parent of 2fbcf92 (putting figures side by side)
-:::
 
 ## Game-theoretic model
 
@@ -374,46 +297,35 @@ UPDATE DESCRIPTION. WHY DO WE CARE. IS IT USEFUL FOR POLICY?! WHO AM I?
 
 ```julia
 function source_sink3!(du, u, p, t)
-  G, L, n = u, lengts(u.x), lengts(u.x[1])
-  β, γ, ρ, b, c, μ, δ = p # δ = 1 (δ = 0): (no) resource requirement to upgrade institution
+  G, L, n = u, length(u.x), length(u.x[1])
+  β, γ, ρ, b, c, μ = p
   Z, pop, R = zeros(L), zeros(L), 0.
 
   # Calculate mean-field coupling and observed fitness landscape
+  # In the following, the functions g (cost-benefits for groups) and g̃ (fitness function) are taken equal to function f. The three have similar properties.
     for ℓ in 1:L
       n_adopt = collect(0:(n-1))
       Z[ℓ]    = sum(f.(b*n_adopt .- c*(ℓ-1)) .* G.x[ℓ])
       pop[ℓ]  = sum(G.x[ℓ])
       R      += sum(n_adopt .* G.x[ℓ]) # Global diffusion
       pop[ℓ] > 0.0 && ( Z[ℓ] /= pop[ℓ] )
-    end
+  end
 
     for ℓ = 1:L, i = 1:n
       n_adopt, gr_size = i-1, n-1
-      # Individual selection process
-      du.x[ℓ][i] = -n_adopt*f(1-s(ℓ))*G.x[ℓ][i] - (gr_size-n_adopt)*f(s(ℓ)-1)*G.x[ℓ][i]
-      du.x[ℓ][i] += - n_adopt*(gr_size-n_adopt)*(β+γ)*G.x[ℓ][i] - ρ*(gr_size-n_adopt)*β*R*G.x[ℓ][i] - ρ*n_adopt*γ*(gr_size-R)*G.x[ℓ][i]
-      n_adopt > 0 && ( du.x[ℓ][i] += (gr_size-n_adopt+1)*f(s(ℓ)-1)*G.x[ℓ][i-1] + β*(n_adopt-1+ρ*R)*(gr_size-n_adopt+1)*G.x[ℓ][i-1] )
-      n_adopt < gr_size && ( du.x[ℓ][i] += (n_adopt+1)*f(1-s(ℓ))*G.x[ℓ][i+1] + γ*(gr_size-n_adopt-1+ρ*(gr_size-R))*(n_adopt+1)*G.x[ℓ][i+1] )
+      # Inndividual selection process
+      du.x[ℓ][i] = -n_adopt*f(1-h(ℓ))*G.x[ℓ][i] - (gr_size-n_adopt)*f(h(ℓ)-1)*G.x[ℓ][i]
+      du.x[ℓ][i] += -n_adopt*(gr_size-n_adopt)*(β+γ)*G.x[ℓ][i] - ρ*(gr_size-n_adopt)*β*R*G.x[ℓ][i] - ρ*n_adopt*γ*(gr_size-R)*G.x[ℓ][i]
+      n_adopt > 0 && ( du.x[ℓ][i] += (gr_size-n_adopt+1)*f(h(ℓ)-1)*G.x[ℓ][i-1] + β*(n_adopt-1+ρ*R)*(gr_size-n_adopt+1)*G.x[ℓ][i-1] )
+      n_adopt < gr_size && ( du.x[ℓ][i] += (n_adopt+1)*f(1-h(ℓ))*G.x[ℓ][i+1] + γ*(gr_size-n_adopt-1+ρ*(gr_size-R))*(n_adopt+1)*G.x[ℓ][i+1] )
       # Group selection process
-      ℓ > 1 && ( du.x[ℓ][i] += (f(b*n_adopt-c*(ℓ-1))^δ)*(μ+ρ*Z[ℓ]/Z[ℓ-1])*G.x[ℓ-1][i] - (μ*(f(c*(ℓ-1)-b*n_adopt)^δ)+ρ*(f(b*n_adopt-c*(ℓ-2))^δ)*Z[ℓ-1]/Z[ℓ])*G.x[ℓ][i] )
-      ℓ < L && ( du.x[ℓ][i] += (μ*(f(c*ℓ-b*n_adopt)^δ)+ρ*(f(b*n_adopt-c*(ℓ-1))^δ)*Z[ℓ]/Z[ℓ+1])*G.x[ℓ+1][i] - (f(b*n_adopt-c*ℓ)^δ)*(μ+ρ*Z[ℓ+1]/Z[ℓ])*G.x[ℓ][i] )
+      ℓ > 1 && ( du.x[ℓ][i] += f(b*n_adopt-c*(ℓ-1))*(μ+ρ*Z[ℓ]/Z[ℓ-1])*G.x[ℓ-1][i] - (μ*f(c*(ℓ-1)-b*n_adopt)+ρ*f(b*n_adopt-c*(ℓ-2))*Z[ℓ-1]/Z[ℓ])*G.x[ℓ][i] )
+      ℓ < L && ( du.x[ℓ][i] += (μ*f(c*ℓ-b*n_adopt)+ρ*f(b*n_adopt-c*(ℓ-1))*Z[ℓ]/Z[ℓ+1])*G.x[ℓ+1][i] - f(b*n_adopt-c*ℓ)*(μ+ρ*Z[ℓ+1]/Z[ℓ])*G.x[ℓ][i] )
     end
 end
 ```
+#### Playground
 
-::: panel-tabset
-
-## Time evo plot
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
-
-=======
->>>>>>> parent of 2fbcf92 (putting figures side by side)
-=======
->>>>>>> parent of 2fbcf92 (putting figures side by side)
-=======
->>>>>>> parent of 2fbcf92 (putting figures side by side)
 
 ```{ojs}
 //| panel: sidebar
@@ -427,63 +339,27 @@ lookup3 = {
 
 p3 = get_param_table(sourcesink3, lookup3)
 
-<<<<<<< HEAD
-=======
-viewof s3 = Inputs.form({
-  β: Inputs.range(p3['β']['minmax'], {step: p3['β']['s'], label: "β"}),
-  γ: Inputs.range(p3['γ']['minmax'], {step: p3['γ']['s'], label: "γ"}),
-  ρ: Inputs.range(p3['ρ']['minmax'], {step: p3['ρ']['s'], label: "ρ"}),
-  b: Inputs.range(p3['b']['minmax'], {step: p3['b']['s'], label: "b"}),
-  c: Inputs.range(p3['c']['minmax'], {step: p3['c']['s'], label: "c"}),
-  μ: Inputs.range(p3['μ']['minmax'], {step: p3['μ']['s'], label: "μ"}),
-  δ: Inputs.range(p3['δ']['minmax'], {step: p3['δ']['s'], label: "δ"})
-})
-
-data3a = resdb.query(`
-  SELECT timestep::INT as timestep, L::INT as L, value, name
-  FROM sourcesink3
-  WHERE
-  name = '${f(s3['β'])}_${f(s3['γ'])}_${f(s3['ρ'])}_${f(s3['b'])}_${f(s3['c'])}_${f(s3['μ'])}_${f(s3['δ'])}'
-`)
-```
-
-```{ojs}
-//| panel: fill
-plot_time_evo(data3a)
-```
-
-## Phase diagram
-
-```{ojs}
-//| panel: sidebar
->>>>>>> parent of 2fbcf92 (putting figures side by side)
 ax_vars3 = ["β", "ρ", 'b']
-fy3 = "δ"
-fp3 = ["γ", "c", "μ", "δ"]
+facet_var3 = ["δ"]
+fp3 = get_fixed_params(p3, ax_vars3, facet_var3);
 
 viewof r3 = Inputs.form({
   x: Inputs.radio(ax_vars3, {label: "x", value: ax_vars3[0]}),
   y: Inputs.radio(ax_vars3, {label: "y", value: ax_vars3[1]})
 })
 
-// index should map to below sliders, e.g. fp0 == γ == "second spot in `name` string" 
-viewof s3 = Inputs.form({
-  ax0: Inputs.range(p3[ax_vars3[0]]['minmax'], {step: p3[ax_vars3[0]]['s'], label: ax_vars3[0]}),
-  ax1: Inputs.range(p3[ax_vars3[1]]['minmax'], {step: p3[ax_vars3[1]]['s'], label: ax_vars3[1]}),
-  ax2: Inputs.range(p3[ax_vars3[2]]['minmax'], {step: p3[ax_vars3[2]]['s'], label: ax_vars3[2]}),
+viewof s3b = Inputs.form({
+  ax0: Inputs.range(p3[ax_vars3[0]]['minmax'], {step: p3[ax_vars3[0]]['s'], label: ax_vars3[0], disabled: r3['x'] == ax_vars3[0] || r3['y'] == ax_vars3[0]}),
+  ax1: Inputs.range(p3[ax_vars3[1]]['minmax'], {step: p3[ax_vars3[1]]['s'], label: ax_vars3[1], disabled: r3['x'] == ax_vars3[1] || r3['y'] == ax_vars3[1]}),
+  ax2: Inputs.range(p3[ax_vars3[2]]['minmax'], {step: p3[ax_vars3[2]]['s'], label: ax_vars3[2], disabled: r3['x'] == ax_vars3[2] || r3['y'] == ax_vars3[2]}),
   fp0: Inputs.range(p3[fp3[0]]['minmax'], {step: p3[fp3[0]]['s'], label: fp3[0], value: p3[fp3[0]]['first_val']}),
   fp1: Inputs.range(p3[fp3[1]]['minmax'], {step: p3[fp3[1]]['s'], label: fp3[1], value: p3[fp3[1]]['first_val']}),
-  fp2: Inputs.range(p3[fp3[2]]['minmax'], {step: p3[fp3[2]]['s'], label: fp3[2], value: p3[fp3[2]]['first_val']}),
-  fp3: Inputs.range(p3[fp3[3]]['minmax'], {step: p3[fp3[3]]['s'], label: fp3[3], value: p3[fp3[3]]['first_val']})
+  fp2: Inputs.range(p3[fp3[2]]['minmax'], {step: p3[fp3[2]]['s'], label: fp3[2], value: p3[fp3[2]]['first_val']})
 })
+```
 
-data3a = resdb.query(`
-  SELECT timestep::INT as timestep, L::INT as L, value, value_prop, name
-  FROM sourcesink3
-  WHERE
-  name = '${f(s3["ax0"])}_${f(s3["fp0"])}_${f(s3["ax1"])}_${f(s3["ax2"])}_${f(s3["fp1"])}_${f(s3["fp2"])}_${f(s3["fp3"])}'
-`)
-
+```{ojs}
+//| panel: fill
 data3b = resdb.query(`
     WITH tmp as (
         SELECT name, L, MAX(timestep::INT) as timestep
@@ -495,48 +371,29 @@ data3b = resdb.query(`
     JOIN tmp
     ON s.name = tmp.name AND s.L = tmp.L AND s.timestep = tmp.timestep 
 `)
-<<<<<<< HEAD
 ```
 
-```{ojs}
-//| panel: fill
-html`
-    <div style="display:flex; ">
-      <div>${ plot_time_evo(data3a, "value", "reds") }</div>
-      <div>${ plot_time_evo(data3a, "value_prop", "blues")}</div>
-    </div>
-`
-```
+data_hm3 = get_data_heatmap(data3b, lookup3, facet_var3, fp3, ax_vars3, r3, s3b)
 
-<<<<<<< HEAD
 ```{ojs}
 data_hm3 = get_data_heatmap(data3b, lookup3, fp3, ax_vars3, r3, s3, fy3)
 pd3 = phase_diagram(data_hm3, r3['x'], r3['y'], fy3)
 pd3.legend('color', {label: "Global Frequency of behavior →", width: 350, marginLeft: 150})
-=======
-phase_diagram(data_hm3, r3['x'], r3['y'])
->>>>>>> parent of 2fbcf92 (putting figures side by side)
 ```
 
-=======
+:::
 
-data_hm3 = get_data_heatmap(data3b, lookup3, facet_var3, fp3, ax_vars3, r3, s3b)
+::: {.callout-note collapse="true"}
+## Model 1 Sketch
 
-phase_diagram(data_hm3, r3['x'], r3['y'])
-```
-
-<<<<<<< HEAD
-<<<<<<< HEAD
->>>>>>> parent of 2fbcf92 (putting figures side by side)
-=======
->>>>>>> parent of 2fbcf92 (putting figures side by side)
-=======
->>>>>>> parent of 2fbcf92 (putting figures side by side)
+![](sourcesink_sketch.jpg)
+:::
+:::
 
 ```{ojs helpers}
 function get_fixed_params(param_table, ax_vars, fx) {
   const all_params = [...Object.keys(param_table)]
-  const varying_params = typeof fx !== undefined ? new Set(ax_vars) : new Set(ax_vars.concat(fx))
+  const varying_params = new Set(ax_vars.concat(fx))
   const diff_params = new Set(all_params.filter((x) => !varying_params.has(x)))
   return Array.from(diff_params)
 }
@@ -578,7 +435,7 @@ function get_param_table(model, lookup) {
 //   fx: variable to facet
 //   fp: other vars
 //   sliders: set of sliders
-function get_data_heatmap(data, lookup, fp, ax_vars, radios, sliders, fx) {
+function get_data_heatmap(data, lookup, fx, fp, ax_vars, radios, sliders) {
   const dat_hm = [];
   
   for (let i=0; i < data.length; i++) { 
@@ -598,7 +455,7 @@ function get_data_heatmap(data, lookup, fp, ax_vars, radios, sliders, fx) {
     
     const hm_vals_i = {
       'L': data[i].L,
-      'fx' : typeof fx !== undefined ? null : p_split[lookup['name2idx'][fx]], 
+      'fx' : p_split[lookup['name2idx'][fx]], 
       'param1': parseFloat(p_split[lookup['name2idx'][radios['x']]]),
       'param2': parseFloat(p_split[lookup['name2idx'][radios['y']]]),
       'value': data[i].value_prop
@@ -619,22 +476,19 @@ function get_data_heatmap(data, lookup, fp, ax_vars, radios, sliders, fx) {
   return dat_hm
 }
 
-function plot_time_evo(d, y_vals, pal) {
-  const global_mean = d3.rollup(d, v => d3.sum(v, d => d.value * d.value_prop), d => d.timestep)
-
+function plot_time_evo(d) {
   return Plot.plot({
     x: {type:"log"},
     marginLeft: 50,
-    color: { scheme: pal, type: "ordinal", legend: true },
+    color: {scheme: "reds", type: "ordinal", legend: true},
     marks: [
-      Plot.lineY(Array.from(global_mean.values()), {strokeDasharray: "5,3"}),
       Plot.line(
         d, {
-          x: 'timestep', y: y_vals, stroke: "L"
+          x: 'timestep', y: "value", stroke: "L"
           }),
       Plot.dot(
         d, {
-          x: 'timestep', y: y_vals, stroke: "L"
+          x: 'timestep', y: "value", stroke: "L"
           })
     ]
   })
@@ -644,8 +498,9 @@ function phase_diagram(d, x, y) {
   return PlotDev.plot({
     width: 400,
     color: {
-      type: "linear",
-        scheme: "spectral"
+      range: [0, 1],
+      legend: true,
+      scheme: "YlGnBu"
     },
     x: { label: x },
     y: { label: y },
@@ -655,18 +510,6 @@ function phase_diagram(d, x, y) {
 <<<<<<< HEAD
     fy: { label: fy },
     facet: { data: d, x: "L", y: typeof fy !== undefined ? 'fx' : null },
-=======
-    facet: { data: d, y: "L", x: 'fx' },
->>>>>>> parent of 2fbcf92 (putting figures side by side)
-=======
-    facet: { data: d, y: "L", x: 'fx' },
->>>>>>> parent of 2fbcf92 (putting figures side by side)
-=======
-    facet: { data: d, y: "L", x: 'fx' },
->>>>>>> parent of 2fbcf92 (putting figures side by side)
-=======
-    facet: { data: d, y: "L", x: 'fx' },
->>>>>>> parent of 2fbcf92 (putting figures side by side)
     marks: [
       PlotDev.raster(d, {
         x: "param1",
