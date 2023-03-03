@@ -235,8 +235,11 @@ function source_sink2!(du, u, p, t)
       end
 end
 ```
+#### Plot
 
-#### Playground
+::: panel-tabset
+
+## Time evo plot
 
 ```{ojs}
 //| panel: sidebar
@@ -250,6 +253,38 @@ lookup2 = {
 
 p2 = get_param_table(sourcesink2, lookup2)
 
+<<<<<<< HEAD
+=======
+viewof s2 = Inputs.form({
+  β: Inputs.range(p2['β']['minmax'], {step: p2['β']['s'], label: "β", value: p2['β']['first_val']}),
+  ξ: Inputs.range(p2['ξ']['minmax'], {step: p2['ξ']['s'], label: "ξ", value: p2['ξ']['first_val']}),
+  α: Inputs.range(p2['α']['minmax'], {step: p2['α']['s'], label: "α", value: p2['α']['first_val']}),
+  γ: Inputs.range(p2['γ']['minmax'], {step: p2['γ']['s'], label: "γ", value: p2['γ']['first_val']}),
+  ρ: Inputs.range(p2['ρ']['minmax'], {step: p2['ρ']['s'], label: "ρ", value: p2['ρ']['first_val']}),
+  η: Inputs.range(p2['η']['minmax'], {step: p2['η']['s'], label: "η", value: p2['η']['first_val']}),
+  b: Inputs.range(p2['b']['minmax'], {step: p2['b']['s'], label: "b", value: p2['b']['first_val']}),
+  c: Inputs.range(p2['c']['minmax'], {step: p2['c']['s'], label: "c", value: p2['c']['first_val']}),
+  μ: Inputs.range(p2['μ']['minmax'], {step: p2['μ']['s'], label: "μ", value: p2['μ']['first_val']})
+})
+
+data2 = resdb.query(`
+  SELECT timestep::INT as timestep, L::INT as L, value, name
+  FROM sourcesink2
+  WHERE
+  name = '${f(s2['β'])}_${f(s2['ξ'])}_${f(s2['α'])}_${f(s2['γ'])}_${f(s2['ρ'])}_${f(s2['η'])}_${f(s2['b'])}_${f(s2['c'])}_${f(s2['μ'])}'
+`)
+```
+
+```{ojs}
+//| panel: fill
+plot_time_evo(data2)
+```
+
+## Phase diagram
+
+```{ojs}
+//| panel: sidebar
+>>>>>>> parent of 2fbcf92 (putting figures side by side)
 ax_vars2 = ["β", "ρ", "η"] // choose the x,y,z axis, i.e. params to vary
 fy2 = "α"  // choose the facet variable
 fp2 = ["ξ", "α", "γ", "b", "c", "μ"]
@@ -302,13 +337,18 @@ html`
 `
 ```
 
+<<<<<<< HEAD
 
 ```{ojs}
 data_hm2 = get_data_heatmap(data2b, lookup2, fp2, ax_vars2, r2, s2, fy2)
 pd2 = phase_diagram(data_hm2, r2['x'], r2['y'], fy2)
 pd2.legend('color', {label: "Global Frequency of behavior →", width: 350, marginLeft: 150})
+=======
+phase_diagram(data_hm2, r2['x'], r2['y'])
+>>>>>>> parent of 2fbcf92 (putting figures side by side)
 ```
 
+:::
 
 ## Game-theoretic model
 
@@ -345,7 +385,10 @@ function source_sink3!(du, u, p, t)
     end
 end
 ```
-#### Playground
+
+::: panel-tabset
+
+## Time evo plot
 
 
 ```{ojs}
@@ -360,6 +403,36 @@ lookup3 = {
 
 p3 = get_param_table(sourcesink3, lookup3)
 
+<<<<<<< HEAD
+=======
+viewof s3 = Inputs.form({
+  β: Inputs.range(p3['β']['minmax'], {step: p3['β']['s'], label: "β"}),
+  γ: Inputs.range(p3['γ']['minmax'], {step: p3['γ']['s'], label: "γ"}),
+  ρ: Inputs.range(p3['ρ']['minmax'], {step: p3['ρ']['s'], label: "ρ"}),
+  b: Inputs.range(p3['b']['minmax'], {step: p3['b']['s'], label: "b"}),
+  c: Inputs.range(p3['c']['minmax'], {step: p3['c']['s'], label: "c"}),
+  μ: Inputs.range(p3['μ']['minmax'], {step: p3['μ']['s'], label: "μ"}),
+  δ: Inputs.range(p3['δ']['minmax'], {step: p3['δ']['s'], label: "δ"})
+})
+
+data3a = resdb.query(`
+  SELECT timestep::INT as timestep, L::INT as L, value, name
+  FROM sourcesink3
+  WHERE
+  name = '${f(s3['β'])}_${f(s3['γ'])}_${f(s3['ρ'])}_${f(s3['b'])}_${f(s3['c'])}_${f(s3['μ'])}_${f(s3['δ'])}'
+`)
+```
+
+```{ojs}
+//| panel: fill
+plot_time_evo(data3a)
+```
+
+## Phase diagram
+
+```{ojs}
+//| panel: sidebar
+>>>>>>> parent of 2fbcf92 (putting figures side by side)
 ax_vars3 = ["β", "ρ", 'b']
 fy3 = "δ"
 fp3 = ["γ", "c", "μ", "δ"]
@@ -410,20 +483,16 @@ html`
 `
 ```
 
+<<<<<<< HEAD
 ```{ojs}
 data_hm3 = get_data_heatmap(data3b, lookup3, fp3, ax_vars3, r3, s3, fy3)
 pd3 = phase_diagram(data_hm3, r3['x'], r3['y'], fy3)
 pd3.legend('color', {label: "Global Frequency of behavior →", width: 350, marginLeft: 150})
+=======
+phase_diagram(data_hm3, r3['x'], r3['y'])
+>>>>>>> parent of 2fbcf92 (putting figures side by side)
 ```
 
-:::
-
-::: {.callout-note collapse="true"}
-## Model 1 Sketch
-
-![](sourcesink_sketch.jpg)
-:::
-:::
 
 ```{ojs helpers}
 function get_fixed_params(param_table, ax_vars, fx) {
@@ -443,7 +512,8 @@ function get_param_table(model, lookup) {
   
   // Extract the step from a list of values for a parameter
   const s = (p,i) => { 
-    const unique_vals = Array.from(new Set(p.map(d => parseFloat(d[i])))).sort((a,b) => a - b)
+    const unique_vals = Array.from(new Set(p.map(d => parseFloat(d[i]))))
+                            .sort((a,b) => a - b)
     const out = []
     for (let i=1; i < unique_vals.length; i++ ) {
       out.push(+(unique_vals[i]-unique_vals[i-1]).toPrecision(2))
@@ -458,9 +528,7 @@ function get_param_table(model, lookup) {
   const param_table = {}
   const first_line_param = p[0]
   for ( let i=0; i < first_line_param.length; i++ ) {
-    param_table[lookup['idx2name'][i]] = { 
-      's': s(p,i), 'first_val': first_line_param[i], 'minmax': minmax(p,i) 
-      }
+    param_table[lookup['idx2name'][i]] = { 's': s(p,i), 'first_val': first_line_param[i], 'minmax': minmax(p,i) }
   }
   return param_table
 }
@@ -533,17 +601,21 @@ function plot_time_evo(d, y_vals, pal) {
   })
 }
 
-function phase_diagram(d, x, y, fy) {
+function phase_diagram(d, x, y) {
   return PlotDev.plot({
-    width: 1200,
+    width: 400,
     color: {
       type: "linear",
         scheme: "spectral"
     },
     x: { label: x },
     y: { label: y },
+<<<<<<< HEAD
     fy: { label: fy },
     facet: { data: d, x: "L", y: typeof fy !== undefined ? 'fx' : null },
+=======
+    facet: { data: d, y: "L", x: 'fx' },
+>>>>>>> parent of 2fbcf92 (putting figures side by side)
     marks: [
       PlotDev.raster(d, {
         x: "param1",
@@ -556,6 +628,16 @@ function phase_diagram(d, x, y, fy) {
 }
 ```
 
+:::
+
+:::
+
+::: {.callout-note collapse="true"}
+## Model 1 Sketch
+
+![](sourcesink_sketch.jpg)
+:::
+:::
 
 ```{ojs}
 PlotDev = await import("https://esm.sh/@observablehq/plot");
