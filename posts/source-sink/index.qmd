@@ -356,6 +356,9 @@ data_hm2 = get_data_heatmap(data2b, lookup2, facet_var2, fp2, ax_vars2, r2, s2b)
 phase_diagram(data_hm2, r2['x'], r2['y'])
 ```
 
+<<<<<<< HEAD
+>>>>>>> parent of 2fbcf92 (putting figures side by side)
+=======
 >>>>>>> parent of 2fbcf92 (putting figures side by side)
 :::
 
@@ -399,7 +402,10 @@ end
 
 ## Time evo plot
 <<<<<<< HEAD
+<<<<<<< HEAD
 
+=======
+>>>>>>> parent of 2fbcf92 (putting figures side by side)
 =======
 >>>>>>> parent of 2fbcf92 (putting figures side by side)
 
@@ -513,6 +519,9 @@ data_hm3 = get_data_heatmap(data3b, lookup3, facet_var3, fp3, ax_vars3, r3, s3b)
 phase_diagram(data_hm3, r3['x'], r3['y'])
 ```
 
+<<<<<<< HEAD
+>>>>>>> parent of 2fbcf92 (putting figures side by side)
+=======
 >>>>>>> parent of 2fbcf92 (putting figures side by side)
 
 ```{ojs helpers}
@@ -633,8 +642,12 @@ function phase_diagram(d, x, y) {
     y: { label: y },
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
     fy: { label: fy },
     facet: { data: d, x: "L", y: typeof fy !== undefined ? 'fx' : null },
+=======
+    facet: { data: d, y: "L", x: 'fx' },
+>>>>>>> parent of 2fbcf92 (putting figures side by side)
 =======
     facet: { data: d, y: "L", x: 'fx' },
 >>>>>>> parent of 2fbcf92 (putting figures side by side)
