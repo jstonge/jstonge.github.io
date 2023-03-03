@@ -120,7 +120,7 @@ end
 
 function run_source_sink2(p; perc_inf::Float64=0.001, lvl_1_inf::Bool=false)
   n, M = 20, 10000
-  L = 6
+  L = 4
   u₀ = initialize_u0(n=n, L=L, M=M, p=perc_inf, lvl_1_inf=lvl_1_inf)
 
   tspan = (1.0, 10000)
