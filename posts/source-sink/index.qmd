@@ -325,6 +325,7 @@ data2b = resdb.query(`
     JOIN tmp
     ON s.name = tmp.name AND s.L = tmp.L AND s.timestep = tmp.timestep 
 `)
+<<<<<<< HEAD
 ```
 
 ```{ojs}
@@ -348,6 +349,14 @@ phase_diagram(data_hm2, r2['x'], r2['y'])
 >>>>>>> parent of 2fbcf92 (putting figures side by side)
 ```
 
+=======
+
+data_hm2 = get_data_heatmap(data2b, lookup2, facet_var2, fp2, ax_vars2, r2, s2b)
+
+phase_diagram(data_hm2, r2['x'], r2['y'])
+```
+
+>>>>>>> parent of 2fbcf92 (putting figures side by side)
 :::
 
 ## Game-theoretic model
@@ -389,7 +398,10 @@ end
 ::: panel-tabset
 
 ## Time evo plot
+<<<<<<< HEAD
 
+=======
+>>>>>>> parent of 2fbcf92 (putting figures side by side)
 
 ```{ojs}
 //| panel: sidebar
@@ -471,6 +483,7 @@ data3b = resdb.query(`
     JOIN tmp
     ON s.name = tmp.name AND s.L = tmp.L AND s.timestep = tmp.timestep 
 `)
+<<<<<<< HEAD
 ```
 
 ```{ojs}
@@ -493,6 +506,14 @@ phase_diagram(data_hm3, r3['x'], r3['y'])
 >>>>>>> parent of 2fbcf92 (putting figures side by side)
 ```
 
+=======
+
+data_hm3 = get_data_heatmap(data3b, lookup3, facet_var3, fp3, ax_vars3, r3, s3b)
+
+phase_diagram(data_hm3, r3['x'], r3['y'])
+```
+
+>>>>>>> parent of 2fbcf92 (putting figures side by side)
 
 ```{ojs helpers}
 function get_fixed_params(param_table, ax_vars, fx) {
@@ -611,8 +632,12 @@ function phase_diagram(d, x, y) {
     x: { label: x },
     y: { label: y },
 <<<<<<< HEAD
+<<<<<<< HEAD
     fy: { label: fy },
     facet: { data: d, x: "L", y: typeof fy !== undefined ? 'fx' : null },
+=======
+    facet: { data: d, y: "L", x: 'fx' },
+>>>>>>> parent of 2fbcf92 (putting figures side by side)
 =======
     facet: { data: d, y: "L", x: 'fx' },
 >>>>>>> parent of 2fbcf92 (putting figures side by side)
