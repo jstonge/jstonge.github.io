@@ -119,9 +119,10 @@ end
 
 ```{ojs}
 //| panel: sidebar
+
 sourcesink1 = resdb.query(`SELECT DISTINCT name FROM sourcesink1`)
 lookup1 = {
-  const out = {}s
+  const out = {}
   out['idx2name'] = {0: "β", 1: 'γ', 2: 'ρ', 3: 'b', 4: 'c', 5: 'μ'}
   out['name2idx'] = {"β": 0, 'γ': 1, 'ρ': 2, 'b': 3, 'c': 4, 'μ': 5}
   return out
@@ -129,26 +130,57 @@ lookup1 = {
 
 p1 = get_param_table(sourcesink1, lookup1)
 
+ax_vars1 = ["β", "c", "b"] // choose the x,y,z axis, i.e. params to vary
+fp1 = get_fixed_params(p1, ax_vars1); // fixed params are the rest
+
 viewof s1 = Inputs.form({
-  β: Inputs.range(p1['β']['minmax'], {step: p1['β']['s'], label: "β"}),
-  γ: Inputs.range(p1['γ']['minmax'], {step: p1['γ']['s'], label: "γ"}),
-  ρ: Inputs.range(p1['ρ']['minmax'], {step: p1['ρ']['s'], label: "ρ"}),
-  b: Inputs.range(p1['b']['minmax'], {step: p1['b']['s'], label: "b"}),
-  c: Inputs.range(p1['c']['minmax'], {step: p1['c']['s'], label: "c"}),
-  μ: Inputs.range(p1['μ']['minmax'], {step: p1['μ']['s'], label: "μ"})
+  ax0: Inputs.range(p1[ax_vars1[0]]['minmax'], {step: p1[ax_vars1[0]]['s'], label: ax_vars1[0]}),
+  ax1: Inputs.range(p1[ax_vars1[1]]['minmax'], {step: p1[ax_vars1[1]]['s'], label: ax_vars1[1]}),
+  ax2: Inputs.range(p1[ax_vars1[2]]['minmax'], {step: p1[ax_vars1[2]]['s'], label: ax_vars1[2]}),
+  fp0: Inputs.range(p1[fp1[0]]['minmax'], {step: p1[fp1[0]]['s'], label: fp1[0], value: p1[fp1[0]]['first_val']}),
+  fp1: Inputs.range(p1[fp1[1]]['minmax'], {step: p1[fp1[1]]['s'], label: fp1[1], value: p1[fp1[1]]['first_val']}),
+  fp2: Inputs.range(p1[fp1[2]]['minmax'], {step: p1[fp1[2]]['s'], label: fp1[2], value: p1[fp1[2]]['first_val']})
+})
+
+viewof r1 = Inputs.form({
+  x: Inputs.radio(ax_vars1, {label: "x", value: ax_vars1[0]}),
+  y: Inputs.radio(ax_vars1, {label: "y", value: ax_vars1[1]})
 })
 
 data = resdb.query(`
-  SELECT timestep::INT as timestep, L::INT as L, value, name
+  SELECT timestep::INT as timestep, L::INT as L, value, value_prop, name
   FROM sourcesink1
   WHERE
-  name = '${f(s1['β'])}_${f(s1['γ'])}_${f(s1['ρ'])}_${f(s1['b'])}_${f(s1['c'])}_${f(s1['μ'])}'
+  name = '${f(s1['ax0'])}_${f(s1['fp0'])}_${f(s1['fp1'])}_${f(s1['ax2'])}_${f(s1['ax1'])}_${f(s1['fp2'])}'
+`)
+
+datab = resdb.query(`
+    WITH tmp as (
+        SELECT name, L, MAX(timestep::INT) as timestep
+        FROM sourcesink1
+        GROUP BY name, L
+    )
+    SELECT s.name, s.value, s.L::INT as L, s.value_prop
+    FROM sourcesink1 s
+    JOIN tmp
+    ON s.name = tmp.name AND s.L = tmp.L AND s.timestep = tmp.timestep 
 `)
 ```
 
 ```{ojs}
 //| panel: fill
-plot_time_evo(data)
+html`
+    <div style="display:flex; ">
+      <div>${ plot_time_evo(data, "value", "reds") }</div>
+      <div>${ plot_time_evo(data, "value_prop", "blues")}</div>
+    </div>
+`
+```
+
+```{ojs}
+data_hm = get_data_heatmap(datab, lookup1, fp1, ax_vars1, r1, s1)
+pd1 = phase_diagram(data_hm, r1['x'], r1['y'])
+pd1.legend('color', {label: "Global Frequency of behavior →", width: 350, marginLeft: 150})
 ```
 
 #### Takeaways:
@@ -204,11 +236,8 @@ function source_sink2!(du, u, p, t)
       end
 end
 ```
-#### Plot
 
-::: panel-tabset
-
-## Time evo plot
+#### Playground
 
 ```{ojs}
 //| panel: sidebar
@@ -226,45 +255,31 @@ ax_vars2 = ["β", "ρ", "η"] // choose the x,y,z axis, i.e. params to vary
 fy2 = "α"  // choose the facet variable
 fp2 = ["ξ", "α", "γ", "b", "c", "μ"]
 
-data2 = resdb.query(`
-  SELECT timestep::INT as timestep, L::INT as L, value, name
-  FROM sourcesink2
-  WHERE
-  name = '${f(s2['β'])}_${f(s2['ξ'])}_${f(s2['α'])}_${f(s2['γ'])}_${f(s2['ρ'])}_${f(s2['η'])}_${f(s2['b'])}_${f(s2['c'])}_${f(s2['μ'])}'
-`)
-```
-
-```{ojs}
-//| panel: fill
-plot_time_evo(data2)
-```
-
-
-```{ojs}
-//| panel: sidebar
-ax_vars2 = ["β", "ρ", "η"] // choose the x,y,z axis, i.e. params to vary
-facet_var2 = ["α"]  // choose the facet variable
-fp2 = get_fixed_params(p2, ax_vars2, facet_var2); // fixed params are the rest
 
 viewof r2 = Inputs.form({
   x: Inputs.radio(ax_vars2, {label: "x", value: ax_vars2[0]}),
   y: Inputs.radio(ax_vars2, {label: "y", value: ax_vars2[1]})
 })
 
-viewof s2b = Inputs.form({
-  ax0: Inputs.range(p2[ax_vars2[0]]['minmax'], {step: p2[ax_vars2[0]]['s'], label: ax_vars2[0], disabled: r2['x'] == ax_vars2[0] || r2['y'] == ax_vars2[0]}),
-  ax1: Inputs.range(p2[ax_vars2[1]]['minmax'], {step: p2[ax_vars2[1]]['s'], label: ax_vars2[1], disabled: r2['x'] == ax_vars2[1] || r2['y'] == ax_vars2[1]}),
-  ax2: Inputs.range(p2[ax_vars2[2]]['minmax'], {step: p2[ax_vars2[2]]['s'], label: ax_vars2[2], disabled: r2['x'] == ax_vars2[2] || r2['y'] == ax_vars2[2]}),
+viewof s2 = Inputs.form({
+  ax0: Inputs.range(p2[ax_vars2[0]]['minmax'], {step: p2[ax_vars2[0]]['s'], label: ax_vars2[0]}),
+  ax1: Inputs.range(p2[ax_vars2[1]]['minmax'], {step: p2[ax_vars2[1]]['s'], label: ax_vars2[1]}),
+  ax2: Inputs.range(p2[ax_vars2[2]]['minmax'], {step: p2[ax_vars2[2]]['s'], label: ax_vars2[2]}),
   fp0: Inputs.range(p2[fp2[0]]['minmax'], {step: p2[fp2[0]]['s'], label: fp2[0], value: p2[fp2[0]]['first_val']}),
-  fp1: Inputs.range(p2[fp2[1]]['minmax'], {step: p2[fp2[1]]['s'], label: fp2[1], value: p2[fp2[1]]['first_val']}),
+  fp1: Inputs.range(p2[fy2]['minmax'], {step: p2[fy2]['s'], label: fy2, value: p2[fy2]['first_val']}),
   fp2: Inputs.range(p2[fp2[2]]['minmax'], {step: p2[fp2[2]]['s'], label: fp2[2], value: p2[fp2[2]]['first_val']}),
   fp3: Inputs.range(p2[fp2[3]]['minmax'], {step: p2[fp2[3]]['s'], label: fp2[3], value: p2[fp2[3]]['first_val']}),
-  fp4: Inputs.range(p2[fp2[4]]['minmax'], {step: p2[fp2[4]]['s'], label: fp2[4], value: p2[fp2[4]]['first_val']})
+  fp4: Inputs.range(p2[fp2[4]]['minmax'], {step: p2[fp2[4]]['s'], label: fp2[4], value: p2[fp2[4]]['first_val']}),
+  fp5: Inputs.range(p2[fp2[5]]['minmax'], {step: p2[fp2[5]]['s'], label: fp2[5], value: p2[fp2[5]]['first_val']}),
 })
-```
 
-```{ojs}
-//| panel: fill
+data2 = resdb.query(`
+  SELECT timestep::INT as timestep, L::INT as L, value, value_prop, name
+  FROM sourcesink2
+  WHERE
+  name = '${f(s2['ax0'])}_${f(s2['fp0'])}_${f(s2['fp1'])}_${f(s2['fp2'])}_${f(s2['ax1'])}_${f(s2['ax2'])}_${f(s2['fp3'])}_${f(s2['fp4'])}_${f(s2['fp5'])}'
+`)
+
 data2b = resdb.query(`
     WITH tmp as (
         SELECT name, L, MAX(timestep::INT) as timestep
@@ -278,7 +293,15 @@ data2b = resdb.query(`
 `)
 ```
 
-data_hm2 = get_data_heatmap(data2b, lookup2, facet_var2, fp2, ax_vars2, r2, s2b)
+```{ojs}
+//| panel: fill
+html`
+    <div style="display:flex; ">
+      <div>${ plot_time_evo(data2, "value", "reds") }</div>
+      <div>${ plot_time_evo(data2, "value_prop", "blues")}</div>
+    </div>
+`
+```
 
 
 ```{ojs}
@@ -297,30 +320,29 @@ UPDATE DESCRIPTION. WHY DO WE CARE. IS IT USEFUL FOR POLICY?! WHO AM I?
 
 ```julia
 function source_sink3!(du, u, p, t)
-  G, L, n = u, length(u.x), length(u.x[1])
-  β, γ, ρ, b, c, μ = p
+  G, L, n = u, lengts(u.x), lengts(u.x[1])
+  β, γ, ρ, b, c, μ, δ = p # δ = 1 (δ = 0): (no) resource requirement to upgrade institution
   Z, pop, R = zeros(L), zeros(L), 0.
 
   # Calculate mean-field coupling and observed fitness landscape
-  # In the following, the functions g (cost-benefits for groups) and g̃ (fitness function) are taken equal to function f. The three have similar properties.
     for ℓ in 1:L
       n_adopt = collect(0:(n-1))
       Z[ℓ]    = sum(f.(b*n_adopt .- c*(ℓ-1)) .* G.x[ℓ])
       pop[ℓ]  = sum(G.x[ℓ])
       R      += sum(n_adopt .* G.x[ℓ]) # Global diffusion
       pop[ℓ] > 0.0 && ( Z[ℓ] /= pop[ℓ] )
-  end
+    end
 
     for ℓ = 1:L, i = 1:n
       n_adopt, gr_size = i-1, n-1
-      # Inndividual selection process
-      du.x[ℓ][i] = -n_adopt*f(1-h(ℓ))*G.x[ℓ][i] - (gr_size-n_adopt)*f(h(ℓ)-1)*G.x[ℓ][i]
-      du.x[ℓ][i] += -n_adopt*(gr_size-n_adopt)*(β+γ)*G.x[ℓ][i] - ρ*(gr_size-n_adopt)*β*R*G.x[ℓ][i] - ρ*n_adopt*γ*(gr_size-R)*G.x[ℓ][i]
-      n_adopt > 0 && ( du.x[ℓ][i] += (gr_size-n_adopt+1)*f(h(ℓ)-1)*G.x[ℓ][i-1] + β*(n_adopt-1+ρ*R)*(gr_size-n_adopt+1)*G.x[ℓ][i-1] )
-      n_adopt < gr_size && ( du.x[ℓ][i] += (n_adopt+1)*f(1-h(ℓ))*G.x[ℓ][i+1] + γ*(gr_size-n_adopt-1+ρ*(gr_size-R))*(n_adopt+1)*G.x[ℓ][i+1] )
+      # Individual selection process
+      du.x[ℓ][i] = -n_adopt*f(1-s(ℓ))*G.x[ℓ][i] - (gr_size-n_adopt)*f(s(ℓ)-1)*G.x[ℓ][i]
+      du.x[ℓ][i] += - n_adopt*(gr_size-n_adopt)*(β+γ)*G.x[ℓ][i] - ρ*(gr_size-n_adopt)*β*R*G.x[ℓ][i] - ρ*n_adopt*γ*(gr_size-R)*G.x[ℓ][i]
+      n_adopt > 0 && ( du.x[ℓ][i] += (gr_size-n_adopt+1)*f(s(ℓ)-1)*G.x[ℓ][i-1] + β*(n_adopt-1+ρ*R)*(gr_size-n_adopt+1)*G.x[ℓ][i-1] )
+      n_adopt < gr_size && ( du.x[ℓ][i] += (n_adopt+1)*f(1-s(ℓ))*G.x[ℓ][i+1] + γ*(gr_size-n_adopt-1+ρ*(gr_size-R))*(n_adopt+1)*G.x[ℓ][i+1] )
       # Group selection process
-      ℓ > 1 && ( du.x[ℓ][i] += f(b*n_adopt-c*(ℓ-1))*(μ+ρ*Z[ℓ]/Z[ℓ-1])*G.x[ℓ-1][i] - (μ*f(c*(ℓ-1)-b*n_adopt)+ρ*f(b*n_adopt-c*(ℓ-2))*Z[ℓ-1]/Z[ℓ])*G.x[ℓ][i] )
-      ℓ < L && ( du.x[ℓ][i] += (μ*f(c*ℓ-b*n_adopt)+ρ*f(b*n_adopt-c*(ℓ-1))*Z[ℓ]/Z[ℓ+1])*G.x[ℓ+1][i] - f(b*n_adopt-c*ℓ)*(μ+ρ*Z[ℓ+1]/Z[ℓ])*G.x[ℓ][i] )
+      ℓ > 1 && ( du.x[ℓ][i] += (f(b*n_adopt-c*(ℓ-1))^δ)*(μ+ρ*Z[ℓ]/Z[ℓ-1])*G.x[ℓ-1][i] - (μ*(f(c*(ℓ-1)-b*n_adopt)^δ)+ρ*(f(b*n_adopt-c*(ℓ-2))^δ)*Z[ℓ-1]/Z[ℓ])*G.x[ℓ][i] )
+      ℓ < L && ( du.x[ℓ][i] += (μ*(f(c*ℓ-b*n_adopt)^δ)+ρ*(f(b*n_adopt-c*(ℓ-1))^δ)*Z[ℓ]/Z[ℓ+1])*G.x[ℓ+1][i] - (f(b*n_adopt-c*ℓ)^δ)*(μ+ρ*Z[ℓ+1]/Z[ℓ])*G.x[ℓ][i] )
     end
 end
 ```
@@ -340,26 +362,32 @@ lookup3 = {
 p3 = get_param_table(sourcesink3, lookup3)
 
 ax_vars3 = ["β", "ρ", 'b']
-facet_var3 = ["δ"]
-fp3 = get_fixed_params(p3, ax_vars3, facet_var3);
+fy3 = "δ"
+fp3 = ["γ", "c", "μ", "δ"]
 
 viewof r3 = Inputs.form({
   x: Inputs.radio(ax_vars3, {label: "x", value: ax_vars3[0]}),
   y: Inputs.radio(ax_vars3, {label: "y", value: ax_vars3[1]})
 })
 
-viewof s3b = Inputs.form({
-  ax0: Inputs.range(p3[ax_vars3[0]]['minmax'], {step: p3[ax_vars3[0]]['s'], label: ax_vars3[0], disabled: r3['x'] == ax_vars3[0] || r3['y'] == ax_vars3[0]}),
-  ax1: Inputs.range(p3[ax_vars3[1]]['minmax'], {step: p3[ax_vars3[1]]['s'], label: ax_vars3[1], disabled: r3['x'] == ax_vars3[1] || r3['y'] == ax_vars3[1]}),
-  ax2: Inputs.range(p3[ax_vars3[2]]['minmax'], {step: p3[ax_vars3[2]]['s'], label: ax_vars3[2], disabled: r3['x'] == ax_vars3[2] || r3['y'] == ax_vars3[2]}),
+// index should map to below sliders, e.g. fp0 == γ == "second spot in `name` string" 
+viewof s3 = Inputs.form({
+  ax0: Inputs.range(p3[ax_vars3[0]]['minmax'], {step: p3[ax_vars3[0]]['s'], label: ax_vars3[0]}),
+  ax1: Inputs.range(p3[ax_vars3[1]]['minmax'], {step: p3[ax_vars3[1]]['s'], label: ax_vars3[1]}),
+  ax2: Inputs.range(p3[ax_vars3[2]]['minmax'], {step: p3[ax_vars3[2]]['s'], label: ax_vars3[2]}),
   fp0: Inputs.range(p3[fp3[0]]['minmax'], {step: p3[fp3[0]]['s'], label: fp3[0], value: p3[fp3[0]]['first_val']}),
   fp1: Inputs.range(p3[fp3[1]]['minmax'], {step: p3[fp3[1]]['s'], label: fp3[1], value: p3[fp3[1]]['first_val']}),
-  fp2: Inputs.range(p3[fp3[2]]['minmax'], {step: p3[fp3[2]]['s'], label: fp3[2], value: p3[fp3[2]]['first_val']})
+  fp2: Inputs.range(p3[fp3[2]]['minmax'], {step: p3[fp3[2]]['s'], label: fp3[2], value: p3[fp3[2]]['first_val']}),
+  fp3: Inputs.range(p3[fp3[3]]['minmax'], {step: p3[fp3[3]]['s'], label: fp3[3], value: p3[fp3[3]]['first_val']})
 })
-```
 
-```{ojs}
-//| panel: fill
+data3a = resdb.query(`
+  SELECT timestep::INT as timestep, L::INT as L, value, value_prop, name
+  FROM sourcesink3
+  WHERE
+  name = '${f(s3["ax0"])}_${f(s3["fp0"])}_${f(s3["ax1"])}_${f(s3["ax2"])}_${f(s3["fp1"])}_${f(s3["fp2"])}_${f(s3["fp3"])}'
+`)
+
 data3b = resdb.query(`
     WITH tmp as (
         SELECT name, L, MAX(timestep::INT) as timestep
@@ -373,7 +401,15 @@ data3b = resdb.query(`
 `)
 ```
 
-data_hm3 = get_data_heatmap(data3b, lookup3, facet_var3, fp3, ax_vars3, r3, s3b)
+```{ojs}
+//| panel: fill
+html`
+    <div style="display:flex; ">
+      <div>${ plot_time_evo(data3a, "value", "reds") }</div>
+      <div>${ plot_time_evo(data3a, "value_prop", "blues")}</div>
+    </div>
+`
+```
 
 ```{ojs}
 data_hm3 = get_data_heatmap(data3b, lookup3, fp3, ax_vars3, r3, s3, fy3)
@@ -393,7 +429,7 @@ pd3.legend('color', {label: "Global Frequency of behavior →", width: 350, marg
 ```{ojs helpers}
 function get_fixed_params(param_table, ax_vars, fx) {
   const all_params = [...Object.keys(param_table)]
-  const varying_params = new Set(ax_vars.concat(fx))
+  const varying_params = typeof fx !== undefined ? new Set(ax_vars) : new Set(ax_vars.concat(fx))
   const diff_params = new Set(all_params.filter((x) => !varying_params.has(x)))
   return Array.from(diff_params)
 }
@@ -408,8 +444,7 @@ function get_param_table(model, lookup) {
   
   // Extract the step from a list of values for a parameter
   const s = (p,i) => { 
-    const unique_vals = Array.from(new Set(p.map(d => parseFloat(d[i]))))
-                            .sort((a,b) => a - b)
+    const unique_vals = Array.from(new Set(p.map(d => parseFloat(d[i])))).sort((a,b) => a - b)
     const out = []
     for (let i=1; i < unique_vals.length; i++ ) {
       out.push(+(unique_vals[i]-unique_vals[i-1]).toPrecision(2))
@@ -424,7 +459,9 @@ function get_param_table(model, lookup) {
   const param_table = {}
   const first_line_param = p[0]
   for ( let i=0; i < first_line_param.length; i++ ) {
-    param_table[lookup['idx2name'][i]] = { 's': s(p,i), 'first_val': first_line_param[i], 'minmax': minmax(p,i) }
+    param_table[lookup['idx2name'][i]] = { 
+      's': s(p,i), 'first_val': first_line_param[i], 'minmax': minmax(p,i) 
+      }
   }
   return param_table
 }
@@ -435,7 +472,7 @@ function get_param_table(model, lookup) {
 //   fx: variable to facet
 //   fp: other vars
 //   sliders: set of sliders
-function get_data_heatmap(data, lookup, fx, fp, ax_vars, radios, sliders) {
+function get_data_heatmap(data, lookup, fp, ax_vars, radios, sliders, fx) {
   const dat_hm = [];
   
   for (let i=0; i < data.length; i++) { 
@@ -455,7 +492,7 @@ function get_data_heatmap(data, lookup, fx, fp, ax_vars, radios, sliders) {
     
     const hm_vals_i = {
       'L': data[i].L,
-      'fx' : p_split[lookup['name2idx'][fx]], 
+      'fx' : typeof fx !== undefined ? null : p_split[lookup['name2idx'][fx]], 
       'param1': parseFloat(p_split[lookup['name2idx'][radios['x']]]),
       'param2': parseFloat(p_split[lookup['name2idx'][radios['y']]]),
       'value': data[i].value_prop
@@ -476,38 +513,36 @@ function get_data_heatmap(data, lookup, fx, fp, ax_vars, radios, sliders) {
   return dat_hm
 }
 
-function plot_time_evo(d) {
+function plot_time_evo(d, y_vals, pal) {
+  const global_mean = d3.rollup(d, v => d3.sum(v, d => d.value * d.value_prop), d => d.timestep)
+
   return Plot.plot({
     x: {type:"log"},
     marginLeft: 50,
-    color: {scheme: "reds", type: "ordinal", legend: true},
+    color: { scheme: pal, type: "ordinal", legend: true },
     marks: [
+      Plot.lineY(Array.from(global_mean.values()), {strokeDasharray: "5,3"}),
       Plot.line(
         d, {
-          x: 'timestep', y: "value", stroke: "L"
+          x: 'timestep', y: y_vals, stroke: "L"
           }),
       Plot.dot(
         d, {
-          x: 'timestep', y: "value", stroke: "L"
+          x: 'timestep', y: y_vals, stroke: "L"
           })
     ]
   })
 }
 
-function phase_diagram(d, x, y) {
+function phase_diagram(d, x, y, fy) {
   return PlotDev.plot({
-    width: 400,
+    width: 1200,
     color: {
-      range: [0, 1],
-      legend: true,
-      scheme: "YlGnBu"
+      type: "linear",
+        scheme: "blues"
     },
     x: { label: x },
     y: { label: y },
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
     fy: { label: fy },
     facet: { data: d, x: "L", y: typeof fy !== undefined ? 'fx' : null },
     marks: [
@@ -522,16 +557,6 @@ function phase_diagram(d, x, y) {
 }
 ```
 
-:::
-
-:::
-
-::: {.callout-note collapse="true"}
-## Model 1 Sketch
-
-![](sourcesink_sketch.jpg)
-:::
-:::
 
 ```{ojs}
 PlotDev = await import("https://esm.sh/@observablehq/plot");
