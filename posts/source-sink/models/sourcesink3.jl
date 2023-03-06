@@ -73,8 +73,9 @@ function initialize_u0(;n::Int=20, L::Int=6, M::Int=20, p::Float64=0.01)::ArrayP
   return ArrayPartition(Tuple([G[ℓ,:] for ℓ=1:L]))
 end
 
-f(x; a1=2.2) = 1 / (1 + exp(-a1*x)) # individual incentive to cooperate given the (perceived) quality of the public good (∝ ℓ)
+f(x; a1=3) = 1 / (1 + exp(-a1*x)) # individual incentive to cooperate given the (perceived) quality of the public good (∝ ℓ)
 s(x; a2=0.3) = a2 > 0 ? (1 - exp(-a2*x)) / (1 - exp(-a2)) : x # dependency of the (perceived) quality of the public good on institutional level
+h(x; a3=0.0) = exp(-a3*x) # rescaling to have a (decreasing) level-dependent benefit
 
 # Note 1: Since the difference between the payoff of a defector (D) and of a cooperator (C) is the same –one unit of "capital"– whatever the group size (n), its composition (i) and the quality of the public good (∝ ℓ),
 #         we conflate the imitation due to strategic learning (generating from individual return maximization) and the imitation due to pure peer-pressure
@@ -83,14 +84,14 @@ s(x; a2=0.3) = a2 > 0 ? (1 - exp(-a2*x)) / (1 - exp(-a2)) : x # dependency of th
 # Note 3: The functions g (cost-benefits for groups) and g̃ (fitness function) are taken equal to function f. The three have similar properties.
 
 function source_sink3!(du, u, p, t)
-  G, L, n = u, lengts(u.x), lengts(u.x[1])
+  G, L, n = u, length(u.x), length(u.x[1])
   β, γ, ρ, b, c, μ, δ = p # δ = 1 (δ = 0): (no) resource requirement to upgrade institution
   Z, pop, R = zeros(L), zeros(L), 0.
 
   # Calculate mean-field coupling and observed fitness landscape
     for ℓ in 1:L
       n_adopt = collect(0:(n-1))
-      Z[ℓ]    = sum(f.(b*n_adopt .- c*(ℓ-1)) .* G.x[ℓ])
+      Z[ℓ]    = sum(f.(b*h(ℓ-1)*n_adopt .- c*(ℓ-1)) .* G.x[ℓ])
       pop[ℓ]  = sum(G.x[ℓ])
       R      += sum(n_adopt .* G.x[ℓ]) # Global diffusion
       pop[ℓ] > 0.0 && ( Z[ℓ] /= pop[ℓ] )
@@ -99,13 +100,13 @@ function source_sink3!(du, u, p, t)
     for ℓ = 1:L, i = 1:n
       n_adopt, gr_size = i-1, n-1
       # Individual selection process
-      du.x[ℓ][i] = -n_adopt*f(1-s(ℓ))*G.x[ℓ][i] - (gr_size-n_adopt)*f(s(ℓ)-1)*G.x[ℓ][i]
+      du.x[ℓ][i] = -n_adopt*f(1-s(ℓ-1))*G.x[ℓ][i] - (gr_size-n_adopt)*f(s(ℓ-1)-1)*G.x[ℓ][i]
       du.x[ℓ][i] += - n_adopt*(gr_size-n_adopt)*(β+γ)*G.x[ℓ][i] - ρ*(gr_size-n_adopt)*β*R*G.x[ℓ][i] - ρ*n_adopt*γ*(gr_size-R)*G.x[ℓ][i]
-      n_adopt > 0 && ( du.x[ℓ][i] += (gr_size-n_adopt+1)*f(s(ℓ)-1)*G.x[ℓ][i-1] + β*(n_adopt-1+ρ*R)*(gr_size-n_adopt+1)*G.x[ℓ][i-1] )
-      n_adopt < gr_size && ( du.x[ℓ][i] += (n_adopt+1)*f(1-s(ℓ))*G.x[ℓ][i+1] + γ*(gr_size-n_adopt-1+ρ*(gr_size-R))*(n_adopt+1)*G.x[ℓ][i+1] )
+      n_adopt > 0 && ( du.x[ℓ][i] += (gr_size-n_adopt+1)*f(s(ℓ-1)-1)*G.x[ℓ][i-1] + β*(n_adopt-1+ρ*R)*(gr_size-n_adopt+1)*G.x[ℓ][i-1] )
+      n_adopt < gr_size && ( du.x[ℓ][i] += (n_adopt+1)*f(1-s(ℓ-1))*G.x[ℓ][i+1] + γ*(gr_size-n_adopt-1+ρ*(gr_size-R))*(n_adopt+1)*G.x[ℓ][i+1] )
       # Group selection process
-      ℓ > 1 && ( du.x[ℓ][i] += (f(b*n_adopt-c*(ℓ-1))^δ)*(μ+ρ*Z[ℓ]/Z[ℓ-1])*G.x[ℓ-1][i] - (μ*(f(c*(ℓ-1)-b*n_adopt)^δ)+ρ*(f(b*n_adopt-c*(ℓ-2))^δ)*Z[ℓ-1]/Z[ℓ])*G.x[ℓ][i] )
-      ℓ < L && ( du.x[ℓ][i] += (μ*(f(c*ℓ-b*n_adopt)^δ)+ρ*(f(b*n_adopt-c*(ℓ-1))^δ)*Z[ℓ]/Z[ℓ+1])*G.x[ℓ+1][i] - (f(b*n_adopt-c*ℓ)^δ)*(μ+ρ*Z[ℓ+1]/Z[ℓ])*G.x[ℓ][i] )
+      ℓ > 1 && ( du.x[ℓ][i] += (f(b*h(ℓ-1)*n_adopt-c*(ℓ-1))^δ)*(μ+ρ*Z[ℓ]/Z[ℓ-1])*G.x[ℓ-1][i] - (μ*(f(c*(ℓ-1)-b*h(ℓ-1)*n_adopt)^δ) + ρ*Z[ℓ-1]/Z[ℓ])*G.x[ℓ][i] )
+      ℓ < L && ( du.x[ℓ][i] += (μ*(f(c*ℓ-b*h(ℓ)*n_adopt)^δ) + ρ*Z[ℓ]/Z[ℓ+1])*G.x[ℓ+1][i] - (f(b*h(ℓ)*n_adopt-c*ℓ)^δ)*(μ+ρ*Z[ℓ+1]/Z[ℓ])*G.x[ℓ][i] )
     end
 end
 
@@ -172,15 +173,16 @@ main()
 # #      --> heatmap β/γ VS ρ/μ for fixed b/c?
 
 # n, M = 20, 1000
-# u₀ = initialize_u0(n=n, L=6, M=M, p=0.01)
-# t_max = 500
+# u₀ = initialize_u0(n=n, L=4, M=M, p=0.01)
+# t_max = 1000
 # tspan = (0., t_max)
 
-β, γ, ρ, b, c, μ = 0.2, 0.2, 0.02, 0.3, 1., 0.2
-δ = 1
-p  = [β, γ, ρ, b, c, μ, δ]
-prob = ODEProblem(source_sink3!, u₀, tspan, p)
-sol = solve(prob, DP5(), saveat=1, reltol=1e-8, abstol=1e-8)
+# h(x; a3=0.) = exp(-a3*x)
+# β, γ, ρ, b, c, μ = 0.02, 0.02, 0.02, 0.16, 1., 0.1
+# δ = 1
+# p  = [β, γ, ρ, b, c, μ, δ]
+# prob = ODEProblem(source_sink3_!, u₀, tspan, p)
+# sol = solve(prob, DP5(), saveat=1, reltol=1e-8, abstol=1e-8)
 # δ = 0
 # p  = [β, γ, ρ, b, c, μ, δ]
 # prob1 = ODEProblem(source_sink3!, u₀, tspan, p)
@@ -191,21 +193,21 @@ inst_level, inst_level_prop = parse_sol(sol)  # params: β, γ, ρ, b, c, μ, δ
 
 # # temporal evolution
 
-function plot_scatter(res::Dict, res_prop::Dict; plot_prop=false)
-  L = lengts(res)
-  tmax = lengts(res[L[1]])
-  if plot_prop
-    scatter(1:tmax, [res_prop[i] for i in 1:L], xaxis=:log, legendtitle= "level", 
-          legend=:outertopright, labels = collect(1:L)', palette = palette(:Blues)[2:(L+1)],
-          markerstrokewidth = 0, markersize = 3.)
-  else 
-    scatter(1:lengts(res[1]), [res[i] for i in 1:L], xaxis=:log, legendtitle= "level", 
-          legend=:outertopright, labels = collect(1:L)', palette = palette(:Reds)[2:(L+1)],
-          markerstrokewidth = 0, markersize = 3.)
-    global_freq = [sum([res[ℓ][t]*res_prop[ℓ][t] for ℓ in 1:L]) for t in 1:tmax]
-    plot!(1:tmax, global_freq, linestyle=:dash, color=:black, width = 1.5, label = "global") 
-  end
-end
+# function plot_scatter(res::Dict, res_prop::Dict; plot_prop=false)
+#   L = length(res)
+#   tmax = length(res[L[1]])
+#   if plot_prop
+#     scatter(1:tmax, [res_prop[i] for i in 1:L], xaxis=:log, legendtitle= "level", 
+#           legend=:outertopright, labels = collect(1:L)', palette = palette(:Blues)[3:2:3*(L-1)],
+#           markerstrokewidth = 0, markersize = 3.)
+#   else 
+#     scatter(1:length(res[1]), [res[i] for i in 1:L], xaxis=:log, legendtitle= "level", 
+#           legend=:outertopright, labels = collect(1:L)', palette = palette(:Reds)[3:2:3*(L-1)],
+#           markerstrokewidth = 0, markersize = 3.)
+#     global_freq = [sum([res[ℓ][t]*res_prop[ℓ][t] for ℓ in 1:L]) for t in 1:tmax]
+#     plot!(1:tmax, global_freq, linestyle=:dash, color=:black, width = 1.5, label = "global") 
+#   end
+# end
 
-plot_scatter(inst_level, inst_level_prop)
-plot_scatter(inst_level, inst_level_prop, plot_prop = true)
+# plot_scatter(inst_level, inst_level_prop)
+# plot_scatter(inst_level, inst_level_prop, plot_prop = true)
