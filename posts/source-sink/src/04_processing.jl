@@ -1,5 +1,5 @@
 using Pkg; Pkg.activate("../..");
-using DataFrames, CSV, ProgressMeter, ArgParse
+using DataFrames, CSV, ProgressMeter, ArgParse, Parquet
 using Parquet2: writefile
 
 function parse_commandline()
@@ -24,7 +24,7 @@ function main()
   
   # DATA_DIR = "sourcesink2_output"
   DATA_DIR = args["d"]
-  fnames = filter(x -> endswith(x, "txt"),  readdir(DATA_DIR, join=true))[4500:5500]
+  fnames = filter(x -> endswith(x, "txt"),  readdir(DATA_DIR, join=true))
 
   @assert length(fnames) > 0 println("There are no data files at the given directory")
 
@@ -35,8 +35,8 @@ function main()
 
   dfs = []
   p = ProgressMeter.Progress(length(fnames))
-  Threads.@threads for i=eachindex(fnames)
-    fname = fnames[i]
+  @showprogress for fname in fnames 
+    # fname = fnames[i]
 
     p_str = split(fname, "/")[end]
     p_str = replace(join(split(p_str, "_")[2:end], "_"), ".txt" => "")
@@ -62,26 +62,27 @@ function main()
     df_agg = filter(:timestep => x -> x <= minmax_timestep, df_agg)
 
     push!(dfs, df_agg)
-    ProgressMeter.next!(p)
+    # ProgressMeter.next!(p)
   end
   
   all_dfs = vcat(dfs...)
 
   # Write lookup for rowids -> all_dfs.name to disk
-  names_params = unique(all_dfs.name)
-  row_ids = Int32.(1:length(names_params))
+  # names_params = unique(all_dfs.name)
+  # row_ids = Int32.(1:length(names_params))
   
-  lookup_name = Dict()
-  [get!(lookup_name, n, row_id) for (n, row_id) in zip(names_params, row_ids)];
+  # lookup_name = Dict()
+  # [get!(lookup_name, n, row_id) for (n, row_id) in zip(names_params, row_ids)];
 
-  writefile(lookup_f, (param_str=names_params, row_id=row_ids))
+  # writefile(lookup_f, (param_str=names_params, row_id=row_ids))
   
   # Write output to disk
-  all_dfs.name = [lookup_name[n] for n in all_dfs.name]
-  all_dfs.L = Int8.(all_dfs.L)
-  all_dfs.timestep = Int16.(all_dfs.timestep)
+  # all_dfs.name = [lookup_name[n] for n in all_dfs.name]
+  all_dfs.L = Int32.(all_dfs.L)
+  all_dfs.timestep = Int32.(all_dfs.timestep)
 
-  writefile(out_f, all_dfs)
+  # writefile(out_f, all_dfs)
+  write_parquet(out_f, all_dfs)
 end
 
 main()
