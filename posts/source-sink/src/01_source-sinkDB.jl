@@ -64,15 +64,18 @@ CREATE TABLE sourcesink3 (
     cost REAL,
     mu REAL,
     delta INT,
-    PRIMARY KEY (beta, gamma, rho, b, cost, mu, delta)
+    alpha REAL,
+    PRIMARY KEY (beta, gamma, rho, b, cost, mu, delta, alpha)
 )
 """)
 
-for β=0.02:0.02:0.4, b=0.20:0.1:1.0, ρ=0.02:0.02:0.4, δ=0:1:1
-  params = (β, 0.2, ρ, b, 1.0, 0.2, δ)
-  SQLite.execute(db, """INSERT INTO sourcesink3 VALUES (?, ?, ?, ?, ?, ?, ?)""", params)
+counter = 1
+for β=0.0:0.025:0.2, γ=0.0:0.025:0.2, ρ=0.0:0.025:0.1, b=0.1:0.45:1.0, α=0.0:0.025:0.2
+  params = (β, γ, ρ, b, 1.0, 0.2, 1, α)
+  SQLite.execute(db, """INSERT INTO sourcesink3 VALUES (?, ?, ?, ?, ?, ?, ?, ?)""", params)
+  counter += 1
 end
 
-SQLite.execute(db, """
-DROP TABLE sourcesink2
-""")
+# SQLite.execute(db, """
+# DROP TABLE sourcesink3
+# """)
