@@ -47,6 +47,10 @@ function parse_commandline()
       arg_type = Float64
       default = 1e-4
       help = "Endogenous rate of institutional change μ"
+      "-a"
+      arg_type = Float64
+      default = 0.2
+      help = "Endogenous rate of individual change α"
       "-o"
       default = "."
       help = "Output file for results"
@@ -85,7 +89,7 @@ h(x; a3=0.0) = exp(-a3*x) # rescaling to have a (decreasing) level-dependent ben
 
 function source_sink3!(du, u, p, t)
   G, L, n = u, length(u.x), length(u.x[1])
-  β, γ, ρ, b, c, μ, δ = p # δ = 1 (δ = 0): (no) resource requirement to upgrade institution
+  β, γ, ρ, b, c, μ, δ, α = p # δ = 1 (δ = 0): (no) resource requirement to upgrade institution
   Z, pop, R = zeros(L), zeros(L), 0.
 
   # Calculate mean-field coupling and observed fitness landscape
@@ -100,10 +104,10 @@ function source_sink3!(du, u, p, t)
     for ℓ = 1:L, i = 1:n
       n_adopt, gr_size = i-1, n-1
       # Individual selection process
-      du.x[ℓ][i] = -n_adopt*f(1-s(ℓ-1))*G.x[ℓ][i] - (gr_size-n_adopt)*f(s(ℓ-1)-1)*G.x[ℓ][i]
+      du.x[ℓ][i] = -α*(n_adopt*f(1-s(ℓ-1)) + (gr_size-n_adopt)*f(s(ℓ-1)-1))*G.x[ℓ][i]
       du.x[ℓ][i] += - n_adopt*(gr_size-n_adopt)*(β+γ)*G.x[ℓ][i] - ρ*(gr_size-n_adopt)*β*R*G.x[ℓ][i] - ρ*n_adopt*γ*(gr_size-R)*G.x[ℓ][i]
-      n_adopt > 0 && ( du.x[ℓ][i] += (gr_size-n_adopt+1)*f(s(ℓ-1)-1)*G.x[ℓ][i-1] + β*(n_adopt-1+ρ*R)*(gr_size-n_adopt+1)*G.x[ℓ][i-1] )
-      n_adopt < gr_size && ( du.x[ℓ][i] += (n_adopt+1)*f(1-s(ℓ-1))*G.x[ℓ][i+1] + γ*(gr_size-n_adopt-1+ρ*(gr_size-R))*(n_adopt+1)*G.x[ℓ][i+1] )
+      n_adopt > 0 && ( du.x[ℓ][i] += (α*(gr_size-n_adopt+1)*f(s(ℓ-1)-1) + β*(n_adopt-1+ρ*R)*(gr_size-n_adopt+1))*G.x[ℓ][i-1] )
+      n_adopt < gr_size && ( du.x[ℓ][i] += (α*(n_adopt+1)*f(1-s(ℓ-1)) + γ*(gr_size-n_adopt-1+ρ*(gr_size-R))*(n_adopt+1))*G.x[ℓ][i+1] )
       # Group selection process
       ℓ > 1 && ( du.x[ℓ][i] += (f(b*h(ℓ-1)*n_adopt-c*(ℓ-1))^δ)*(μ+ρ*Z[ℓ]/Z[ℓ-1])*G.x[ℓ-1][i] - (μ*(f(c*(ℓ-1)-b*h(ℓ-1)*n_adopt)^δ) + ρ*Z[ℓ-1]/Z[ℓ])*G.x[ℓ][i] )
       ℓ < L && ( du.x[ℓ][i] += (μ*(f(c*ℓ-b*h(ℓ)*n_adopt)^δ) + ρ*Z[ℓ]/Z[ℓ+1])*G.x[ℓ+1][i] - (f(b*h(ℓ)*n_adopt-c*ℓ)^δ)*(μ+ρ*Z[ℓ+1]/Z[ℓ])*G.x[ℓ][i] )
@@ -122,7 +126,7 @@ function run_source_sink3(p)
 end
 
 function main()
-  # β, γ, ρ, b, c, μ, δ = 0.07, 0.5, 1, 0.1, 0.18, 1.05, 0.2, 0
+  # β, γ, ρ, b, c, μ, δ, α  = 0.07, 0.5, 1, 0.1, 0.18, 1.05, 0.2, 1, 0.2
   args = parse_commandline()
 
   modelname = "sourcesink3"
@@ -136,8 +140,9 @@ function main()
     c = args["c"]
     μ = args["m"]
     δ = args["d"]
+    α = args["a"]
 
-    p = [β, γ, ρ, b, c, μ, δ]
+    p = [β, γ, ρ, b, c, μ, δ, α]
     println(p)
     sol = run_source_sink3(p)
     write_sol2txt("$(args["o"])$(modelname)_$(join(p, "_")).txt", sol)
@@ -154,8 +159,9 @@ function main()
       c = row["cost"]
       μ = row["mu"]
       δ = row["delta"]
+      α = row["alpha"]
 
-      p = [β, γ, ρ, b, c, μ, δ]
+      p = [β, γ, ρ, b, c, μ, δ, α]
       sol = run_source_sink3(p)
       write_sol2txt("$(args["o"])/$(modelname)_$(join(p, "_")).txt", sol)
     end
@@ -163,6 +169,7 @@ function main()
 end
 
 main()
+
 
 
 # prototyping -------------------------------------------------------------------------------
