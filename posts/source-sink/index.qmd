@@ -115,10 +115,18 @@ function source_sink!(du, u, p, t)
     end
 end
 ```
-#### Analysis
+#### Playground
+
 
 ```{ojs}
 //| panel: sidebar
+
+// Lookup table 1
+// param_str:   β,   γ,   ρ,    b,   c,    μ
+// param_grid: 
+// ax_vars:    
+// fps:        
+// s_vec_idx:  
 
 sourcesink1 = resdb.query(`SELECT DISTINCT name FROM sourcesink1`)
 lookup1 = {
@@ -147,25 +155,12 @@ viewof r1 = Inputs.form({
   y: Inputs.radio(ax_vars1, {label: "y", value: ax_vars1[1]})
 })
 
-data = resdb.query(`
-  SELECT timestep::INT as timestep, L::INT as L, value, value_prop, name
-  FROM sourcesink1
-  WHERE
-  name = '${f(s1['ax0'])}_${f(s1['fp0'])}_${f(s1['fp1'])}_${f(s1['ax2'])}_${f(s1['ax1'])}_${f(s1['fp2'])}'
-`)
 
-datab = resdb.query(`
-    WITH tmp as (
-        SELECT name, L, MAX(timestep::INT) as timestep
-        FROM sourcesink1
-        GROUP BY name, L
-    )
-    SELECT s.name, s.value, s.L::INT as L, s.value_prop
-    FROM sourcesink1 s
-    JOIN tmp
-    ON s.name = tmp.name AND s.L = tmp.L AND s.timestep = tmp.timestep 
-`)
+data = sql_data_a('sourcesink1', `${f(s1['ax0'])}_${f(s1['fp0'])}_${f(s1['fp1'])}_${f(s1['ax2'])}_${f(s1['ax1'])}_${f(s1['fp2'])}`)
+datab = sql_data_b('sourcesink1')
+data_hm = get_data_heatmap(datab, lookup1, fp1, ax_vars1, r1, s1)
 ```
+
 
 ```{ojs}
 //| panel: fill
@@ -178,12 +173,19 @@ html`
 ```
 
 ```{ojs}
-data_hm = get_data_heatmap(datab, lookup1, fp1, ax_vars1, r1, s1)
-pd1 = phase_diagram(data_hm, r1['x'], r1['y'])
+pd1 = phase_diagram(data_hm, r1['x'], r1['y'], 'value_prop', 'blues')
+
+html`
+    <div style="display: flex;">
+      <div flex-grow=2>${ pd1 }</div>
+      <div flex-grow=0>${ phase_diagram(global_hm(data_hm),  r3['x'], r3['y'], 'value', 'rainbow') }</div>
+    </div>
+`
+
 pd1.legend('color', {label: "Global Frequency of behavior →", width: 350, marginLeft: 150})
 ```
 
-#### Takeaways:
+#### Takeaways
 
 -   Frequency of behaviour in groups with different institutional strength.
 -   Within groups, the frequency of cooperative behaviour follows the strength of institutions (with ℓ = 1 in light beige and ℓ = 6 in dark red).
@@ -241,6 +243,15 @@ end
 
 ```{ojs}
 //| panel: sidebar
+
+// Lookup table 2
+// param_str:   β,   ξ,   α,   γ,   ρ,   η,   b,   c    μ
+// param_grid: 
+// ax_vars:    
+// fps:        
+// s_vec_idx:  
+
+
 sourcesink2 = resdb.query(`SELECT DISTINCT name FROM sourcesink2`)
 lookup2 = {
   const out = {}
@@ -273,24 +284,12 @@ viewof s2 = Inputs.form({
   fp5: Inputs.range(p2[fp2[5]]['minmax'], {step: p2[fp2[5]]['s'], label: fp2[5], value: p2[fp2[5]]['first_val']}),
 })
 
-data2 = resdb.query(`
-  SELECT timestep::INT as timestep, L::INT as L, value, value_prop, name
-  FROM sourcesink2
-  WHERE
-  name = '${f(s2['ax0'])}_${f(s2['fp0'])}_${f(s2['fp1'])}_${f(s2['fp2'])}_${f(s2['ax1'])}_${f(s2['ax2'])}_${f(s2['fp3'])}_${f(s2['fp4'])}_${f(s2['fp5'])}'
-`)
 
-data2b = resdb.query(`
-    WITH tmp as (
-        SELECT name, L, MAX(timestep::INT) as timestep
-        FROM sourcesink2
-        GROUP BY name, L
-    )
-    SELECT s.name, s.value, s.L::INT as L, s.value_prop
-    FROM sourcesink2 s
-    JOIN tmp
-    ON s.name = tmp.name AND s.L = tmp.L AND s.timestep = tmp.timestep 
-`)
+data2 = sql_data_a('sourcesink2', `${f(s2['ax0'])}_${f(s2['fp0'])}_${f(s2['fp1'])}_${f(s2['fp2'])}_${f(s2['ax1'])}_${f(s2['ax2'])}_${f(s2['fp3'])}_${f(s2['fp4'])}_${f(s2['fp5'])}`)
+
+data2b = sql_data_b("sourcesink2")
+
+data_hm2 = get_data_heatmap(data2b, lookup2, fp2, ax_vars2, r2, s2, fy2)
 ```
 
 ```{ojs}
@@ -305,8 +304,14 @@ html`
 
 
 ```{ojs}
-data_hm2 = get_data_heatmap(data2b, lookup2, fp2, ax_vars2, r2, s2, fy2)
-pd2 = phase_diagram(data_hm2, r2['x'], r2['y'], fy2)
+pd2 = phase_diagram(data_hm2, r2['x'], r2['y'], 'value_prop', fy2)
+
+html`
+    <div style="display:flex; ">
+      <div>${ pd2 }</div>
+    </div>
+`
+
 pd2.legend('color', {label: "Global Frequency of behavior →", width: 350, marginLeft: 150})
 ```
 
@@ -349,59 +354,56 @@ end
 #### Playground
 
 
-```{ojs}
+```{ojs sidebar model 3}
 //| panel: sidebar
+
+// Lookup table 3
+// param_str:   β,   γ,   ρ,   b,   c,   μ,   δ,   α
+// param_grid:  β    γ,   ρ,   b,   1., 0.2,  1.,  α
+// ax_vars:     β,        ρ,                       α
+// fps:              γ,        b,   c,   μ,   δ
+// s_vec_idx:  ax0, fp0, ax1, fp1, fp2, fp3, fp4, ax2
+
 sourcesink3 = resdb.query(`SELECT DISTINCT name FROM sourcesink3`)
+
 lookup3 = {
   const out = {}
-  out['idx2name'] = {0: "β", 1: 'γ', 2: 'ρ', 3: 'b', 4: 'c', 5: 'μ', 6: 'δ'}
-  out['name2idx'] = {"β": 0, 'γ':1, 'ρ': 2, 'b': 3, 'c': 4, 'μ': 5, 'δ': 6}
+  out['idx2name'] = {0: "β", 1: 'γ', 2: 'ρ', 3: 'b', 4: 'c', 5: 'μ', 6: 'δ', 7: 'α'}
+  out['name2idx'] = {"β": 0, 'γ':1, 'ρ': 2, 'b': 3, 'c': 4, 'μ': 5, 'δ': 6, 'α': 7}
   return out
 }
 
 p3 = get_param_table(sourcesink3, lookup3)
 
-ax_vars3 = ["β", "ρ", 'b']
-fy3 = "δ"
-fp3 = ["γ", "c", "μ", "δ"]
+av3 = ["β", "ρ", 'α']           // ax vars
+fy3 = "δ"                       // facet y var
+fp3 = ["γ", "b", "c", "μ", fy3] // fixed param vars
 
-viewof r3 = Inputs.form({
-  x: Inputs.radio(ax_vars3, {label: "x", value: ax_vars3[0]}),
-  y: Inputs.radio(ax_vars3, {label: "y", value: ax_vars3[1]})
-})
-
-// index should map to below sliders, e.g. fp0 == γ == "second spot in `name` string" 
+// sliders
 viewof s3 = Inputs.form({
-  ax0: Inputs.range(p3[ax_vars3[0]]['minmax'], {step: p3[ax_vars3[0]]['s'], label: ax_vars3[0]}),
-  ax1: Inputs.range(p3[ax_vars3[1]]['minmax'], {step: p3[ax_vars3[1]]['s'], label: ax_vars3[1]}),
-  ax2: Inputs.range(p3[ax_vars3[2]]['minmax'], {step: p3[ax_vars3[2]]['s'], label: ax_vars3[2]}),
+  ax0: Inputs.range(p3[av3[0]]['minmax'], {step: p3[av3[0]]['s'], label: av3[0]}),
+  ax1: Inputs.range(p3[av3[1]]['minmax'], {step: p3[av3[1]]['s'], label: av3[1]}),
+  ax2: Inputs.range(p3[av3[2]]['minmax'], {step: p3[av3[2]]['s'], label: av3[2]}),
   fp0: Inputs.range(p3[fp3[0]]['minmax'], {step: p3[fp3[0]]['s'], label: fp3[0], value: p3[fp3[0]]['first_val']}),
   fp1: Inputs.range(p3[fp3[1]]['minmax'], {step: p3[fp3[1]]['s'], label: fp3[1], value: p3[fp3[1]]['first_val']}),
-  fp2: Inputs.range(p3[fp3[2]]['minmax'], {step: p3[fp3[2]]['s'], label: fp3[2], value: p3[fp3[2]]['first_val']}),
-  fp3: Inputs.range(p3[fp3[3]]['minmax'], {step: p3[fp3[3]]['s'], label: fp3[3], value: p3[fp3[3]]['first_val']})
+  fp2: Inputs.range(p3[fp3[2]]['minmax'], {step: p3[fp3[2]]['s'], label: fp3[2], value: p3[fp3[2]]['first_val'], disabled: true}),
+  fp3: Inputs.range(p3[fp3[3]]['minmax'], {step: p3[fp3[3]]['s'], label: fp3[3], value: p3[fp3[3]]['first_val'], disabled: true}),
+  fp4: Inputs.range(p3[fp3[4]]['minmax'], {step: p3[fp3[4]]['s'], label: fp3[4], value: p3[fp3[4]]['first_val'], disabled: true})
 })
 
-data3a = resdb.query(`
-  SELECT timestep::INT as timestep, L::INT as L, value, value_prop, name
-  FROM sourcesink3
-  WHERE
-  name = '${f(s3["ax0"])}_${f(s3["fp0"])}_${f(s3["ax1"])}_${f(s3["ax2"])}_${f(s3["fp1"])}_${f(s3["fp2"])}_${f(s3["fp3"])}'
-`)
+// radios
+viewof r3 = Inputs.form({
+  x: Inputs.radio(av3, {label: "x", value: av3[0]}),
+  y: Inputs.radio(av3, {label: "y", value: av3[1]})
+})
 
-data3b = resdb.query(`
-    WITH tmp as (
-        SELECT name, L, MAX(timestep::INT) as timestep
-        FROM sourcesink3
-        GROUP BY name, L
-    )
-    SELECT s.name, s.value, s.L::INT as L, s.value_prop
-    FROM sourcesink3 s
-    JOIN tmp
-    ON s.name = tmp.name AND s.L = tmp.L AND s.timestep = tmp.timestep 
-`)
+// data
+data3a = sql_data_a('sourcesink3', `${f(s3["ax0"])}_${f(s3["fp0"])}_${f(s3["ax1"])}_${f(s3["fp1"])}_${f(s3["fp2"])}_${f(s3["fp3"])}_${f(s3["fp4"])}_${f(s3["ax2"])}`)
+data3b = sql_data_b("sourcesink3")
+data_hm3 = get_data_heatmap(data3b, lookup3, fp3, av3, r3, s3, fy3)
 ```
 
-```{ojs}
+```{ojs dashboard model 3 - time evo}
 //| panel: fill
 html`
     <div style="display:flex; ">
@@ -411,9 +413,15 @@ html`
 `
 ```
 
-```{ojs}
-data_hm3 = get_data_heatmap(data3b, lookup3, fp3, ax_vars3, r3, s3, fy3)
-pd3 = phase_diagram(data_hm3, r3['x'], r3['y'], fy3)
+```{ojs dashboard model 3 - phase diagrams}
+pd3 = phase_diagram(data_hm3,  r3['x'], r3['y'], 'value_prop', 'blues', fy3)
+
+html`
+    <div style="display:flex; ">
+      <div>${ pd3 }</div>
+      <div>${ phase_diagram(global_hm(data_hm3),  r3['x'], r3['y'], 'value', 'rainbow') }</div>
+    </div>
+`
 pd3.legend('color', {label: "Global Frequency of behavior →", width: 350, marginLeft: 150})
 ```
 
@@ -427,6 +435,40 @@ pd3.legend('color', {label: "Global Frequency of behavior →", width: 350, marg
 :::
 
 ```{ojs helpers}
+function sql_data_a(model, name) {
+    return resdb.query(`
+      SELECT timestep::INT as timestep, L::INT as L, value, value_prop, name
+      FROM ${model}
+      WHERE
+      name = '${name}'
+    `)
+}
+
+function sql_data_b(model) {
+    return resdb.query(`
+      WITH tmp as (
+          SELECT name, L, MAX(timestep::INT) as timestep
+          FROM ${model}
+          GROUP BY name, L
+      )
+      SELECT s.name, s.value, s.L::INT as L, s.value_prop
+      FROM ${model} s
+      JOIN tmp
+      ON s.name = tmp.name AND s.L = tmp.L AND s.timestep = tmp.timestep 
+  `)
+}
+
+
+function global_hm(d){
+  return d3.flatRollup(d, v => d3.sum(v, d => d.value * d.value_prop), d => d.param_str)
+           .map(currentElement => ({
+             'param1': parseFloat(currentElement[0].split('/')[0]),
+             'param2': parseFloat(currentElement[0].split('/')[1]),
+             'value': currentElement[1],
+             'L': 1
+          }))
+}
+
 function get_fixed_params(param_table, ax_vars, fx) {
   const all_params = [...Object.keys(param_table)]
   const varying_params = typeof fx !== undefined ? new Set(ax_vars) : new Set(ax_vars.concat(fx))
@@ -490,12 +532,16 @@ function get_data_heatmap(data, lookup, fp, ax_vars, radios, sliders, fx) {
       vs[fp[i]] = parseFloat(p_split[lookup['name2idx'][fp[i]]])
     }
     
+    const p1 = parseFloat(p_split[lookup['name2idx'][radios['x']]])
+    const p2 = parseFloat(p_split[lookup['name2idx'][radios['y']]])
     const hm_vals_i = {
       'L': data[i].L,
       'fx' : typeof fx !== undefined ? null : p_split[lookup['name2idx'][fx]], 
-      'param1': parseFloat(p_split[lookup['name2idx'][radios['x']]]),
-      'param2': parseFloat(p_split[lookup['name2idx'][radios['y']]]),
-      'value': data[i].value_prop
+      'param1': p1,
+      'param2': p2,
+      'param_str': `${p1}/${p2}`,
+      'value': data[i].value,
+      'value_prop': data[i].value_prop
     }
 
     if (vs[fp[0]] === sliders['fp0'] && vs[fp[1]] === sliders['fp1'] && vs[fp[2]] === sliders['fp2'] && vs[fp[3]] == sliders['fp3'] && vs[fp[4]] == sliders['fp4']) {
@@ -519,9 +565,16 @@ function plot_time_evo(d, y_vals, pal) {
   return Plot.plot({
     x: {type:"log"},
     marginLeft: 50,
-    color: { scheme: pal, type: "ordinal", legend: true },
+    color: { 
+      scheme: pal, 
+      type: "ordinal", 
+      range: [0.3, 1],
+      legend: true 
+    },
     marks: [
-      Plot.lineY(Array.from(global_mean.values()), {strokeDasharray: "5,3"}),
+      Plot.lineY(Array.from(global_mean.values()), {
+        strokeDasharray: "5,3", opacity: pal == 'blues' ? 0 : 1.
+        }),
       Plot.line(
         d, {
           x: 'timestep', y: y_vals, stroke: "L"
@@ -534,22 +587,26 @@ function plot_time_evo(d, y_vals, pal) {
   })
 }
 
-function phase_diagram(d, x, y, fy) {
+function phase_diagram(d, x, y, z, pal, fy) {
   return PlotDev.plot({
     width: 1200,
     color: {
       type: "linear",
-        scheme: "blues"
+      scheme: pal
     },
     x: { label: x },
     y: { label: y },
     fy: { label: fy },
-    facet: { data: d, x: "L", y: typeof fy !== undefined ? 'fx' : null },
+    facet: { 
+      data: d, 
+      x: "L", 
+      y: typeof fy !== undefined ? 'fx' : null 
+    },
     marks: [
       PlotDev.raster(d, {
         x: "param1",
         y: "param2",
-        fill: "value",
+        fill: z,
         interpolate: "nearest"
       }),
     ]

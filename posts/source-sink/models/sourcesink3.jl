@@ -126,7 +126,7 @@ function run_source_sink3(p)
 end
 
 function main()
-  # β, γ, ρ, b, c, μ, δ, α  = 0.07, 0.5, 1, 0.1, 0.18, 1.05, 0.2, 1, 0.2
+  # β,1 γ, ρ, b, c, μ, δ, α  = 0.07, 0.5, 1, 0.1, 0.18, 1.05, 0.2, 1, 0.2
   args = parse_commandline()
 
   modelname = "sourcesink3"
