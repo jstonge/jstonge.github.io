@@ -20,7 +20,6 @@ end
 
 function model1()
   SQLite.execute(db, """DROP TABLE IF EXISTS sourcesink1""")
-
   SQLite.execute(db, """
   CREATE TABLE sourcesink1 (
       beta REAL,
@@ -33,15 +32,15 @@ function model1()
   )
   """)
   
-  @showprogress for β=0.07:0.05:0.22, γ= 0.9:0.1:1.1, ρ=0.1:0.15:0.40, b=0.12:0.05:0.22, c=.55:0.5:2.05
-    params = (β, γ, ρ, b, c, 1e-4)
+  @showprogress for β=0.:0.01:0.2, γ= 0.9:0.1:1.1, ρ=0.1:0.15:0.40, b=0.12:0.05:0.22, c=0.:0.05:2.0
+    μ = 1e-4
+    params = (β, γ, ρ, b, c, μ)
     SQLite.execute(db, """INSERT INTO sourcesink1 VALUES (?, ?, ?, ?, ?, ?)""", params)
   end
 end
 
 function model2()
   SQLite.execute(db, """DROP TABLE IF EXISTS sourcesink2""")
-
   SQLite.execute(db, """
   CREATE TABLE sourcesink2 (
       beta REAL,
@@ -58,7 +57,8 @@ function model2()
   """)
   
   @showprogress for β = 0.06:0.01:0.17, ρ = 0.005:0.005:0.1, η = 0.005:0.005:0.05, b = 0.2:0.2:1.0
-    params = (β, 1.0, 1.0, 1.0, ρ, η, -b, 1.0, 1e-4)
+    ξ, α, γ, c, μ = 1.0, 1.0, 1.0, 1e-4
+    params = (β, ξ, α, γ, ρ, η, -b, c, μ)
     SQLite.execute(db, """INSERT INTO sourcesink2 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)""", params)
   end
   
@@ -66,7 +66,6 @@ end
 
 function model3()
   SQLite.execute(db, """DROP TABLE IF EXISTS sourcesink3""")
-
   SQLite.execute(db, """
   CREATE TABLE sourcesink3 (
       beta REAL,
@@ -82,13 +81,14 @@ function model3()
   """)
   
   @showprogress for β=0.0:0.025:0.15, γ=0.0:0.025:0.15, ρ=0.0:0.025:0.15, b=0.1:0.1:0.3, α=0.0:0.025:0.15
-    params = (β, γ, ρ, b, 1.0, 0.2, 1, α)
+    c, μ, δ = 1., 0.2, 1.
+    params = (β, γ, ρ, b, c, μ, δ, α)
     SQLite.execute(db, """INSERT INTO sourcesink3 VALUES (?, ?, ?, ?, ?, ?, ?, ?)""", params)
   end
 end
 
 function main()
-  global db = SQLite.DB("../source-sink.db")
+  global db = SQLite.DB("source-sink.db")
   args = parse_commandline()
   if args["m"] == 1
     model1()
