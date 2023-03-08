@@ -1,81 +1,102 @@
-# This script creates a database that contains all the parameters that we want
-# to run.
+# This script creates a database that contains all the parameters that we want to run.
+# For each new model, we need to provide a new functions specifying the grid.
 
 using Pkg; Pkg.activate("../../");
 using SQLite
-db = SQLite.DB("source-sink.db")
+using ProgressMeter
+using ArgParse
 
-# ---------------------------------- model 1 --------------------------------- #
+function parse_commandline()
+  s = ArgParseSettings()
 
-SQLite.execute(db, """
-CREATE TABLE sourcesink1 (
-    beta REAL,
-    gamma REAL,
-    rho REAL,
-    b REAL,
-    cost REAL,
-    mu REAL,
-    PRIMARY KEY (beta, gamma, rho, b, cost, mu)
-)
-""")
+  @add_arg_table! s begin
+      "-m"
+      arg_type = Int
+      help = "Name of the model to generate scripts"
+    end
 
-for β=0.07:0.05:0.22, γ= 0.9:0.1:1.1, ρ=0.1:0.15:0.40, b=0.12:0.05:0.22, c=.55:0.5:2.05
-  p = [β, γ, ρ, b, c, 1e-4]
-  params = (β, γ, ρ, b, c, 1e-4)
-  SQLite.execute(db, """INSERT INTO sourcesink1 VALUES (?, ?, ?, ?, ?, ?)""", params)
+  return parse_args(s)
 end
 
-# ---------------------------------- model 2 --------------------------------- #
+function model1()
+  SQLite.execute(db, """DROP TABLE IF EXISTS sourcesink1""")
 
-# better to drop the current table before reruning
-
-SQLite.execute(db, """
-DROP TABLE sourcesink2
-""")
-
-SQLite.execute(db, """
-CREATE TABLE sourcesink2 (
-    beta REAL,
-    xi REAL,
-    alpha REAL,
-    gamma REAL,
-    rho REAL,
-    eta REAL,
-    b REAL,
-    cost REAL,
-    mu REAL,
-    PRIMARY KEY (beta, xi, alpha, gamma, rho, eta, b, cost, mu)
-)
-""")
-
-for β = 0.06:0.01:0.17, ρ = 0.005:0.005:0.1, η = 0.005:0.005:0.05, b = 0.2:0.2:1.0
-  params = (β, 1.0, 1.0, 1.0, ρ, η, -b, 1.0, 1e-4)
-  SQLite.execute(db, """INSERT INTO sourcesink2 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)""", params)
+  SQLite.execute(db, """
+  CREATE TABLE sourcesink1 (
+      beta REAL,
+      gamma REAL,
+      rho REAL,
+      b REAL,
+      cost REAL,
+      mu REAL,
+      PRIMARY KEY (beta, gamma, rho, b, cost, mu)
+  )
+  """)
+  
+  @showprogress for β=0.07:0.05:0.22, γ= 0.9:0.1:1.1, ρ=0.1:0.15:0.40, b=0.12:0.05:0.22, c=.55:0.5:2.05
+    params = (β, γ, ρ, b, c, 1e-4)
+    SQLite.execute(db, """INSERT INTO sourcesink1 VALUES (?, ?, ?, ?, ?, ?)""", params)
+  end
 end
 
-# ---------------------------------- model 3 --------------------------------- #
+function model2()
+  SQLite.execute(db, """DROP TABLE IF EXISTS sourcesink2""")
 
-SQLite.execute(db, """
-CREATE TABLE sourcesink3 (
-    beta REAL,
-    gamma REAL,
-    rho REAL,
-    b REAL,
-    cost REAL,
-    mu REAL,
-    delta INT,
-    alpha REAL,
-    PRIMARY KEY (beta, gamma, rho, b, cost, mu, delta, alpha)
-)
-""")
-
-counter = 1
-for β=0.0:0.025:0.2, γ=0.0:0.025:0.2, ρ=0.0:0.025:0.1, b=0.1:0.45:1.0, α=0.0:0.025:0.2
-  params = (β, γ, ρ, b, 1.0, 0.2, 1, α)
-  SQLite.execute(db, """INSERT INTO sourcesink3 VALUES (?, ?, ?, ?, ?, ?, ?, ?)""", params)
-  counter += 1
+  SQLite.execute(db, """
+  CREATE TABLE sourcesink2 (
+      beta REAL,
+      xi REAL,
+      alpha REAL,
+      gamma REAL,
+      rho REAL,
+      eta REAL,
+      b REAL,
+      cost REAL,
+      mu REAL,
+      PRIMARY KEY (beta, xi, alpha, gamma, rho, eta, b, cost, mu)
+  )
+  """)
+  
+  @showprogress for β = 0.06:0.01:0.17, ρ = 0.005:0.005:0.1, η = 0.005:0.005:0.05, b = 0.2:0.2:1.0
+    params = (β, 1.0, 1.0, 1.0, ρ, η, -b, 1.0, 1e-4)
+    SQLite.execute(db, """INSERT INTO sourcesink2 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)""", params)
+  end
+  
 end
 
-# SQLite.execute(db, """
-# DROP TABLE sourcesink3
-# """)
+function model3()
+  SQLite.execute(db, """DROP TABLE IF EXISTS sourcesink3""")
+
+  SQLite.execute(db, """
+  CREATE TABLE sourcesink3 (
+      beta REAL,
+      gamma REAL,
+      rho REAL,
+      b REAL,
+      cost REAL,
+      mu REAL,
+      delta INT,
+      alpha REAL,
+      PRIMARY KEY (beta, gamma, rho, b, cost, mu, delta, alpha)
+  )
+  """)
+  
+  @showprogress for β=0.0:0.025:0.15, γ=0.0:0.025:0.15, ρ=0.0:0.025:0.15, b=0.1:0.1:0.3, α=0.0:0.025:0.15
+    params = (β, γ, ρ, b, 1.0, 0.2, 1, α)
+    SQLite.execute(db, """INSERT INTO sourcesink3 VALUES (?, ?, ?, ?, ?, ?, ?, ?)""", params)
+  end
+end
+
+function main()
+  global db = SQLite.DB("../source-sink.db")
+  args = parse_commandline()
+  if args["m"] == 1
+    model1()
+  elseif args["m"] == 2
+    model2()
+  elseif args["m"] == 3
+    model3()
+  end
+end
+
+main()

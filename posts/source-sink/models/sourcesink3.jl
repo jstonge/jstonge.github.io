@@ -104,10 +104,10 @@ function source_sink3!(du, u, p, t)
     for ℓ = 1:L, i = 1:n
       n_adopt, gr_size = i-1, n-1
       # Individual selection process
-      du.x[ℓ][i] = -α*(n_adopt*f(1-s(ℓ-1)) + (gr_size-n_adopt)*f(s(ℓ-1)-1))*G.x[ℓ][i]
+      du.x[ℓ][i] = - α*n_adopt*f(1-s(ℓ-1))*G.x[ℓ][i] - α*(gr_size-n_adopt)*f(s(ℓ-1)-1)*G.x[ℓ][i]
       du.x[ℓ][i] += - n_adopt*(gr_size-n_adopt)*(β+γ)*G.x[ℓ][i] - ρ*(gr_size-n_adopt)*β*R*G.x[ℓ][i] - ρ*n_adopt*γ*(gr_size-R)*G.x[ℓ][i]
-      n_adopt > 0 && ( du.x[ℓ][i] += (α*(gr_size-n_adopt+1)*f(s(ℓ-1)-1) + β*(n_adopt-1+ρ*R)*(gr_size-n_adopt+1))*G.x[ℓ][i-1] )
-      n_adopt < gr_size && ( du.x[ℓ][i] += (α*(n_adopt+1)*f(1-s(ℓ-1)) + γ*(gr_size-n_adopt-1+ρ*(gr_size-R))*(n_adopt+1))*G.x[ℓ][i+1] )
+      n_adopt > 0 && ( du.x[ℓ][i] += α*(gr_size-n_adopt+1)*f(s(ℓ-1)-1)*G.x[ℓ][i-1] + β*(n_adopt-1+ρ*R)*(gr_size-n_adopt+1)*G.x[ℓ][i-1] )
+      n_adopt < gr_size && ( du.x[ℓ][i] += α*(n_adopt+1)*f(1-s(ℓ-1))*G.x[ℓ][i+1] + γ*(gr_size-n_adopt-1+ρ*(gr_size-R))*(n_adopt+1)*G.x[ℓ][i+1] )
       # Group selection process
       ℓ > 1 && ( du.x[ℓ][i] += (f(b*h(ℓ-1)*n_adopt-c*(ℓ-1))^δ)*(μ+ρ*Z[ℓ]/Z[ℓ-1])*G.x[ℓ-1][i] - (μ*(f(c*(ℓ-1)-b*h(ℓ-1)*n_adopt)^δ) + ρ*Z[ℓ-1]/Z[ℓ])*G.x[ℓ][i] )
       ℓ < L && ( du.x[ℓ][i] += (μ*(f(c*ℓ-b*h(ℓ)*n_adopt)^δ) + ρ*Z[ℓ]/Z[ℓ+1])*G.x[ℓ+1][i] - (f(b*h(ℓ)*n_adopt-c*ℓ)^δ)*(μ+ρ*Z[ℓ+1]/Z[ℓ])*G.x[ℓ][i] )
@@ -116,8 +116,8 @@ end
 
 function run_source_sink3(p)
   n, M = 20, 1000
-  u₀ = initialize_u0(n=n, L=6, M=M, p=0.01)
-  t_max = 500
+  u₀ = initialize_u0(n=n, L=4, M=M, p=0.01)
+  t_max = 2000
   tspan = (1.0, t_max)
 
   # Solve problem
@@ -196,7 +196,7 @@ main()
 # sol1 = solve(prob1, DP5(), saveat=1, reltol=1e-8, abstol=1e-8)
 
 # file should be there
-inst_level, inst_level_prop = parse_sol(sol)  # params: β, γ, ρ, b, c, μ, δ
+# inst_level, inst_level_prop = parse_sol(sol)  # params: β, γ, ρ, b, c, μ, δ
 
 # # temporal evolution
 
