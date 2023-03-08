@@ -32,7 +32,7 @@ function model1()
   )
   """)
   
-  @showprogress for β=0.:0.01:0.2, γ= 0.9:0.1:1.1, ρ=0.1:0.15:0.40, b=0.12:0.05:0.22, c=0.:0.05:2.0
+  @showprogress for β=0.:0.02:0.2, γ= 0.9:0.1:1.1, ρ=0.1:0.15:0.40, b=0.12:0.05:0.22, c=0.:0.1:2.0
     μ = 1e-4
     params = (β, γ, ρ, b, c, μ)
     SQLite.execute(db, """INSERT INTO sourcesink1 VALUES (?, ?, ?, ?, ?, ?)""", params)
