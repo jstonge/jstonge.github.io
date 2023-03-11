@@ -83,9 +83,10 @@ $$
 \frac{d}{dt}G_{i,\ell} = \frac{d}{dt}G_{i,\ell}^{diff} + \frac{d}{dt}G_{i,\ell}^{select}
 $$
 
-#### Julia model
+<details>
+  <summary>Click to see the Julia code</summary>
 
-``` julia
+```julia
 function source_sink!(du, u, p, t)
     G, L, n = u, length(u.x), length(first(u.x))
     β, γ, ρ, b, c, μ = p
@@ -115,6 +116,8 @@ function source_sink!(du, u, p, t)
     end
 end
 ```
+</details>
+
 #### Playground
 
 
@@ -122,11 +125,9 @@ end
 //| panel: sidebar
 
 // Lookup table 1
-// param_str:   β,   γ,   ρ,    b,   c,    μ
-// param_grid: 
-// ax_vars:    
-// fps:        
-// s_vec_idx:  
+// ax_vars:     β               b    c
+// fps:              γ    ρ                μ
+// s_vec_idx:  ax0  fp0  fp1   ax1  ax2   fp2
 
 sourcesink1 = resdb.query(`SELECT DISTINCT name FROM sourcesink1`)
 lookup1 = {
@@ -138,27 +139,28 @@ lookup1 = {
 
 p1 = get_param_table(sourcesink1, lookup1)
 
-ax_vars1 = ["β", "c", "b"] // choose the x,y,z axis, i.e. params to vary
-fp1 = get_fixed_params(p1, ax_vars1); // fixed params are the rest
+av1 = ["β", "b", "c"] 
+// fy1 = "α"  // choose the facet variable
+fp1 = ["γ", "ρ", "μ"]
 
 viewof s1 = Inputs.form({
-  ax0: Inputs.range(p1[ax_vars1[0]]['minmax'], {step: p1[ax_vars1[0]]['s'], label: ax_vars1[0]}),
-  ax1: Inputs.range(p1[ax_vars1[1]]['minmax'], {step: p1[ax_vars1[1]]['s'], label: ax_vars1[1]}),
-  ax2: Inputs.range(p1[ax_vars1[2]]['minmax'], {step: p1[ax_vars1[2]]['s'], label: ax_vars1[2]}),
+  ax0: Inputs.range(p1[av1[0]]['minmax'], {step: p1[av1[0]]['s'], label: av1[0]}),
+  ax1: Inputs.range(p1[av1[1]]['minmax'], {step: p1[av1[1]]['s'], label: av1[1]}),
+  ax2: Inputs.range(p1[av1[2]]['minmax'], {step: p1[av1[2]]['s'], label: av1[2]}),
   fp0: Inputs.range(p1[fp1[0]]['minmax'], {step: p1[fp1[0]]['s'], label: fp1[0], value: p1[fp1[0]]['first_val']}),
   fp1: Inputs.range(p1[fp1[1]]['minmax'], {step: p1[fp1[1]]['s'], label: fp1[1], value: p1[fp1[1]]['first_val']}),
   fp2: Inputs.range(p1[fp1[2]]['minmax'], {step: p1[fp1[2]]['s'], label: fp1[2], value: p1[fp1[2]]['first_val']})
 })
 
 viewof r1 = Inputs.form({
-  x: Inputs.radio(ax_vars1, {label: "x", value: ax_vars1[0]}),
-  y: Inputs.radio(ax_vars1, {label: "y", value: ax_vars1[1]})
+  x: Inputs.radio(av1, {label: "x", value: av1[0]}),
+  y: Inputs.radio(av1, {label: "y", value: av1[1]})
 })
 
 
-data = sql_data_a('sourcesink1', `${f(s1['ax0'])}_${f(s1['fp0'])}_${f(s1['fp1'])}_${f(s1['ax2'])}_${f(s1['ax1'])}_${f(s1['fp2'])}`)
+data = sql_data_a('sourcesink1', `${f(s1['ax0'])}_${f(s1['fp0'])}_${f(s1['fp1'])}_${f(s1['ax1'])}_${f(s1['ax2'])}_${f(s1['fp2'])}`)
 datab = sql_data_b('sourcesink1')
-data_hm = get_data_heatmap(datab, lookup1, fp1, ax_vars1, r1, s1)
+data_hm = get_data_heatmap(datab, lookup1, fp1, av1, r1, s1)
 ```
 
 
@@ -174,15 +176,20 @@ html`
 
 ```{ojs}
 pd1 = phase_diagram(data_hm, r1['x'], r1['y'], 'value_prop', 'blues')
+pd1d = phase_diagram(global_hm(data_hm),  r1['x'], r1['y'], 'value', 'viridis') 
 
 html`
-    <div style="display: flex;">
-      <div flex-grow=2>${ pd1 }</div>
-      <div flex-grow=0>${ phase_diagram(global_hm(data_hm),  r3['x'], r3['y'], 'value', 'rainbow') }</div>
+    <div style="display:flex; ">
+    <div>
+      <div>${ pd1 }</div>
+      <div>${ pd1.legend('color', {label: "Level proportion →", width: 350, marginLeft: 150})
+ }</div>
+    </div>
+    <div>
+      <div>${ pd1d }</div>
+      <div>${ pd1d.legend('color', {label: "Global Frequency of behavior →", width: 350, marginLeft: 150}) }</div>
     </div>
 `
-
-pd1.legend('color', {label: "Global Frequency of behavior →", width: 350, marginLeft: 150})
 ```
 
 #### Takeaways
@@ -211,6 +218,9 @@ We want institutions to be able to stop contagions but contagion must exist in t
 ```
 where $R = \mathbin{\rho} \sum_{i',\ell'} i'G_{i',\ell'}$ represents the global diffusion of behaviors and primes denote variable over which we sum to calculate global quantity. The sum over adopters at each level weighted by global behavioural diffusion $\rho$.
 
+<details>
+  <summary>Click to see the Julia code</summary>
+
 ``` julia
 function source_sink2!(du, u, p, t)
     G, L, n = u, length(u.x), length(first(u.x))
@@ -238,6 +248,22 @@ function source_sink2!(du, u, p, t)
       end
 end
 ```
+</details>
+
+<details>
+  <summary>Click to see the parameters definition</summary>
+
+ - `β`: Spreading rate from non-adopter to adopter beta
+ - `ξ`: Simple-complex contagion parameter
+ - `α`: Negative benefits alpha
+ - `γ`: Recovery rate gamma, i.e rate at which adopters loose  behavioral trait
+ - `ρ`: rate between groups to  spread the contagion
+ - `η`: rate between groups to    spread the institution level.
+ - `b`: Group benefits b
+ - `c`: Institutional cost c
+ - `μ`: Noise u
+
+</details>
 
 #### Playground
 
@@ -250,7 +276,6 @@ end
 // ax_vars:    
 // fps:        
 // s_vec_idx:  
-
 
 sourcesink2 = resdb.query(`SELECT DISTINCT name FROM sourcesink2`)
 lookup2 = {
@@ -288,7 +313,6 @@ viewof s2 = Inputs.form({
 data2 = sql_data_a('sourcesink2', `${f(s2['ax0'])}_${f(s2['fp0'])}_${f(s2['fp1'])}_${f(s2['fp2'])}_${f(s2['ax1'])}_${f(s2['ax2'])}_${f(s2['fp3'])}_${f(s2['fp4'])}_${f(s2['fp5'])}`)
 
 data2b = sql_data_b("sourcesink2")
-
 data_hm2 = get_data_heatmap(data2b, lookup2, fp2, ax_vars2, r2, s2, fy2)
 ```
 
@@ -304,15 +328,21 @@ html`
 
 
 ```{ojs}
-pd2 = phase_diagram(data_hm2, r2['x'], r2['y'], 'value_prop', fy2)
+pd2 = phase_diagram(data_hm2, r2['x'], r2['y'], 'value_prop', "blues", fy2)
+pd2d = phase_diagram(global_hm(data_hm2),  r2['x'], r2['y'], 'value', 'viridis') 
 
 html`
     <div style="display:flex; ">
+    <div>
       <div>${ pd2 }</div>
+      <div>${ pd2.legend('color', {label: "Level proportion →", width: 350, marginLeft: 150})
+ }</div>
+    </div>
+    <div>
+      <div>${ pd2d }</div>
+      <div>${ pd2d.legend('color', {label: "Global Frequency of behavior →", width: 350, marginLeft: 150}) }</div>
     </div>
 `
-
-pd2.legend('color', {label: "Global Frequency of behavior →", width: 350, marginLeft: 150})
 ```
 
 
@@ -322,6 +352,8 @@ pd2.legend('color', {label: "Global Frequency of behavior →", width: 350, marg
 
 UPDATE DESCRIPTION. WHY DO WE CARE. IS IT USEFUL FOR POLICY?! WHO AM I?
 
+<details>
+  <summary>Click to see the Julia code</summary>
 
 ```julia
 function source_sink3!(du, u, p, t)
@@ -351,6 +383,8 @@ function source_sink3!(du, u, p, t)
     end
 end
 ```
+</details>
+
 #### Playground
 
 
@@ -415,14 +449,18 @@ html`
 
 ```{ojs dashboard model 3 - phase diagrams}
 pd3 = phase_diagram(data_hm3,  r3['x'], r3['y'], 'value_prop', 'blues', fy3)
-
+pd3d = phase_diagram(global_hm(data_hm3),  r3['x'], r3['y'], 'value', 'viridis') 
 html`
     <div style="display:flex; ">
+    <div>
       <div>${ pd3 }</div>
-      <div>${ phase_diagram(global_hm(data_hm3),  r3['x'], r3['y'], 'value', 'rainbow') }</div>
+      <div>${ pd3.legend('color', {label: "Level proportion →", width: 350, marginLeft: 150}) }</div>
+    </div>
+    <div>
+      <div>${ pd3d }</div>
+      <div>${ pd3d.legend('color', {label: "Global Frequency of behavior →", width: 350, marginLeft: 150}) }</div>
     </div>
 `
-pd3.legend('color', {label: "Global Frequency of behavior →", width: 350, marginLeft: 150})
 ```
 
 :::
@@ -590,6 +628,7 @@ function plot_time_evo(d, y_vals, pal) {
 function phase_diagram(d, x, y, z, pal, fy) {
   return PlotDev.plot({
     width: 1200,
+    height: 600,
     color: {
       type: "linear",
       scheme: pal
