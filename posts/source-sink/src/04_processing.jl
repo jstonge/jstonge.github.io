@@ -22,7 +22,7 @@ Combine all sols and proportion in `sourcesink_output/`, using only unique value
 function main()
   args = parse_commandline()
   
-  # DATA_DIR = "sourcesink2_output"
+  # DATA_DIR = "sourcesink1_output"
   DATA_DIR = args["d"]
   fnames = filter(x -> endswith(x, "txt"),  readdir(DATA_DIR, join=true))
 
@@ -31,19 +31,19 @@ function main()
   modelname = split(fnames[1], "_")[1]
 
   out_f = "$(modelname).parquet"
-  lookup_f = "$(modelname)_lookup.parquet"
+  # lookup_f = "$(modelname)_lookup.parquet"
 
   dfs = []
   p = ProgressMeter.Progress(length(fnames))
-  @showprogress for fname in fnames 
-    # fname = fnames[i]
+  Threads.@threads for i in eachindex(fnames)
+    fname = fnames[i]
 
     p_str = split(fname, "/")[end]
     p_str = replace(join(split(p_str, "_")[2:end], "_"), ".txt" => "")
   
     sol = CSV.read(fname, DataFrame; header=["timestep", "L", "value"], 
                    types=Dict(:timestep => Int, :L => Int, :value => Float32))
-    
+
     gd = groupby(sol, [:timestep, :L])
     n = nrow(gd[1])
   
@@ -57,12 +57,12 @@ function main()
     df_agg[!, :name] .= p_str
 
     # Take timestep maxmin so all levels have same length
-    gd2 = groupby(df_agg, [:L])
-    minmax_timestep = minimum(combine(gd2,:timestep=>maximum=>:timestep)[!, :timestep])
-    df_agg = filter(:timestep => x -> x <= minmax_timestep, df_agg)
-
+    # gd2 = groupby(df_agg, [:L])
+    # minmax_timestep = minimum(combine(gd2,:timestep=>maximum=>:timestep)[!, :timestep])
+    # df_agg = filter(:timestep => x -> x <= minmax_timestep, df_agg)
     push!(dfs, df_agg)
-    # ProgressMeter.next!(p)
+
+    ProgressMeter.next!(p)
   end
   
   all_dfs = vcat(dfs...)
@@ -78,8 +78,8 @@ function main()
   
   # Write output to disk
   # all_dfs.name = [lookup_name[n] for n in all_dfs.name]
-  all_dfs.L = Int32.(all_dfs.L)
-  all_dfs.timestep = Int32.(all_dfs.timestep)
+  # all_dfs.L = all_dfs.L
+  # all_dfs.timestep = Int32.(all_dfs.timestep)
 
   # writefile(out_f, all_dfs)
   write_parquet(out_f, all_dfs)
