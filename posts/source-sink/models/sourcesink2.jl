@@ -176,68 +176,6 @@ main()
 
 # prototyping -------------------------------------------------------------------------------
 
-# default(legendfont = ("Computer modern", 12),
-#         tickfont = ("Computer modern", 12),
-#         guidefontsize = 12, markerstrokewidth=0., markersize = 4.,
-#         linewidth=1, framestyle=:axis,
-#         titlefontsize=10, grid=:none,
-#         bottom_margin = 1mm, left_margin = 1mm, right_margin = 0mm)
-# gr(size=(650,400))
-
-# # abstract figure
-# run_source_sink2(p, lvl_1_inf=lvl_1_inf)
-# t_max = 3500
-# # i.c. 1
-# lvl_1_inf = true
-# ηs = [5.,0.05,0.0005]
-# p = [0.17, 1., 2., 1., 0.05, ηs[1], -1., 1., 0.0001]  # β, ξ, α, γ, ρ, η, b, c, μ
-# sol = run_source_sink2(p, lvl_1_inf=lvl_1_inf)
-# res, res_prop = parse_sol(sol)
-# L = length(res)
-# global_freq1 = [sum([res[ℓ][t]*res_prop[ℓ][t] for ℓ in 1:L]) for t in 1:t_max]
-# pl = plot(1:t_max, global_freq1[1:t_max], width = 4, xscale=:log, xlabel = L"\textrm{time}",
-#             ylabel = L"\textrm{prevalence}", legend=:right, label = L"\ \eta = %$(ηs[1]),\ \beta = %$(p[1]),\ \textrm{i.c.}\ 1",
-#             color = "seagreen", grid =:none);
-# p[6] = ηs[2]
-# sol = run_source_sink2(p, lvl_1_inf=lvl_1_inf)
-# res, res_prop = parse_sol(sol)
-# global_freq2 = [sum([res[ℓ][t]*res_prop[ℓ][t] for ℓ in 1:L]) for t in 1:t_max]
-# plot!(1:t_max, global_freq2[1:t_max], width = 4, label = L"\ \eta = %$(ηs[2]),\ \beta = %$(p[1]),\ \textrm{i.c.}\ 1",
-#         color = "deepskyblue");
-# p[6] = ηs[3]
-# sol = run_source_sink2(p, lvl_1_inf=lvl_1_inf)
-# res, res_prop = parse_sol(sol)
-# global_freq3 = [sum([res[ℓ][t]*res_prop[ℓ][t] for ℓ in 1:L]) for t in 1:t_max]
-# plot!(1:t_max, global_freq3[1:t_max], width = 4, label = L"\ \eta = %$(ηs[3]),\ \beta = %$(p[1]),\ \textrm{i.c.}\ 1",
-#       color = "darkorchid2");
-# # i.c. 2
-# lvl_1_inf = false
-# p[6] = ηs[3]
-# sol = run_source_sink2(p, lvl_1_inf=lvl_1_inf)
-# res, res_prop = parse_sol(sol)
-# global_freq4 = [sum([res[ℓ][t]*res_prop[ℓ][t] for ℓ in 1:L]) for t in 1:t_max]
-# plot!(1:t_max, global_freq4[1:t_max], width = 4,
-#       label = L"\ \eta = %$(ηs[3]),\ \beta = %$(p[1]),\ \textrm{i.c.}\ 2",
-#       color = "purple");
-# # i.c. 3
-# lvl_1_inf = false
-# perc_inf = 0.3
-# p[6] = ηs[2]
-# sol = run_source_sink2(p, perc_inf = perc_inf, lvl_1_inf=lvl_1_inf)
-# res, res_prop = parse_sol(sol)
-# global_freq5 = [sum([res[ℓ][t]*res_prop[ℓ][t] for ℓ in 1:L]) for t in 1:t_max]
-# plot!(1:t_max, global_freq5[1:t_max], width = 4,
-#       label = L"\ \eta = %$(ηs[2]),\ \beta = %$(p[1]),\ \textrm{i.c.}\ 3",
-#       color = "blue4");
-# p[1] = 0.06
-# sol = run_source_sink2(p, perc_inf = perc_inf, lvl_1_inf=lvl_1_inf)
-# res, res_prop = parse_sol(sol)
-# global_freq6 = [sum([res[ℓ][t]*res_prop[ℓ][t] for ℓ in 1:L]) for t in 1:t_max]
-# plot!(1:t_max, global_freq6[1:t_max], width = 4,
-#       label = L"\ \eta = %$(ηs[2]),\ \beta = %$(p[1]),\ \textrm{i.c.}\ 3",
-#       color = "orange3")
-
-# savefig("NetSci_abstract_fig.pdf")
 
 
 # params_name = "β", "ξ", "α", "γ", "ρ", "η", "b", "c", "μ"
