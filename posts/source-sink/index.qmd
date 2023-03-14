@@ -16,9 +16,9 @@ resdb = DuckDBClient.of({
   sourcesink1: FileAttachment("sourcesink1.parquet"),
   sourcesink1_lookup: FileAttachment("sourcesink1_lookup.parquet"),
   sourcesink2: FileAttachment("sourcesink2.parquet"),
-  sourcesink2_lookup: FileAttachment("sourcesink2_lookup.parquet"),
-  sourcesink3: FileAttachment("sourcesink3.parquet"),
-  sourcesink3_lookup: FileAttachment("sourcesink3_lookup.parquet")
+  sourcesink2_lookup: FileAttachment("sourcesink2_lookup.parquet")
+  // sourcesink3: FileAttachment("sourcesink3.parquet"),
+  // sourcesink3_lookup: FileAttachment("sourcesink3_lookup.parquet")
 })
 ```
 
@@ -403,10 +403,6 @@ end
 
 #### Playground
 
-```{ojs}
-// sourcesink3_lookup_map[`${f(s3["ax0"])}_${f(s3["fp0"])}_${f(s3["ax1"])}_${f(s3["fp1"])}_${f(s3["fp2"])}_${f(s3["fp3"])}_${f(s3["fp4"])}_${f(s3["ax2"])}`]
-sourcesink3_lookup_map
-```
 
 ```{ojs sidebar model 3}
 //| panel: sidebar
@@ -418,7 +414,7 @@ sourcesink3_lookup_map
 // fps:              γ,        b,   c,   μ,   δ
 // s_vec_idx:  ax0, fp0, ax1, fp1, fp2, fp3, fp4, ax2
 
-sourcesink3_lookup = resdb.query("SELECT param_str as name, row_id FROM sourcesink3_lookup")
+// sourcesink3_lookup = resdb.query("SELECT param_str as name, row_id FROM sourcesink3_lookup")
 
 // TODO: Ideally we would like to have resdb return a lookup
 sourcesink3_lookup_map = sourcesink3_lookup.reduce(function(map, obj) {
@@ -459,7 +455,7 @@ viewof r3 = Inputs.form({
 
 
 // data3a = sql_data_a('sourcesink3', sourcesink3_lookup_map[`${f(s3["ax0"])}_${f(s3["fp0"])}_${f(s3["ax1"])}_${f(s3["fp1"])}_${f(s3["fp2"])}_${f(s3["fp3"])}_${f(s3["fp4"])}_${f(s3["ax2"])}`])
-data3a = sql_data_a('sourcesink3', sourcesink3_lookup_map[`0.0_0.0_0.0_0.2_1.0_0.1_1.0_0.14`])
+// data3a = sql_data_a('sourcesink3', sourcesink3_lookup_map[`0.0_0.0_0.0_0.2_1.0_0.1_1.0_0.14`])
 // data3b = sql_data_b("sourcesink3")
 // data_hm3 = get_data_heatmap(data3b, lookup3, fp3, av3, r3, s3, fy3)
 ```
