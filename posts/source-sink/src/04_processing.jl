@@ -23,7 +23,7 @@ Combine all sols and proportion in `sourcesink_output/`, using only unique value
 function main()
   args = parse_commandline()
   
-  # DATA_DIR = "sourcesink3_output"
+  # DATA_DIR = "sourcesink1_output"
   DATA_DIR = args["d"]
   fnames = filter(x -> endswith(x, "txt"),  readdir(DATA_DIR, join=true))
 
@@ -34,8 +34,11 @@ function main()
   out_f = "$(modelname).parquet"
   lookup_f = "$(modelname)_lookup.parquet"
 
+  println("Processing files")
+  tot_rows = 0
   dfs = []
   p = ProgressMeter.Progress(length(fnames))
+  # @showprogress for i=eachindex(fnames)
   Threads.@threads for i=eachindex(fnames)
     fname = fnames[i]
 
@@ -66,31 +69,36 @@ function main()
     df_agg[!, :name] .= p_str
 
     push!(dfs, df_agg)
+    tot_rows += nrow(df_agg)
     ProgressMeter.next!(p)
   end
   
+  println("Concatenating $(tot_rows) rows")
   all_dfs = vcat(dfs...)
 
+  println("Write lookup")
   # Write lookup for rowids -> all_dfs.name to disk
   names_params = unique(all_dfs.name)
   row_ids = Int32.(1:length(names_params))
    
-  writefile(lookup_f, (row_id=row_ids, param_str=names_params))
+  write_parquet(lookup_f, (row_id=row_ids, param_str=names_params))
   
   # lookup
+  println("Converting data to better types")
   lookup_name = Dict()
   [get!(lookup_name, n, row_id) for (n, row_id) in zip(names_params, row_ids)];
 
   # Write output to disk
   all_dfs.row_id = [lookup_name[n] for n in all_dfs.name]
   select!(all_dfs, Not(:name))
-  all_dfs.L = Int8.(all_dfs.L)
+  all_dfs.L = all_dfs.L
   all_dfs.timestep = Int32.(all_dfs.timestep)
   all_dfs.value = round.(all_dfs.value, digits=4)
   all_dfs.value_prop = round.(all_dfs.value_prop, digits=4)
 
+  println("Writing data to disk")
   # writefile(out_f, all_dfs)
-  writefile(out_f, all_dfs)
+  write_parquet(out_f, all_dfs)
 end
 
 main()

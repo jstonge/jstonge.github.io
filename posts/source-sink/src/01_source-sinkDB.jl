@@ -2,7 +2,7 @@
 # For each new model, we need to provide a new functions specifying the grid.
 
 using Pkg; Pkg.activate("../../");
-using SQLite, ProgressMeter, ArgParse, DataFrames
+using SQLite, ArgParse, DataFrames
 
 function parse_commandline()
   s = ArgParseSettings()
@@ -18,65 +18,33 @@ end
 
 function model1()
   SQLite.execute(db, """DROP TABLE IF EXISTS sourcesink1""")
-  SQLite.execute(db, """
-  CREATE TABLE sourcesink1 (
-      beta REAL,
-      gamma REAL,
-      rho REAL,
-      b REAL,
-      cost REAL,
-      mu REAL,
-      PRIMARY KEY (beta, gamma, rho, b, cost, mu)
-  )
-  """)
-  
-  @showprogress for β=0.:0.02:0.2, γ= 0.9:0.1:1.1, ρ=0.1:0.15:0.40, b=0.12:0.05:0.22, c=0.:0.1:2.0
+  param_list = []
+  for β=0.:0.02:0.2, γ= 0.9:0.1:1.1, ρ=0.1:0.15:0.40, b=0.12:0.05:0.22, c=0.:0.1:2.0
     μ = 1e-4
     params = (β, γ, ρ, b, c, μ)
-    SQLite.execute(db, """INSERT INTO sourcesink1 VALUES (?, ?, ?, ?, ?, ?)""", params)
+    push!(param_list, params)
   end
+  df = DataFrame(param_list)
+  rename!(df, ["beta", "gamma", "rho", "b", "cost", "mu"])
+  SQLite.load!(df, db, "sourcesink1")
 end
 
 function model2()
   SQLite.execute(db, """DROP TABLE IF EXISTS sourcesink2""")
-  SQLite.execute(db, """
-  CREATE TABLE sourcesink2 (
-      beta REAL,
-      xi REAL,
-      alpha REAL,
-      gamma REAL,
-      rho REAL,
-      eta REAL,
-      b REAL,
-      cost REAL,
-      mu REAL,
-      PRIMARY KEY (beta, xi, alpha, gamma, rho, eta, b, cost, mu)
-  )
-  """)
-  
-  @showprogress for β = 0.06:0.01:0.17, ρ = 0.005:0.005:0.1, η = 0.005:0.005:0.05, b = 0.2:0.2:1.0
+  param_list = []
+  for β = 0.06:0.01:0.17, ρ = 0.005:0.005:0.1, η = 0.005:0.005:0.05, b = 0.2:0.2:1.0
     ξ, α, γ, c, μ = 1.0, 1.0, 1.0, 1e-4
     params = (β, ξ, α, γ, ρ, η, -b, c, μ)
-    SQLite.execute(db, """INSERT INTO sourcesink2 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)""", params)
+    push!(param_list, params)
   end
+  df = DataFrame(param_list)
+  rename!(df, ["beta", "xi", "alpha", "gamma", "rho", "eta", "b", "cost", "mu"])
+  SQLite.load!(df, db, "sourcesink2")
   
 end
 
 function model3()
   SQLite.execute(db, """DROP TABLE IF EXISTS sourcesink3""")
-  # SQLite.execute(db, """
-  # CREATE TABLE sourcesink3 (
-  #     beta REAL,
-  #     gamma REAL,
-  #     rho REAL,
-  #     b REAL,
-  #     cost REAL,
-  #     mu REAL,
-  #     delta INT,
-  #     alpha REAL,
-  #     PRIMARY KEY (beta, gamma, rho, b, cost, mu, delta, alpha)
-  # )
-  # """)
   param_list = []
   for β=0.0:0.01:0.15, ρ=0.0:0.01:0.15, b=0.1:0.1:0.3, α=0.0:0.01:0.15
     γ = β
