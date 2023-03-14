@@ -16,9 +16,9 @@ resdb = DuckDBClient.of({
   sourcesink1: FileAttachment("sourcesink1.parquet"),
   sourcesink1_lookup: FileAttachment("sourcesink1_lookup.parquet"),
   sourcesink2: FileAttachment("sourcesink2.parquet"),
-  sourcesink2_lookup: FileAttachment("sourcesink2_lookup.parquet")
-  // sourcesink3: FileAttachment("sourcesink3.parquet"),
-  // sourcesink3_lookup: FileAttachment("sourcesink3_lookup.parquet")
+  sourcesink2_lookup: FileAttachment("sourcesink2_lookup.parquet"),
+  sourcesink3: FileAttachment("sourcesink3.parquet"),
+  sourcesink3_lookup: FileAttachment("sourcesink3_lookup.parquet")
 })
 ```
 
@@ -35,6 +35,7 @@ resdb = DuckDBClient.of({
 The key ingredients of the `source-sink model`[^1] are groups $G$ of various size with a certain number of adopters $i$ and of institution of level $\ell$. We assume that with higher levels of institutional strength, $\ell$, the institution will more effectively promote group-beneficial behavior, $\ell$$\beta$. As it gets better, each adopter in the group also gain a collective benefit [$b$]{style="color: seagreen;"}. But all of these toodily-doo perks are offset by an institutional implementation costs, [$c$]{style="color: darkred;"}, of entertaining larger groups. For instance, think of the process of unionization, promoting behaviors that are costly at individual level. When unionization becomes more successful, the unions can become ungaingly. Lastly adopters lose their behavioural trait at a rate [$\gamma$]{style="color: red;"}.
 
 [^1]: 
+```
 @article{hebert-dufresne_source-sink_nodate,
 	title = {Source-sink behavioural dynamics limit institutional evolution in a group-structured society},
 	volume = {9},
@@ -45,21 +46,11 @@ The key ingredients of the `source-sink model`[^1] are groups $G$ of various siz
 	journal = {Royal Society Open Science},
 	author = {Hébert-Dufresne, Laurent and Waring, Timothy M. and St-Onge, Guillaume and Niles, Meredith T. and Kati Corlew, Laura and Dube, Matthew P. and Miller, Stephanie J. and Gotelli, Nicholas J. and McGill, Brian J.}},
 }
-
+```
 
 First master equation[^2]:
 
-[^2]: A sidenote on master equations for non-physicists. The citation for master equations in the original paper is the following:
-
-    > Hébert-Dufresne, L., Noël, P.-A., Marceau, V., Allard, A., & Dubé, L. J. (2010). Propagation dynamics on networks featuring complex topologies. Physical Review E, 82(3), 036115. https://doi.org/10.1103/PhysRevE.82.036115
-
-    The term ''master equation'' is not mentionned once in the paper. But they do talk about "*a mean-field description used to coherently couple the dynamics of the network elements (nodes, vertices, individuals...) and their recurrent topological patterns (subgraphs, groups...)*" that yields a set of ODEs for the time evolution of the system. Another paper writen by Guillaume St-Onge et al. is a more generous in their description of master equation:
-
-    > St-Onge, G., Thibeault, V., Allard, A., Dubé, L. J., & Hébert-Dufresne, L. (2021). Master equation analysis of mesoscopic localization in contagion dynamics on higher-order networks. Physical Review E, 103(3), 032301. https://doi.org/10.1103/PhysRevE.103.032301
-
-    In it, section II does a great job of describing what master equations are and why they are powerful modeling tools. Relevant to this model, we learn that the size of a group is determined by drawing from a group size distribution. This is what we do in our intialization scheme above. We also learn that these 3 following papers are relevant to understand master equations:
-
-    > Lindquist, J., Ma, J., van den Driessche, P., & Willeboordse, F. H. (2011). Effective degree network disease models. Journal of Mathematical Biology, 62(2), 143--164. https://doi.org/10.1007/s00285-010-0331-2 <br><br> Gleeson, J. P. (2011). High-Accuracy Approximation of Binary-State Dynamics on Networks. Physical Review Letters, 107(6), 068701. https://doi.org/10.1103/PhysRevLett.107.068701 <br><br> Marceau, V., Noël, P.-A., Hébert-Dufresne, L., Allard, A., & Dubé, L. J. (2010). Adaptive networks: Coevolution of disease and topology. Physical Review E, 82(3), 036116. https://doi.org/10.1103/PhysRevE.82.036116
+[^2]: A sidenote on master equations for non-physicists. A friendly introductory book on the topic is under construction at [https://www.gstonge.ca/tame/chapters/index.html](https://www.gstonge.ca/tame/chapters/index.html). 
 
 ```{=tex}
 \begin{align*}
@@ -132,7 +123,7 @@ end
 // fps:              γ    ρ                μ
 // s_vec_idx:  ax0  fp0  fp1   ax1  ax2   fp2
 
-sourcesink1_lookup = resdb.query("SELECT param_str as name, row_id FROM sourcesink1_lookup")
+sourcesink1_lookup = resdb.query("SELECT param_str::STRING as name, row_id FROM sourcesink1_lookup")
 
 // TODO: Ideally we would like to have resdb return a lookup
 sourcesink1_lookup_map = sourcesink1_lookup.reduce(function(map, obj) {
@@ -287,7 +278,7 @@ end
 // fps:        
 // s_vec_idx:  
 
-sourcesink2_lookup = resdb.query("SELECT param_str as name, row_id FROM sourcesink2_lookup")
+sourcesink2_lookup = resdb.query("SELECT param_str::STRING as name, row_id FROM sourcesink2_lookup")
 
 // TODO: Ideally we would like to have resdb return a lookup
 sourcesink2_lookup_map = sourcesink2_lookup.reduce(function(map, obj) {
@@ -364,9 +355,11 @@ html`
 
 ## Game-theoretic model
 
+Under construction
+
 #### Description
 
-UPDATE DESCRIPTION. WHY DO WE CARE. IS IT USEFUL FOR POLICY?! WHO AM I?
+<!-- UPDATE DESCRIPTION. WHY DO WE CARE. IS IT USEFUL FOR POLICY?! WHO AM I?
 
 <details>
   <summary>Click to see the Julia code</summary>
@@ -399,13 +392,12 @@ function source_sink3!(du, u, p, t)
     end
 end
 ```
-</details>
+</details> -->
 
 #### Playground
 
 
-```{ojs sidebar model 3}
-//| panel: sidebar
+<!-- //| panel: sidebar
 
 // Lookup table 3
 // param_str:   β,   γ,   ρ,   b,   c,   μ,   δ,   α
@@ -414,7 +406,7 @@ end
 // fps:              γ,        b,   c,   μ,   δ
 // s_vec_idx:  ax0, fp0, ax1, fp1, fp2, fp3, fp4, ax2
 
-// sourcesink3_lookup = resdb.query("SELECT param_str as name, row_id FROM sourcesink3_lookup")
+sourcesink3_lookup = resdb.query("SELECT param_str::STRING as name, row_id FROM sourcesink3_lookup")
 
 // TODO: Ideally we would like to have resdb return a lookup
 sourcesink3_lookup_map = sourcesink3_lookup.reduce(function(map, obj) {
@@ -454,13 +446,10 @@ viewof r3 = Inputs.form({
 })
 
 
-// data3a = sql_data_a('sourcesink3', sourcesink3_lookup_map[`${f(s3["ax0"])}_${f(s3["fp0"])}_${f(s3["ax1"])}_${f(s3["fp1"])}_${f(s3["fp2"])}_${f(s3["fp3"])}_${f(s3["fp4"])}_${f(s3["ax2"])}`])
-// data3a = sql_data_a('sourcesink3', sourcesink3_lookup_map[`0.0_0.0_0.0_0.2_1.0_0.1_1.0_0.14`])
-// data3b = sql_data_b("sourcesink3")
-// data_hm3 = get_data_heatmap(data3b, lookup3, fp3, av3, r3, s3, fy3)
-```
+data3a = sql_data_a('sourcesink3', sourcesink3_lookup_map[`${f(s3["ax0"])}_${f(s3["fp0"])}_${f(s3["ax1"])}_${f(s3["fp1"])}_${f(s3["fp2"])}_${f(s3["fp3"])}_${f(s3["fp4"])}_${f(s3["ax2"])}`])
+data3b = sql_data_b("sourcesink3")
+data_hm3 = get_data_heatmap(data3b, lookup3, fp3, av3, r3, s3, fy3)
 
-```{ojs dashboard model 3 - time evo}
 //| panel: fill
 html`
     <div style="display:flex; ">
@@ -468,9 +457,7 @@ html`
       <div>${ plot_time_evo(data3a, "value_prop", "blues")}</div>
     </div>
 `
-```
 
-```{ojs dashboard model 3 - phase diagrams}
 pd3 = phase_diagram(data_hm3,  r3['x'], r3['y'], 'value_prop', 'blues', fy3)
 pd3d = phase_diagram(global_hm(data_hm3),  r3['x'], r3['y'], 'value', 'viridis') 
 html`
@@ -483,8 +470,8 @@ html`
       <div>${ pd3d }</div>
       <div>${ pd3d.legend('color', {label: "Global Frequency of behavior →", width: 350, marginLeft: 150}) }</div>
     </div>
-`
-```
+` -->
+
 
 :::
 
@@ -512,7 +499,7 @@ function sql_data_b(model) {
           FROM ${model}
           GROUP BY row_id, L
       )
-      SELECT s.value, s.L::INT as L, s.value_prop, ss.param_str as name
+      SELECT s.value, s.L::INT as L, s.value_prop, ss.param_str::STRING as name
       FROM ${model} s
       JOIN tmp
       ON s.row_id = tmp.row_id AND s.L = tmp.L AND s.timestep = tmp.timestep
@@ -521,7 +508,6 @@ function sql_data_b(model) {
       ORDER BY (s.row_id, s.L)
   `)
 }
-
 
 function get_fixed_params(param_table, ax_vars, fx) {
   const all_params = [...Object.keys(param_table)]
