@@ -2,9 +2,7 @@
 # For each new model, we need to provide a new functions specifying the grid.
 
 using Pkg; Pkg.activate("../../");
-using SQLite
-using ProgressMeter
-using ArgParse
+using SQLite, ProgressMeter, ArgParse, DataFrames
 
 function parse_commandline()
   s = ArgParseSettings()
@@ -66,26 +64,29 @@ end
 
 function model3()
   SQLite.execute(db, """DROP TABLE IF EXISTS sourcesink3""")
-  SQLite.execute(db, """
-  CREATE TABLE sourcesink3 (
-      beta REAL,
-      gamma REAL,
-      rho REAL,
-      b REAL,
-      cost REAL,
-      mu REAL,
-      delta INT,
-      alpha REAL,
-      PRIMARY KEY (beta, gamma, rho, b, cost, mu, delta, alpha)
-  )
-  """)
-  
-  @showprogress for β=0.0:0.01:0.15, ρ=0.0:0.01:0.15, b=0.1:0.1:0.3, α=0.0:0.01:0.15
+  # SQLite.execute(db, """
+  # CREATE TABLE sourcesink3 (
+  #     beta REAL,
+  #     gamma REAL,
+  #     rho REAL,
+  #     b REAL,
+  #     cost REAL,
+  #     mu REAL,
+  #     delta INT,
+  #     alpha REAL,
+  #     PRIMARY KEY (beta, gamma, rho, b, cost, mu, delta, alpha)
+  # )
+  # """)
+  param_list = []
+  for β=0.0:0.01:0.15, ρ=0.0:0.01:0.15, b=0.1:0.1:0.3, α=0.0:0.01:0.15
     γ = β
     c, μ, δ = 1., 0.1, 1.
     params = (β, γ, ρ, b, c, μ, δ, α)
-    SQLite.execute(db, """INSERT INTO sourcesink3 VALUES (?, ?, ?, ?, ?, ?, ?, ?)""", params)
+    push!(param_list, params)
   end
+  df = DataFrame(param_list)
+  rename!(df, ["beta", "gamma", "rho", "b", "cost", "mu", "delta", "alpha"])
+  SQLite.load!(df, db, "sourcesink3")
 end
 
 function main()
