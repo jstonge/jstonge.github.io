@@ -14,8 +14,11 @@ image: unions.jpg
 ```{ojs load results db}
 resdb = DuckDBClient.of({
   sourcesink1: FileAttachment("sourcesink1.parquet"),
+  sourcesink1_lookup: FileAttachment("sourcesink1_lookup.parquet"),
   sourcesink2: FileAttachment("sourcesink2.parquet"),
-  sourcesink3: FileAttachment("sourcesink3.parquet")
+  sourcesink2_lookup: FileAttachment("sourcesink2_lookup.parquet"),
+  sourcesink3: FileAttachment("sourcesink3.parquet"),
+  sourcesink3_lookup: FileAttachment("sourcesink3_lookup.parquet")
 })
 ```
 
@@ -129,7 +132,14 @@ end
 // fps:              γ    ρ                μ
 // s_vec_idx:  ax0  fp0  fp1   ax1  ax2   fp2
 
-sourcesink1 = resdb.query(`SELECT DISTINCT name FROM sourcesink1`)
+sourcesink1_lookup = resdb.query("SELECT param_str as name, row_id FROM sourcesink1_lookup")
+
+// TODO: Ideally we would like to have resdb return a lookup
+sourcesink1_lookup_map = sourcesink1_lookup.reduce(function(map, obj) {
+    map[obj.name] = obj.row_id;
+    return map;
+}, {})
+
 lookup1 = {
   const out = {}
   out['idx2name'] = {0: "β", 1: 'γ', 2: 'ρ', 3: 'b', 4: 'c', 5: 'μ'}
@@ -137,7 +147,7 @@ lookup1 = {
   return out
 }
 
-p1 = get_param_table(sourcesink1, lookup1)
+p1 = get_param_table(sourcesink1_lookup_map, lookup1)
 
 av1 = ["β", "b", "c"] 
 // fy1 = "α"  // choose the facet variable
@@ -157,8 +167,9 @@ viewof r1 = Inputs.form({
   y: Inputs.radio(av1, {label: "y", value: av1[1]})
 })
 
+query_str = `${f(s1['ax0'])}_${f(s1['fp0'])}_${f(s1['fp1'])}_${f(s1['ax1'])}_${f(s1['ax2'])}_${f(s1['fp2'])}`
+data = sql_data_a('sourcesink1', sourcesink1_lookup_map[query_str])
 
-data = sql_data_a('sourcesink1', `${f(s1['ax0'])}_${f(s1['fp0'])}_${f(s1['fp1'])}_${f(s1['ax1'])}_${f(s1['ax2'])}_${f(s1['fp2'])}`)
 datab = sql_data_b('sourcesink1')
 data_hm = get_data_heatmap(datab, lookup1, fp1, av1, r1, s1)
 ```
@@ -310,10 +321,10 @@ viewof s2 = Inputs.form({
 })
 
 
-data2 = sql_data_a('sourcesink2', `${f(s2['ax0'])}_${f(s2['fp0'])}_${f(s2['fp1'])}_${f(s2['fp2'])}_${f(s2['ax1'])}_${f(s2['ax2'])}_${f(s2['fp3'])}_${f(s2['fp4'])}_${f(s2['fp5'])}`)
+// data2 = sql_data_a('sourcesink2', `${f(s2['ax0'])}_${f(s2['fp0'])}_${f(s2['fp1'])}_${f(s2['fp2'])}_${f(s2['ax1'])}_${f(s2['ax2'])}_${f(s2['fp3'])}_${f(s2['fp4'])}_${f(s2['fp5'])}`)
 
-data2b = sql_data_b("sourcesink2")
-data_hm2 = get_data_heatmap(data2b, lookup2, fp2, ax_vars2, r2, s2, fy2)
+// data2b = sql_data_b("sourcesink2")
+// data_hm2 = get_data_heatmap(data2b, lookup2, fp2, ax_vars2, r2, s2, fy2)
 ```
 
 ```{ojs}
@@ -432,9 +443,9 @@ viewof r3 = Inputs.form({
 })
 
 // data
-data3a = sql_data_a('sourcesink3', `${f(s3["ax0"])}_${f(s3["fp0"])}_${f(s3["ax1"])}_${f(s3["fp1"])}_${f(s3["fp2"])}_${f(s3["fp3"])}_${f(s3["fp4"])}_${f(s3["ax2"])}`)
-data3b = sql_data_b("sourcesink3")
-data_hm3 = get_data_heatmap(data3b, lookup3, fp3, av3, r3, s3, fy3)
+// data3a = sql_data_a('sourcesink3', `${f(s3["ax0"])}_${f(s3["fp0"])}_${f(s3["ax1"])}_${f(s3["fp1"])}_${f(s3["fp2"])}_${f(s3["fp3"])}_${f(s3["fp4"])}_${f(s3["ax2"])}`)
+// data3b = sql_data_b("sourcesink3")
+// data_hm3 = get_data_heatmap(data3b, lookup3, fp3, av3, r3, s3, fy3)
 ```
 
 ```{ojs dashboard model 3 - time evo}
@@ -475,37 +486,30 @@ html`
 ```{ojs helpers}
 function sql_data_a(model, name) {
     return resdb.query(`
-      SELECT timestep::INT as timestep, L::INT as L, value, value_prop, name
+      SELECT timestep::INT as timestep, L::INT as L, value, value_prop
       FROM ${model}
       WHERE
-      name = '${name}'
+      row_id = '${name}'
     `)
 }
 
 function sql_data_b(model) {
     return resdb.query(`
       WITH tmp as (
-          SELECT name, L, MAX(timestep::INT) as timestep
+          SELECT row_id, L, MAX(timestep::INT) as timestep
           FROM ${model}
-          GROUP BY name, L
+          GROUP BY row_id, L
       )
-      SELECT s.name, s.value, s.L::INT as L, s.value_prop
+      SELECT s.value, s.L::INT as L, s.value_prop, ss.param_str as name
       FROM ${model} s
       JOIN tmp
-      ON s.name = tmp.name AND s.L = tmp.L AND s.timestep = tmp.timestep 
+      ON s.row_id = tmp.row_id AND s.L = tmp.L AND s.timestep = tmp.timestep
+      JOIN ${model}_lookup ss
+      ON s.row_id = ss.row_id
+      ORDER BY (s.row_id, s.L)
   `)
 }
 
-
-function global_hm(d){
-  return d3.flatRollup(d, v => d3.sum(v, d => d.value * d.value_prop), d => d.param_str)
-           .map(currentElement => ({
-             'param1': parseFloat(currentElement[0].split('/')[0]),
-             'param2': parseFloat(currentElement[0].split('/')[1]),
-             'value': currentElement[1],
-             'L': 1
-          }))
-}
 
 function get_fixed_params(param_table, ax_vars, fx) {
   const all_params = [...Object.keys(param_table)]
@@ -516,30 +520,30 @@ function get_fixed_params(param_table, ax_vars, fx) {
 
 f = (x) => Number.isInteger(x) ? x.toPrecision(2) : x
 
-// Param table where each key is a parameter, and values 
-// are list of values relevant to 
-// model: resdb output for a specific model
-// lookup: { [0: param1, 1: param2, ...] }
-function get_param_table(model, lookup) {
-  
-  // Extract the step from a list of values for a parameter
-  const s = (p,i) => { 
+// Extract the step from a list of values for a parameter
+s = (p,i) => { 
     const unique_vals = Array.from(new Set(p.map(d => parseFloat(d[i])))).sort((a,b) => a - b)
     const out = []
     for (let i=1; i < unique_vals.length; i++ ) {
       out.push(+(unique_vals[i]-unique_vals[i-1]).toPrecision(2))
     } // return whatev if length is zero
     return out.length === 0 ? 0.1 : out[0]
-  }
+}
 
-  const minmax = (p, i) => d3.extent(p.map(d => parseFloat(d[i])))
-  
-  const p = model.map(d => d.name.split("_"))
+minmax = (p, i) => d3.extent(p.map(d => parseFloat(d[i])))
+
+// Param table where each key is a parameter, and values 
+// are list of values relevant to 
+// model: resdb output for a specific model
+// lookup: { [0: param1, 1: param2, ...] }
+function get_param_table(model_lookup, param_lookup) {
+    
+  const p = Object.keys(model_lookup).map(d => d.split("_")) 
   
   const param_table = {}
   const first_line_param = p[0]
   for ( let i=0; i < first_line_param.length; i++ ) {
-    param_table[lookup['idx2name'][i]] = { 
+    param_table[param_lookup['idx2name'][i]] = { 
       's': s(p,i), 'first_val': first_line_param[i], 'minmax': minmax(p,i) 
       }
   }
@@ -561,15 +565,20 @@ function get_data_heatmap(data, lookup, fp, ax_vars, radios, sliders, fx) {
     
     const vs = {} // dictionary containing all the values of selected parameters 
 
+    // Grab the chosen axis0/x, axis1/y, axis2/z
     const [ax0, ax1, ax2] = ax_vars
     vs[ax0] = parseFloat(p_split[lookup['name2idx'][ax0]])
     vs[ax1] = parseFloat(p_split[lookup['name2idx'][ax1]])
     vs[ax2] = parseFloat(p_split[lookup['name2idx'][ax2]])
 
+    // Grab the Fixed parameters
     for (let i=0; i < fp.length; i++) {
       vs[fp[i]] = parseFloat(p_split[lookup['name2idx'][fp[i]]])
     }
     
+    // Grab the radios, which will be 2 of the 3 axis vars. 
+    // The other other one we'll be the value of our heatmap.
+    // This is where we need to know the actual param_name.
     const p1 = parseFloat(p_split[lookup['name2idx'][radios['x']]])
     const p2 = parseFloat(p_split[lookup['name2idx'][radios['y']]])
     const hm_vals_i = {
@@ -577,7 +586,7 @@ function get_data_heatmap(data, lookup, fp, ax_vars, radios, sliders, fx) {
       'fx' : typeof fx !== undefined ? null : p_split[lookup['name2idx'][fx]], 
       'param1': p1,
       'param2': p2,
-      'param_str': `${p1}/${p2}`,
+      'param_str': `${p1}/${p2}`, // We need a way to groupby (p1,p2) for `global_hm()`
       'value': data[i].value,
       'value_prop': data[i].value_prop
     }
@@ -596,6 +605,17 @@ function get_data_heatmap(data, lookup, fp, ax_vars, radios, sliders, fx) {
   }
   return dat_hm
 }
+
+function global_hm(d){
+  return d3.flatRollup(d, v => d3.sum(v, d => d.value * d.value_prop), d => d.param_str)
+           .map(currentElement => ({
+             'param1': parseFloat(currentElement[0].split('/')[0]),
+             'param2': parseFloat(currentElement[0].split('/')[1]),
+             'value': currentElement[1],
+             'L': 1
+          }))
+}
+
 
 function plot_time_evo(d, y_vals, pal) {
   const global_mean = d3.rollup(d, v => d3.sum(v, d => d.value * d.value_prop), d => d.timestep)

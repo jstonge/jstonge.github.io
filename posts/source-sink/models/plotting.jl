@@ -1,6 +1,6 @@
 using Pkg; Pkg.activate("../../");
 # using Distributions, StatsBase, OrdinaryDiffEq, RecursiveArrayTools, DataFrames, SQLite, Plots, LaTeXStrings
-using Plots, Measures
+using Plots, Measures, ProgressMeter
 
 include("helpers.jl")
 include("sourcesink2.jl")
@@ -191,7 +191,7 @@ annotate!(repeat([t_max/0.15], inner=L), [i == 4 ? last(res_prop[i])-0.01 : last
 xlabel!("timestep")
 ylabel!(L"prop($\ell$)")
 
-pl_tot4 = plot(pl5, pl6, layout = @layout([a b]), size=(1000, 350))
+pl_tot4 = plot(pl6, pl7, layout = @layout([a b]), size=(1000, 350))
 plot!(margin=10mm)
 savefig("figs/slowest_inst_ic2_purple.pdf")
 
@@ -218,6 +218,85 @@ annotate!(repeat([t_max/0.15], inner=L), [i == 4 ? last(res_prop[i])-0.01 : last
 xlabel!("timestep")
 ylabel!(L"prop($\ell$)")
 
-pl_tot5 = plot(pl5, pl6, layout = @layout([a b]), size=(1000, 350))
+pl_tot5 = plot(pl8, pl9, layout = @layout([a b]), size=(1000, 350))
 plot!(margin=10mm)
 savefig("figs/slower_inst_ic3_darkblue.pdf")
+
+# eradication
+p[6] = ηs[2]
+p[1] = 0.06
+lvl_1_inf = false
+perc_inf = 0.3
+sol = run_source_sink2(p, perc_inf = perc_inf, lvl_1_inf=lvl_1_inf)
+res, res_prop = parse_sol(sol)
+
+L = length(res)
+tmax = length(res[L[1]])
+
+pl10 = plot_scatter(res, res_prop, size=(500, 350))
+plot!([], [], legend=false)
+annotate!(repeat([t_max/0.15], inner=L), [i == 4 ? last(res[i])-0.03 : last(res[i]) for i=eachindex(res)], [L"$\ell=$"*"$(i)" for i=eachindex(res)], 10)
+xlabel!("timestep")
+ylabel!(L"$I(\ell$)")
+
+pl11 = plot_scatter(res, res_prop, plot_prop=true, size=(500, 350))
+plot!([], [], legend=false)
+annotate!(repeat([t_max/0.15], inner=L), [i == 4 ? last(res_prop[i])-0.01 : last(res_prop[i]) for i=eachindex(res)], [L"$\ell=$"*"$(i)" for i=eachindex(res)], 10)
+xlabel!("timestep")
+ylabel!(L"prop($\ell$)")
+
+pl_tot6 = plot(pl10, pl11, layout = @layout([a b]), size=(1000, 350))
+plot!(margin=10mm)
+savefig("figs/eradication.pdf")
+
+# ------------------------------ Giulio's plots ----------------------------- #
+
+function run_source_sink2(p; perc_inf::Float64=0.001, lvl_1_inf::Bool=false)
+      n, M = 20, 1_000
+      L = 4
+      u₀ = initialize_u0(n=n, L=L, M=M, p=perc_inf, lvl_1_inf=lvl_1_inf)
+    
+      tspan = (1.0, 10_000)
+      
+      # Solve problem
+      prob = ODEProblem(source_sink2!, u₀, tspan, p)
+      return solve(prob, DP5(), saveat = 1., reltol=1e-8, abstol=1e-8)
+end
+    
+η_lowest = 0.005
+βs = 0.06:0.001:0.16
+p = [0.1, 1., 1., 1., 0.05, η_lowest, -1., 1., 0.0001]  # β, ξ, α, γ, ρ, η, b, c, μ
+lvl_1_inf=false
+t_max = 9999
+results = zeros(length(βs))
+@showprogress for i in eachindex(βs)
+  p[1] = βs[i]
+  sol = run_source_sink2(p, lvl_1_inf=lvl_1_inf)
+  res, res_prop = parse_sol(sol)
+  L = length(res)
+  results[i] = [sum([res[ℓ][t]*res_prop[ℓ][t] for ℓ in 1:L]) for t in 1:t_max][end]
+end
+
+η_alright = 0.05 
+βs = 0.06:0.001:0.16
+p = [0.1, 1., 1., 1., 0.05, η_alright, -1., 1., 0.0001]  # β, ξ, α, γ, ρ, η, b, c, μ
+lvl_1_inf=false
+t_max = 9999
+results_alright = zeros(length(βs))
+@showprogress for i in eachindex(βs)
+  p[1] = βs[i]
+  sol = run_source_sink2(p, lvl_1_inf=lvl_1_inf)
+  res, res_prop = parse_sol(sol)
+  L = length(res)
+  results_alright[i] = [sum([res[ℓ][t]*res_prop[ℓ][t] for ℓ in 1:L]) for t in 1:t_max][end]
+end
+
+
+plot(βs, [results, results_alright], 
+     ylabel = L"\textrm{equilibrium\ prevalence}", 
+     xlabel = L"\beta",
+     labels = [η_lowest η_alright],
+     width = 4., legendtitle = L"\eta", color = ["orangered" "blue3"])
+vline!([0.085, .12], color = "black", linestyle = :dash, label=false)
+
+savefig("figs/Istar_vs_beta.pdf")
