@@ -17,8 +17,8 @@ resdb = DuckDBClient.of({
   sourcesink1_lookup: FileAttachment("sourcesink1_lookup.parquet"),
   sourcesink2: FileAttachment("sourcesink2.parquet"),
   sourcesink2_lookup: FileAttachment("sourcesink2_lookup.parquet"),
-  sourcesink3: FileAttachment("sourcesink3.parquet"),
-  sourcesink3_lookup: FileAttachment("sourcesink3_lookup.parquet")
+  // sourcesink3: FileAttachment("sourcesink3.parquet"),
+  // sourcesink3_lookup: FileAttachment("sourcesink3_lookup.parquet")
 })
 ```
 
