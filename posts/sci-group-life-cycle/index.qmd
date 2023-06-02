@@ -22,6 +22,8 @@ editor: visual
 
 :::
 
+
+
 There are research groups $G$ with a number of non-programmers $n$ and programmers $p$. In a data-driven world, we assume that learning to code confer a large benefit to programmers over non-programmer such that $\alpha << \beta$. There is a constant rate of influx of students who do not know how to learn to code in research groups $\mu$. There is a cost of learning to code $c(p,n)$, which depend on the number of programmers and non-programmers within group. We assume that programmers and non-programmers have different graduation rates, $\nu_p$ and $\nu_n$, with $\nu_p > \nu_n$. 
 
 We model the group life cycle with the following master equation:

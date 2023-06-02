@@ -1,5 +1,9 @@
 using Pkg; Pkg.activate("../../");
-using ArgParse, Distributions, StatsBase, OrdinaryDiffEq, RecursiveArrayTools, DataFrames, SQLite
+using ArgParse, Distributions, StatsBase, OrdinaryDiffEq, RecursiveArrayTools, DataFrames, SQLite, Plots
+using OrdinaryDiffEq:ODESolution
+using Plots.PlotMeasures
+
+include("helpers.jl")
 
 function parse_commandline()
   s = ArgParseSettings()
@@ -54,55 +58,84 @@ function write_sol2txt(path, sol)
   end
 end
 
-function initialize_u0(;N::Int=20)
-  N_plus_1 = N + 1 # add column for zeroth case
-  G = zeros(N_plus_1, N_plus_1)
-  for i=1:N_plus_1, j=1:N_plus_1
-    G[i,j] = 1/(N_plus_1*N_plus_1)
+function initialize_u0(;N=20, M::Int=100, p::Float64=0.01)
+  N_plus_one = N+1
+  G = zeros(N_plus_one, N_plus_one)
+  for _ in 1:M
+    ℓ = rand(1:N_plus_one)
+    i = sum(rand(Binomial(1, p), N_plus_one))
+    G[ℓ, i+1] += 1
   end
-  return ArrayPartition(Tuple([G[n,:] for n=1:N_plus_1]))
+
+  G = G ./ M
+
+  return G
 end
 
-c(n, i) = 0.95 * exp(-i / n)                # cost function
-τ(n, i, α, β) = n*exp(-α + β*(1 - c(n, i))) # group benefits
+function plot_cost(a=3; p=5)
+  p1=plot(x -> c(x, p, a=a), 1, 21, label="p=$(p)")
+  xlabel!("# non programmers")
+  
+  p2=plot(x -> c(1, x, a=a), 0, 21, label="n=1")
+  plot!(x -> c(5, x, a=a),  0, 21, label="n=5")
+  plot!(x -> c(10, x, a=a), 0, 21, label="n=10")
+  plot!(x -> c(15, x, a=a), 0, 21, label="n=15")
+  xlabel!("# programmers")
+  
+  p3=plot(p1,p2, layout=(2,1))
+  ylabel!("cost")
+  title!("a=$(a)")  
+  return p3
+end
+
+function plot_tryptic_cost(p)
+  p1=plot_cost(5; p=p)
+  p2=plot_cost(3; p=p)
+  p3=plot_cost(1; p=p)
+  plot(p1,p2,p3, layout=(1,3), bottom_margin = 10mm)
+  plot!(size=(700,500))
+end
+
+plot_tryptic_cost(1)
+
+c(n, i; a=3) = n == i == 0 ? 0.95 : 0.95 * exp(-a*i / n)  # cost function
+
+τ(n, i, α, β) = exp(-α + β*(1 - c(n, i))) # group benefits
+
+
+# plot(x -> τ(1,x,α,β)*c(1,x), 0, 20, label="#nonprog=1")
+# plot!(x -> τ(3,x,α,β)*c(3,x), 0, 20, label="#nonprog=3")
+# plot!(x -> τ(5,x,α,β)*c(5,x), 0, 20, label="#nonprog=5")
+# xlabel!("# prog")
+# ylabel!("cost")
+# title!("plotting τ*c")
+
 
 function life_cycle_research_groups!(du, u, p, t)
-
-  G, N, P = u, length(u.x), length(first(u₀.x)) # Note that there can be no coders but not non-coders
-  μ, νₙ, νₚ, α, β = p
+  N, P = size(u) # Note that there can be no coders but not non-coders
+  G = u # G for groups
+  μ, νₙ, νₚ, α, β, a = p
   for n=1:N, i=1:P
-    println("n:$(n), i:$(i), G.x[n][i]:$(G.x[n][i])")
-    coder, non_coder = i-1, n-1   # we distinguish indices from actual values.
-    
-    du.x[n][i] = 0
+    coder, noncoder = i-1, n-1 
+    du[n,i] = 0
 
-    non_coder > 0 && ( du.x[n][i] += μ*(G.x[n-1][i]) )                # 1st term
-    
-    # for everybody
-    println("2: $(νₙ*non_coder*G.x[n][i])")
-    du.x[n][i] -= νₙ*non_coder*G.x[n][i]
-    println("3: $(νₚ*coder*G.x[n][i])")
-    du.x[n][i] -= νₚ*coder*G.x[n][i]
+    noncoder > 0 && ( du[n,i] += μ*G[n-1,i] ) # non-prog repro input
+    n < N && ( du[n,i] -= G[n,i]*μ )                       # non-prog repro output
 
-    # upper boxes don't exist 
-    if i < P
-      # non_coder > 0 && println("4: $(τ(non_coder, coder, α, β)*G.x[n][i] )")
-      # We don't want to pass non_coder = 0 to τ()
-      non_coder > 0 && ( du.x[n][i] -= τ(non_coder, coder, α, β)*G.x[n][i] )               # 4th term
-      # println("5: $(νₚ*(coder+1)*G.x[n][i+1])")
-      du.x[n][i] += νₚ*(coder+1)*G.x[n][i+1]  # 5th term
-    end
+    n < N && ( du[n,i] += G[n+1,i]*νₙ*(noncoder+1) ) # non-prog death input
+    du[n,i] -= G[n,i]*noncoder*νₙ                    # non-prog death output
     
-    # the bottom boxes don't exist
-    if n < N
-      # println("6: $(μ*G.x[n][i])")
-      du.x[n][i] -= μ*G.x[n][i]                                       # 1st term
-      du.x[n][i] += τ(non_coder+1, coder, α, β)*(c(non_coder+1, coder))*G.x[n+1][i]     # 6th term
-      du.x[n][i] += νₙ*(non_coder+1)*G.x[n+1][i]                                            # 2nd term
-      coder > 0 && ( du.x[n][i] += τ(non_coder+1, coder-1, α, β)*(1-c(non_coder+1, coder-1))*G.x[n+1][i-1] ) # 3rd term 
-    end
+    i < P && ( du[n,i] += G[n,i+1]*νₚ*(coder+1) ) # prog death input
+    du[n,i] -= G[n,i]*coder*νₚ                    # prog death output
+    
+    (coder > 0 && n < N) && ( du[n,i] += G[n+1,i-1]*(noncoder+1)*τ(noncoder+1, coder-1, α, β)*(1-c(noncoder+1,coder-1, a=a)) ) # non-prog to prog predation input
+    i < P && ( du[n,i] -= G[n,i]*noncoder*τ(noncoder, coder, α, β)*(1-c(noncoder,coder, a=a)) ) # non-prog to prog predation output
+    
+    i < P && ( du[n,i] -= G[n,i]*noncoder*τ(noncoder, coder, α, β)*c(noncoder,coder, a=a) )           # non-prog death output due to cost
+    (n < N && i < P) && ( du[n,i] += G[n+1,i]*(noncoder+1)*τ(noncoder+1, coder, α, β)*c(noncoder+1,coder, a=a) ) # non-prog death input due to cost
   end
 end
+
 
 function run_life_cycle_research_groups(p)
   u₀ = initialize_u0(N=3)
@@ -112,7 +145,6 @@ function run_life_cycle_research_groups(p)
   prob = ODEProblem(life_cycle_research_groups!, u₀, tspan, p)
   return solve(prob, DP5(), saveat = 1., reltol=1e-8, abstol=1e-8)
 end
-
 
 function main()
     # β, γ, ρ, b, c, μ = 0.07, 1., 0.1, 0.18, 1.05, 0.0001
@@ -148,96 +180,77 @@ function main()
     end  
 end
 
-main()
+# main()
 
 
 # prototyping -------------------------------------------------------------------------------
 
-μ  = 0.001   # inflow new students-non coders
+μ  = 0.1   # inflow new students-non coders
 νₙ = 0.01    # death rate non-coders
 νₚ = 0.05    # death rate coders
 α  = 0.01    # benefits non coders
-β  = 0.1     # benefits coders
-p  = [μ, νₙ, νₚ, α, β]
+β  = 0.02     # benefits coders
+a = 1       # parameter cost function
+p  = [μ, νₙ, νₚ, α, β, a]
 
-u₀ = initialize_u0(N=3)
-tspan = (0., 160.)
+u₀ = initialize_u0(N=20)
+
+t_max = 4000
+tspan = (0., t_max)
 
 prob = ODEProblem(life_cycle_research_groups!, u₀, tspan, p)
 sol = solve(prob, Tsit5(), saveat=1, reltol=1e-8, abstol=1e-8)
 
-N = length(sol[1].x)
-P = length(sol[1].x[1]) # i programmers ~ i adopters
-maxsize = (N-1)+(P-1)
-I = zeros(maxsize, length(sol.t))
-weighted_avg = zeros(maxsize, length(sol.t))
-size_dis = zeros(maxsize, length(sol.t))
-dist_gsize = zeros(maxsize, length(sol.t))
-sommeGNI = zeros(maxsize, length(sol.t))
 
-for t=1:length(sol.t)
-  for n=1:N
-    for i=1:P
-      
-      coder, noncoder = i-1, n-1 
-      G_nil = sol[t].x[n] # sol of group with n non-coders at time t
-      gsize = coder+noncoder
-      
-      gsize > 0 && ( sommeGNI[gsize, t] += gsize*G_nil[i] )
-      gsize > 0 && ( dist_gsize[gsize, t] = G_nil[i] )  
-      gsize > 0 && ( weighted_avg[gsize, t] += (coder/gsize)*G_nil[i] )
-      gsize > 0 && ( size_dis[gsize, t] += G_nil[i] )
+# ------------------------------ wrangling n1+n2 ----------------------------- #
 
+# for s in group size
+# for p in 1:max number of programers OR s
+# (nb prog / group size) * (sol for that nb prog and p)
+# normalized by (sol for that nb prog and p)
+function wrangle()
+  tot_out = []
+  for t=1:t_max
+    out_num = zeros(41)
+    out_denum = zeros(41)
+    #!TODO: not just max but for all ts.
+    for s=1:20
+      for p=1:minimum([21,s+1])
+        out_num[s+1] += ((p-1) / s) * sol[t][s-p+2,p]
+        out_denum[s+1] += sol[t][s-p+2,p]
+      end
     end
+    push!(tot_out, out_num[2:20] ./ out_denum[2:20])
   end
-  
-  for gsize=1:maxsize
-      I[gsize,t] = weighted_avg[gsize, t]/size_dis[gsize, t]
+  return tot_out
+end
+
+out = wrangle()
+
+function plot_sol()
+
+  param_str = join(["$(pname)=$(p);" for (pname, p) in zip(["μ", "νₙ", "νₚ", "α", "β", "a", "p"], p)], ' ')
+
+  ps=plot(2:20, out[2], label="t=2", legend=:outerright, top_margin = 20mm)
+  for t=collect(5:5:30)
+    plot!(2:20, out[t], label="t=$(t)") 
   end
+  plot!(2:20, out[t_max], label="t=$(t_max)")
+  ps
+  title!("Many programmers in large groups while\nwe have few programmers in small groups\n($(param_str))")
+  xlabel!("group size")
+  ylabel!("proportion programmers")
+  # ylims!(0,1)
+  plot!(size=(650,400))
+  # savefig("mymodel.pdf")
 end
 
-# Plotting -------------------------------------------------------------
-
-for i=1:160
-  dist_gsize[:,i] = dist_gsize[:,i] / sum(dist_gsize[:,i])
-end
-
-scatter(dist_gsize[1,1:100], legendtitle="grsize", legend=:outertopright, label="1")
-for i=2:6
-  scatter!(dist_gsize[i,1:100], label="$(i)")
-end
-vline!([10], label="")
-xlabel!("time")
-ylabel!("Fraction of gsize (%)")
+plot_sol()
 
 
-# heatmap(sommeGNI)
-# xlabel!("time")
-# ylabel!("grsize")
-# title!("Couleur: (coder+noncoder)*G_nil[i] ")
+# checks
+round(sum(sol[1]), digits= 2)
+round(sum(sol[t_max]), digits= 2)
 
-# Writing to file -------------------------------------------------------------
-
-
-old_run = isfile("data.json") ? JSON.parsefile("data.json") : Dict()
-
-new_run = []
-for n in 1:N
-  tmp_dat = [Dict("N" => n, "value" => I[n, i], "timesteps" => i) for i in 1:length(sol.t)]
-  x = round.([i["value"] for i in tmp_dat], digits=5) # To lighten the output file we only keep unique `y` values.
-  push!(new_run, tmp_dat )
-end
-
-if isfile("data.json")
-  get!(old_run, join(p, "_"), vcat(new_run...))
-  new_run = old_run
-else
-  new_run = Dict(join(p, "_") => vcat(new_run...))
-end
-
-new_run = Dict("$(N)_$(join(p, "_"))" => vcat(new_run...))
-
-open("data.json", "w") do f
-  write(f, JSON.json(new_run))
-end
-
+round.(sum(sol[t_max], dims=1), digits=4)
+round.(sum(sol[t_max], dims=2), digits=4)
