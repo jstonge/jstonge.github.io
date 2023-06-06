@@ -1,19 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>https://github.com/jstonge/teenyverse/posts/source-sink/index.html</loc>
-    <lastmod>2023-06-06T20:19:42.975Z</lastmod>
-  </url>
-  <url>
-    <loc>https://github.com/jstonge/teenyverse/posts/sci-group-life-cycle/index.html</loc>
-    <lastmod>2023-06-06T20:19:44.359Z</lastmod>
-  </url>
-  <url>
     <loc>https://github.com/jstonge/teenyverse/index.html</loc>
-    <lastmod>2023-06-06T20:19:44.727Z</lastmod>
+    <lastmod>2023-06-06T20:37:36.783Z</lastmod>
   </url>
   <url>
     <loc>https://github.com/jstonge/teenyverse/about.html</loc>
-    <lastmod>2023-06-06T20:19:44.995Z</lastmod>
+    <lastmod>2023-06-06T20:37:37.423Z</lastmod>
+  </url>
+  <url>
+    <loc>https://github.com/jstonge/teenyverse/posts/source-sink/index.html</loc>
+    <lastmod>2023-06-06T20:37:38.835Z</lastmod>
+  </url>
+  <url>
+    <loc>https://github.com/jstonge/teenyverse/posts/sci-group-life-cycle/index.html</loc>
+    <lastmod>2023-06-06T20:37:39.847Z</lastmod>
   </url>
 </urlset>

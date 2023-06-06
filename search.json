@@ -1,5 +1,12 @@
 [
   {
+    "objectID": "about.html",
+    "href": "about.html",
+    "title": "About",
+    "section": "",
+    "text": "About this blog"
+  },
+  {
     "objectID": "posts/source-sink/index.html",
     "href": "posts/source-sink/index.html",
     "title": "Source-sink behavioural dynamics limit institutional evolution in a group structured society",
@@ -33,12 +40,5 @@
     "title": "Scientific group life cycle",
     "section": "Takeaways:",
     "text": "Takeaways:"
-  },
-  {
-    "objectID": "about.html",
-    "href": "about.html",
-    "title": "About",
-    "section": "",
-    "text": "About this blog"
   }
 ]
