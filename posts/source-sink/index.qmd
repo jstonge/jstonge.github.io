@@ -13,12 +13,12 @@ image: unions.jpg
 
 ```{ojs load results db}
 resdb = DuckDBClient.of({
-  sourcesink1: FileAttachment("sourcesink1.parquet"),
+  sourcesink1: FileAttachment("sourcesink1_simple.parquet"),
   sourcesink1_lookup: FileAttachment("sourcesink1_lookup.parquet"),
-  sourcesink2: FileAttachment("sourcesink2.parquet"),
+  sourcesink2: FileAttachment("sourcesink2_simple.parquet"),
   sourcesink2_lookup: FileAttachment("sourcesink2_lookup.parquet"),
-  // sourcesink3: FileAttachment("sourcesink3.parquet"),
-  // sourcesink3_lookup: FileAttachment("sourcesink3_lookup.parquet")
+  sourcesink3: FileAttachment("sourcesink3.parquet"),
+  sourcesink3_lookup: FileAttachment("sourcesink3_lookup.parquet")
 })
 ```
 
@@ -359,8 +359,6 @@ Under construction
 
 #### Description
 
-<!-- UPDATE DESCRIPTION. WHY DO WE CARE. IS IT USEFUL FOR POLICY?! WHO AM I?
-
 <details>
   <summary>Click to see the Julia code</summary>
 
@@ -392,12 +390,16 @@ function source_sink3!(du, u, p, t)
     end
 end
 ```
-</details> -->
+</details>
 
 #### Playground
 
+```{ojs}
+data_hm3
+```
 
-<!-- //| panel: sidebar
+```{ojs}
+//| panel: sidebar
 
 // Lookup table 3
 // param_str:   β,   γ,   ρ,   b,   c,   μ,   δ,   α
@@ -432,7 +434,7 @@ viewof s3 = Inputs.form({
   ax0: Inputs.range(p3[av3[0]]['minmax'], {step: p3[av3[0]]['s'], label: av3[0]}),
   ax1: Inputs.range(p3[av3[1]]['minmax'], {step: p3[av3[1]]['s'], label: av3[1]}),
   ax2: Inputs.range(p3[av3[2]]['minmax'], {step: p3[av3[2]]['s'], label: av3[2]}),
-  fp0: Inputs.range(p3[fp3[0]]['minmax'], {step: p3[fp3[0]]['s'], label: fp3[0], value: p3[fp3[0]]['first_val']}),
+  fp0: Inputs.range(p3[fp3[0]]['minmax'], {step: p3[fp3[0]]['s'], label: fp3[0], disabled: true}),
   fp1: Inputs.range(p3[fp3[1]]['minmax'], {step: p3[fp3[1]]['s'], label: fp3[1], value: p3[fp3[1]]['first_val']}),
   fp2: Inputs.range(p3[fp3[2]]['minmax'], {step: p3[fp3[2]]['s'], label: fp3[2], value: p3[fp3[2]]['first_val'], disabled: true}),
   fp3: Inputs.range(p3[fp3[3]]['minmax'], {step: p3[fp3[3]]['s'], label: fp3[3], value: p3[fp3[3]]['first_val'], disabled: true}),
@@ -446,10 +448,12 @@ viewof r3 = Inputs.form({
 })
 
 
-data3a = sql_data_a('sourcesink3', sourcesink3_lookup_map[`${f(s3["ax0"])}_${f(s3["fp0"])}_${f(s3["ax1"])}_${f(s3["fp1"])}_${f(s3["fp2"])}_${f(s3["fp3"])}_${f(s3["fp4"])}_${f(s3["ax2"])}`])
+data3a = sql_data_a('sourcesink3', sourcesink3_lookup_map[`${f(s3["ax0"])}_${f(s3["ax0"])}_${f(s3["ax1"])}_${f(s3["fp1"])}_${f(s3["fp2"])}_${f(s3["fp3"])}_${f(s3["fp4"])}_${f(s3["ax2"])}`])
 data3b = sql_data_b("sourcesink3")
 data_hm3 = get_data_heatmap(data3b, lookup3, fp3, av3, r3, s3, fy3)
+```
 
+```{ojs}
 //| panel: fill
 html`
     <div style="display:flex; ">
@@ -457,7 +461,9 @@ html`
       <div>${ plot_time_evo(data3a, "value_prop", "blues")}</div>
     </div>
 `
+```
 
+```{ojs}
 pd3 = phase_diagram(data_hm3,  r3['x'], r3['y'], 'value_prop', 'blues', fy3)
 pd3d = phase_diagram(global_hm(data_hm3),  r3['x'], r3['y'], 'value', 'viridis') 
 html`
@@ -470,8 +476,8 @@ html`
       <div>${ pd3d }</div>
       <div>${ pd3d.legend('color', {label: "Global Frequency of behavior →", width: 350, marginLeft: 150}) }</div>
     </div>
-` -->
-
+`
+```
 
 :::
 
@@ -492,6 +498,7 @@ function sql_data_a(model, name) {
     `)
 }
 
+// Grab values, values_prop at max timestep (steady states) grouped by row_id and L
 function sql_data_b(model) {
     return resdb.query(`
       WITH tmp as (
@@ -549,7 +556,7 @@ function get_param_table(model_lookup, param_lookup) {
 }
 
 // To get heatmap data, we need
-//   data: data from resdb join `name` and `L`
+//   data: `value`, `value_prop` at max `timestep` grouped by `row_id` and `L`
 //   ax_vars: variables we want as x,y,z
 //   fx: variable to facet
 //   fp: other vars
@@ -616,9 +623,9 @@ function global_hm(d){
 
 
 function plot_time_evo(d, y_vals, pal) {
-  const global_mean = d3.rollup(d, v => d3.sum(v, d => d.value * d.value_prop), d => d.timestep)
+  const global_mean = d3.flatRollup(d, v => d3.sum(v, d => d.value * d.value_prop), d => d.timestep)
 
-  return Plot.plot({
+  return PlotDev.plot({
     x: {type:"log"},
     marginLeft: 50,
     color: { 
@@ -628,16 +635,17 @@ function plot_time_evo(d, y_vals, pal) {
       legend: true 
     },
     marks: [
-      Plot.lineY(Array.from(global_mean.values()), {
+      PlotDev.lineY(global_mean, {
+        x: d => d[0], y: d => d[1],
         strokeDasharray: "5,3", opacity: pal == 'blues' ? 0 : 1.
         }),
-      Plot.line(
+      PlotDev.line(
         d, {
           x: 'timestep', y: y_vals, stroke: "L"
           }),
-      Plot.dot(
+      PlotDev.dot(
         d, {
-          x: 'timestep', y: y_vals, stroke: "L"
+          x: 'timestep', y: y_vals, stroke: "L", tip: true
           })
     ]
   })
@@ -664,7 +672,8 @@ function phase_diagram(d, x, y, z, pal, fy) {
         x: "param1",
         y: "param2",
         fill: z,
-        interpolate: "nearest"
+        interpolate: "nearest",
+        tip: true
       }),
     ]
   })
