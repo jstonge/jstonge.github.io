@@ -207,12 +207,12 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 
 <div class="cell">
 <div class="sourceCode cell-code hidden" id="cb1" data-startfrom="14" data-source-offset="0"><pre class="sourceCode js code-with-copy"><code class="sourceCode javascript" style="counter-reset: source-line 13;"><span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>resdb <span class="op">=</span> DuckDBClient<span class="op">.</span><span class="fu">of</span>({</span>
-<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>  <span class="dt">sourcesink1</span><span class="op">:</span> <span class="fu">FileAttachment</span>(<span class="st">"sourcesink1.parquet"</span>)<span class="op">,</span></span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>  <span class="dt">sourcesink1</span><span class="op">:</span> <span class="fu">FileAttachment</span>(<span class="st">"sourcesink1_simple.parquet"</span>)<span class="op">,</span></span>
 <span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>  <span class="dt">sourcesink1_lookup</span><span class="op">:</span> <span class="fu">FileAttachment</span>(<span class="st">"sourcesink1_lookup.parquet"</span>)<span class="op">,</span></span>
-<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>  <span class="dt">sourcesink2</span><span class="op">:</span> <span class="fu">FileAttachment</span>(<span class="st">"sourcesink2.parquet"</span>)<span class="op">,</span></span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>  <span class="dt">sourcesink2</span><span class="op">:</span> <span class="fu">FileAttachment</span>(<span class="st">"sourcesink2_simple.parquet"</span>)<span class="op">,</span></span>
 <span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>  <span class="dt">sourcesink2_lookup</span><span class="op">:</span> <span class="fu">FileAttachment</span>(<span class="st">"sourcesink2_lookup.parquet"</span>)<span class="op">,</span></span>
-<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>  <span class="co">// sourcesink3: FileAttachment("sourcesink3.parquet"),</span></span>
-<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>  <span class="co">// sourcesink3_lookup: FileAttachment("sourcesink3_lookup.parquet")</span></span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>  <span class="dt">sourcesink3</span><span class="op">:</span> <span class="fu">FileAttachment</span>(<span class="st">"sourcesink3.parquet"</span>)<span class="op">,</span></span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>  <span class="dt">sourcesink3_lookup</span><span class="op">:</span> <span class="fu">FileAttachment</span>(<span class="st">"sourcesink3_lookup.parquet"</span>)</span>
 <span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>})</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display">
 <div id="ojs-cell-1" data-nodetype="declaration">
@@ -720,118 +720,232 @@ Click to see the parameters definition
 <p>Under construction</p>
 <section id="description-2" class="level4">
 <h4 class="anchored" data-anchor-id="description-2">Description</h4>
-<!-- UPDATE DESCRIPTION. WHY DO WE CARE. IS IT USEFUL FOR POLICY?! WHO AM I?
-
 <details>
-  <summary>Click to see the Julia code</summary>
-
-```julia
-function source_sink3!(du, u, p, t)
-  G, L, n = u, lengts(u.x), lengts(u.x[1])
-  β, γ, ρ, b, c, μ, δ = p # δ = 1 (δ = 0): (no) resource requirement to upgrade institution
-  Z, pop, R = zeros(L), zeros(L), 0.
-
-  # Calculate mean-field coupling and observed fitness landscape
-    for ℓ in 1:L
-      n_adopt = collect(0:(n-1))
-      Z[ℓ]    = sum(f.(b*n_adopt .- c*(ℓ-1)) .* G.x[ℓ])
-      pop[ℓ]  = sum(G.x[ℓ])
-      R      += sum(n_adopt .* G.x[ℓ]) # Global diffusion
-      pop[ℓ] > 0.0 && ( Z[ℓ] /= pop[ℓ] )
-    end
-
-    for ℓ = 1:L, i = 1:n
-      n_adopt, gr_size = i-1, n-1
-      # Individual selection process
-      du.x[ℓ][i] = -n_adopt*f(1-s(ℓ))*G.x[ℓ][i] - (gr_size-n_adopt)*f(s(ℓ)-1)*G.x[ℓ][i]
-      du.x[ℓ][i] += - n_adopt*(gr_size-n_adopt)*(β+γ)*G.x[ℓ][i] - ρ*(gr_size-n_adopt)*β*R*G.x[ℓ][i] - ρ*n_adopt*γ*(gr_size-R)*G.x[ℓ][i]
-      n_adopt > 0 && ( du.x[ℓ][i] += (gr_size-n_adopt+1)*f(s(ℓ)-1)*G.x[ℓ][i-1] + β*(n_adopt-1+ρ*R)*(gr_size-n_adopt+1)*G.x[ℓ][i-1] )
-      n_adopt < gr_size && ( du.x[ℓ][i] += (n_adopt+1)*f(1-s(ℓ))*G.x[ℓ][i+1] + γ*(gr_size-n_adopt-1+ρ*(gr_size-R))*(n_adopt+1)*G.x[ℓ][i+1] )
-      # Group selection process
-      ℓ > 1 && ( du.x[ℓ][i] += (f(b*n_adopt-c*(ℓ-1))^δ)*(μ+ρ*Z[ℓ]/Z[ℓ-1])*G.x[ℓ-1][i] - (μ*(f(c*(ℓ-1)-b*n_adopt)^δ)+ρ*(f(b*n_adopt-c*(ℓ-2))^δ)*Z[ℓ-1]/Z[ℓ])*G.x[ℓ][i] )
-      ℓ < L && ( du.x[ℓ][i] += (μ*(f(c*ℓ-b*n_adopt)^δ)+ρ*(f(b*n_adopt-c*(ℓ-1))^δ)*Z[ℓ]/Z[ℓ+1])*G.x[ℓ+1][i] - (f(b*n_adopt-c*ℓ)^δ)*(μ+ρ*Z[ℓ+1]/Z[ℓ])*G.x[ℓ][i] )
-    end
-end
-```
-</details> -->
+<summary>
+Click to see the Julia code
+</summary>
+<div class="sourceCode" id="cb11"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="kw">function</span> <span class="fu">source_sink3!</span>(du, u, p, t)</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>  G, L, n <span class="op">=</span> u, <span class="fu">lengts</span>(u.x), <span class="fu">lengts</span>(u.x[<span class="fl">1</span>])</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>  β, γ, ρ, b, c, μ, δ <span class="op">=</span> p <span class="co"># δ = 1 (δ = 0): (no) resource requirement to upgrade institution</span></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>  Z, pop, R <span class="op">=</span> <span class="fu">zeros</span>(L), <span class="fu">zeros</span>(L), <span class="fl">0</span>.</span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Calculate mean-field coupling and observed fitness landscape</span></span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> ℓ <span class="kw">in</span> <span class="fl">1</span><span class="op">:</span>L</span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>      n_adopt <span class="op">=</span> <span class="fu">collect</span>(<span class="fl">0</span><span class="op">:</span>(n<span class="op">-</span><span class="fl">1</span>))</span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a>      Z[ℓ]    <span class="op">=</span> <span class="fu">sum</span>(<span class="fu">f</span>.(b<span class="op">*</span>n_adopt <span class="op">.-</span> <span class="fu">c*</span>(ℓ<span class="op">-</span><span class="fl">1</span>)) <span class="op">.*</span> G.x[ℓ])</span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a>      pop[ℓ]  <span class="op">=</span> <span class="fu">sum</span>(G.x[ℓ])</span>
+<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a>      R      <span class="op">+=</span> <span class="fu">sum</span>(n_adopt <span class="op">.*</span> G.x[ℓ]) <span class="co"># Global diffusion</span></span>
+<span id="cb11-12"><a href="#cb11-12" aria-hidden="true" tabindex="-1"></a>      pop[ℓ] <span class="op">&gt;</span> <span class="fl">0.0</span> <span class="op">&amp;&amp;</span> ( Z[ℓ] <span class="op">/=</span> pop[ℓ] )</span>
+<span id="cb11-13"><a href="#cb11-13" aria-hidden="true" tabindex="-1"></a>    <span class="cf">end</span></span>
+<span id="cb11-14"><a href="#cb11-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-15"><a href="#cb11-15" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> ℓ <span class="op">=</span> <span class="fl">1</span><span class="op">:</span>L, i <span class="op">=</span> <span class="fl">1</span><span class="op">:</span>n</span>
+<span id="cb11-16"><a href="#cb11-16" aria-hidden="true" tabindex="-1"></a>      n_adopt, gr_size <span class="op">=</span> i<span class="op">-</span><span class="fl">1</span>, n<span class="op">-</span><span class="fl">1</span></span>
+<span id="cb11-17"><a href="#cb11-17" aria-hidden="true" tabindex="-1"></a>      <span class="co"># Individual selection process</span></span>
+<span id="cb11-18"><a href="#cb11-18" aria-hidden="true" tabindex="-1"></a>      du.x[ℓ][i] <span class="op">=</span> <span class="fu">-n_adopt*f</span>(<span class="fl">1</span><span class="fu">-s</span>(ℓ))<span class="op">*</span>G.x[ℓ][i] <span class="op">-</span> (gr_size<span class="op">-</span>n_adopt)<span class="fu">*f</span>(<span class="fu">s</span>(ℓ)<span class="op">-</span><span class="fl">1</span>)<span class="op">*</span>G.x[ℓ][i]</span>
+<span id="cb11-19"><a href="#cb11-19" aria-hidden="true" tabindex="-1"></a>      du.x[ℓ][i] <span class="op">+=</span> <span class="op">-</span> <span class="fu">n_adopt*</span>(gr_size<span class="op">-</span>n_adopt)<span class="fu">*</span>(β<span class="op">+</span>γ)<span class="op">*</span>G.x[ℓ][i] <span class="op">-</span> <span class="fu">ρ*</span>(gr_size<span class="op">-</span>n_adopt)<span class="op">*</span>β<span class="op">*</span>R<span class="op">*</span>G.x[ℓ][i] <span class="op">-</span> <span class="fu">ρ*n_adopt*γ*</span>(gr_size<span class="op">-</span>R)<span class="op">*</span>G.x[ℓ][i]</span>
+<span id="cb11-20"><a href="#cb11-20" aria-hidden="true" tabindex="-1"></a>      n_adopt <span class="op">&gt;</span> <span class="fl">0</span> <span class="op">&amp;&amp;</span> ( du.x[ℓ][i] <span class="op">+=</span> (gr_size<span class="op">-</span>n_adopt<span class="op">+</span><span class="fl">1</span>)<span class="fu">*f</span>(<span class="fu">s</span>(ℓ)<span class="op">-</span><span class="fl">1</span>)<span class="op">*</span>G.x[ℓ][i<span class="op">-</span><span class="fl">1</span>] <span class="op">+</span> <span class="fu">β*</span>(n_adopt<span class="op">-</span><span class="fl">1</span><span class="op">+</span>ρ<span class="op">*</span>R)<span class="fu">*</span>(gr_size<span class="op">-</span>n_adopt<span class="op">+</span><span class="fl">1</span>)<span class="op">*</span>G.x[ℓ][i<span class="op">-</span><span class="fl">1</span>] )</span>
+<span id="cb11-21"><a href="#cb11-21" aria-hidden="true" tabindex="-1"></a>      n_adopt <span class="op">&lt;</span> gr_size <span class="op">&amp;&amp;</span> ( du.x[ℓ][i] <span class="op">+=</span> (n_adopt<span class="op">+</span><span class="fl">1</span>)<span class="fu">*f</span>(<span class="fl">1</span><span class="fu">-s</span>(ℓ))<span class="op">*</span>G.x[ℓ][i<span class="op">+</span><span class="fl">1</span>] <span class="op">+</span> <span class="fu">γ*</span>(<span class="fu">gr_size-n_adopt-1+ρ*</span>(gr_size<span class="op">-</span>R))<span class="fu">*</span>(n_adopt<span class="op">+</span><span class="fl">1</span>)<span class="op">*</span>G.x[ℓ][i<span class="op">+</span><span class="fl">1</span>] )</span>
+<span id="cb11-22"><a href="#cb11-22" aria-hidden="true" tabindex="-1"></a>      <span class="co"># Group selection process</span></span>
+<span id="cb11-23"><a href="#cb11-23" aria-hidden="true" tabindex="-1"></a>      ℓ <span class="op">&gt;</span> <span class="fl">1</span> <span class="op">&amp;&amp;</span> ( du.x[ℓ][i] <span class="op">+=</span> (<span class="fu">f</span>(<span class="fu">b*n_adopt-c*</span>(ℓ<span class="op">-</span><span class="fl">1</span>))<span class="op">^</span>δ)<span class="fu">*</span>(μ<span class="op">+</span>ρ<span class="op">*</span>Z[ℓ]<span class="op">/</span>Z[ℓ<span class="op">-</span><span class="fl">1</span>])<span class="op">*</span>G.x[ℓ<span class="op">-</span><span class="fl">1</span>][i] <span class="op">-</span> (<span class="fu">μ*</span>(<span class="fu">f</span>(<span class="fu">c*</span>(ℓ<span class="op">-</span><span class="fl">1</span>)<span class="op">-</span>b<span class="op">*</span>n_adopt)<span class="op">^</span>δ)<span class="fu">+ρ*</span>(<span class="fu">f</span>(<span class="fu">b*n_adopt-c*</span>(ℓ<span class="op">-</span><span class="fl">2</span>))<span class="op">^</span>δ)<span class="op">*</span>Z[ℓ<span class="op">-</span><span class="fl">1</span>]<span class="op">/</span>Z[ℓ])<span class="op">*</span>G.x[ℓ][i] )</span>
+<span id="cb11-24"><a href="#cb11-24" aria-hidden="true" tabindex="-1"></a>      ℓ <span class="op">&lt;</span> L <span class="op">&amp;&amp;</span> ( du.x[ℓ][i] <span class="op">+=</span> (<span class="fu">μ*</span>(<span class="fu">f</span>(c<span class="op">*</span>ℓ<span class="op">-</span>b<span class="op">*</span>n_adopt)<span class="op">^</span>δ)<span class="fu">+ρ*</span>(<span class="fu">f</span>(<span class="fu">b*n_adopt-c*</span>(ℓ<span class="op">-</span><span class="fl">1</span>))<span class="op">^</span>δ)<span class="op">*</span>Z[ℓ]<span class="op">/</span>Z[ℓ<span class="op">+</span><span class="fl">1</span>])<span class="op">*</span>G.x[ℓ<span class="op">+</span><span class="fl">1</span>][i] <span class="op">-</span> (<span class="fu">f</span>(b<span class="op">*</span>n_adopt<span class="op">-</span>c<span class="op">*</span>ℓ)<span class="op">^</span>δ)<span class="fu">*</span>(μ<span class="op">+</span>ρ<span class="op">*</span>Z[ℓ<span class="op">+</span><span class="fl">1</span>]<span class="op">/</span>Z[ℓ])<span class="op">*</span>G.x[ℓ][i] )</span>
+<span id="cb11-25"><a href="#cb11-25" aria-hidden="true" tabindex="-1"></a>    <span class="cf">end</span></span>
+<span id="cb11-26"><a href="#cb11-26" aria-hidden="true" tabindex="-1"></a><span class="kw">end</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
 </section>
 <section id="playground-2" class="level4">
 <h4 class="anchored" data-anchor-id="playground-2">Playground</h4>
+<div class="cell">
+<div class="sourceCode cell-code hidden" id="cb12" data-startfrom="397" data-source-offset="0"><pre class="sourceCode js code-with-copy"><code class="sourceCode javascript" style="counter-reset: source-line 396;"><span id="cb12-397"><a href="#cb12-397" aria-hidden="true" tabindex="-1"></a>data_hm3</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<div id="ojs-cell-8" data-nodetype="expression">
 
-<!-- //| panel: sidebar
+</div>
+</div>
+</div>
+<div class="panel-grid layout-sidebar ms-md-0 layout-sidebar-left">
+<div class="cell panel-sidebar card bg-light p-2 g-col-24 g-col-lg-7">
+<div class="sourceCode cell-code hidden" id="cb13" data-startfrom="411" data-source-offset="-281"><pre class="sourceCode js code-with-copy"><code class="sourceCode javascript" style="counter-reset: source-line 410;"><span id="cb13-411"><a href="#cb13-411" aria-hidden="true" tabindex="-1"></a>sourcesink3_lookup <span class="op">=</span> resdb<span class="op">.</span><span class="fu">query</span>(<span class="st">"SELECT param_str::STRING as name, row_id FROM sourcesink3_lookup"</span>)</span>
+<span id="cb13-412"><a href="#cb13-412" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-413"><a href="#cb13-413" aria-hidden="true" tabindex="-1"></a><span class="co">// </span><span class="al">TODO</span><span class="co">: Ideally we would like to have resdb return a lookup</span></span>
+<span id="cb13-414"><a href="#cb13-414" aria-hidden="true" tabindex="-1"></a>sourcesink3_lookup_map <span class="op">=</span> sourcesink3_lookup<span class="op">.</span><span class="fu">reduce</span>(<span class="kw">function</span>(map<span class="op">,</span> obj) {</span>
+<span id="cb13-415"><a href="#cb13-415" aria-hidden="true" tabindex="-1"></a>    map[obj<span class="op">.</span><span class="at">name</span>] <span class="op">=</span> obj<span class="op">.</span><span class="at">row_id</span><span class="op">;</span></span>
+<span id="cb13-416"><a href="#cb13-416" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> map<span class="op">;</span></span>
+<span id="cb13-417"><a href="#cb13-417" aria-hidden="true" tabindex="-1"></a>}<span class="op">,</span> {})</span>
+<span id="cb13-418"><a href="#cb13-418" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-419"><a href="#cb13-419" aria-hidden="true" tabindex="-1"></a>lookup3 <span class="op">=</span> {</span>
+<span id="cb13-420"><a href="#cb13-420" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> out <span class="op">=</span> {}</span>
+<span id="cb13-421"><a href="#cb13-421" aria-hidden="true" tabindex="-1"></a>  out[<span class="st">'idx2name'</span>] <span class="op">=</span> {<span class="dv">0</span><span class="op">:</span> <span class="st">"β"</span><span class="op">,</span> <span class="dv">1</span><span class="op">:</span> <span class="st">'γ'</span><span class="op">,</span> <span class="dv">2</span><span class="op">:</span> <span class="st">'ρ'</span><span class="op">,</span> <span class="dv">3</span><span class="op">:</span> <span class="st">'b'</span><span class="op">,</span> <span class="dv">4</span><span class="op">:</span> <span class="st">'c'</span><span class="op">,</span> <span class="dv">5</span><span class="op">:</span> <span class="st">'μ'</span><span class="op">,</span> <span class="dv">6</span><span class="op">:</span> <span class="st">'δ'</span><span class="op">,</span> <span class="dv">7</span><span class="op">:</span> <span class="st">'α'</span>}</span>
+<span id="cb13-422"><a href="#cb13-422" aria-hidden="true" tabindex="-1"></a>  out[<span class="st">'name2idx'</span>] <span class="op">=</span> {<span class="st">"β"</span><span class="op">:</span> <span class="dv">0</span><span class="op">,</span> <span class="st">'γ'</span><span class="op">:</span><span class="dv">1</span><span class="op">,</span> <span class="st">'ρ'</span><span class="op">:</span> <span class="dv">2</span><span class="op">,</span> <span class="st">'b'</span><span class="op">:</span> <span class="dv">3</span><span class="op">,</span> <span class="st">'c'</span><span class="op">:</span> <span class="dv">4</span><span class="op">,</span> <span class="st">'μ'</span><span class="op">:</span> <span class="dv">5</span><span class="op">,</span> <span class="st">'δ'</span><span class="op">:</span> <span class="dv">6</span><span class="op">,</span> <span class="st">'α'</span><span class="op">:</span> <span class="dv">7</span>}</span>
+<span id="cb13-423"><a href="#cb13-423" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> out</span>
+<span id="cb13-424"><a href="#cb13-424" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb13-425"><a href="#cb13-425" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-426"><a href="#cb13-426" aria-hidden="true" tabindex="-1"></a>p3 <span class="op">=</span> <span class="fu">get_param_table</span>(sourcesink3_lookup_map<span class="op">,</span> lookup3)</span>
+<span id="cb13-427"><a href="#cb13-427" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-428"><a href="#cb13-428" aria-hidden="true" tabindex="-1"></a>av3 <span class="op">=</span> [<span class="st">"β"</span><span class="op">,</span> <span class="st">"ρ"</span><span class="op">,</span> <span class="st">'α'</span>]           <span class="co">// ax vars</span></span>
+<span id="cb13-429"><a href="#cb13-429" aria-hidden="true" tabindex="-1"></a>fy3 <span class="op">=</span> <span class="st">"δ"</span>                       <span class="co">// facet y var</span></span>
+<span id="cb13-430"><a href="#cb13-430" aria-hidden="true" tabindex="-1"></a>fp3 <span class="op">=</span> [<span class="st">"γ"</span><span class="op">,</span> <span class="st">"b"</span><span class="op">,</span> <span class="st">"c"</span><span class="op">,</span> <span class="st">"μ"</span><span class="op">,</span> fy3] <span class="co">// fixed param vars</span></span>
+<span id="cb13-431"><a href="#cb13-431" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-432"><a href="#cb13-432" aria-hidden="true" tabindex="-1"></a><span class="co">// sliders</span></span>
+<span id="cb13-433"><a href="#cb13-433" aria-hidden="true" tabindex="-1"></a>viewof s3 <span class="op">=</span> Inputs<span class="op">.</span><span class="fu">form</span>({</span>
+<span id="cb13-434"><a href="#cb13-434" aria-hidden="true" tabindex="-1"></a>  <span class="dt">ax0</span><span class="op">:</span> Inputs<span class="op">.</span><span class="fu">range</span>(p3[av3[<span class="dv">0</span>]][<span class="st">'minmax'</span>]<span class="op">,</span> {<span class="dt">step</span><span class="op">:</span> p3[av3[<span class="dv">0</span>]][<span class="st">'s'</span>]<span class="op">,</span> <span class="dt">label</span><span class="op">:</span> av3[<span class="dv">0</span>]})<span class="op">,</span></span>
+<span id="cb13-435"><a href="#cb13-435" aria-hidden="true" tabindex="-1"></a>  <span class="dt">ax1</span><span class="op">:</span> Inputs<span class="op">.</span><span class="fu">range</span>(p3[av3[<span class="dv">1</span>]][<span class="st">'minmax'</span>]<span class="op">,</span> {<span class="dt">step</span><span class="op">:</span> p3[av3[<span class="dv">1</span>]][<span class="st">'s'</span>]<span class="op">,</span> <span class="dt">label</span><span class="op">:</span> av3[<span class="dv">1</span>]})<span class="op">,</span></span>
+<span id="cb13-436"><a href="#cb13-436" aria-hidden="true" tabindex="-1"></a>  <span class="dt">ax2</span><span class="op">:</span> Inputs<span class="op">.</span><span class="fu">range</span>(p3[av3[<span class="dv">2</span>]][<span class="st">'minmax'</span>]<span class="op">,</span> {<span class="dt">step</span><span class="op">:</span> p3[av3[<span class="dv">2</span>]][<span class="st">'s'</span>]<span class="op">,</span> <span class="dt">label</span><span class="op">:</span> av3[<span class="dv">2</span>]})<span class="op">,</span></span>
+<span id="cb13-437"><a href="#cb13-437" aria-hidden="true" tabindex="-1"></a>  <span class="dt">fp0</span><span class="op">:</span> Inputs<span class="op">.</span><span class="fu">range</span>(p3[fp3[<span class="dv">0</span>]][<span class="st">'minmax'</span>]<span class="op">,</span> {<span class="dt">step</span><span class="op">:</span> p3[fp3[<span class="dv">0</span>]][<span class="st">'s'</span>]<span class="op">,</span> <span class="dt">label</span><span class="op">:</span> fp3[<span class="dv">0</span>]<span class="op">,</span> <span class="dt">disabled</span><span class="op">:</span> <span class="kw">true</span>})<span class="op">,</span></span>
+<span id="cb13-438"><a href="#cb13-438" aria-hidden="true" tabindex="-1"></a>  <span class="dt">fp1</span><span class="op">:</span> Inputs<span class="op">.</span><span class="fu">range</span>(p3[fp3[<span class="dv">1</span>]][<span class="st">'minmax'</span>]<span class="op">,</span> {<span class="dt">step</span><span class="op">:</span> p3[fp3[<span class="dv">1</span>]][<span class="st">'s'</span>]<span class="op">,</span> <span class="dt">label</span><span class="op">:</span> fp3[<span class="dv">1</span>]<span class="op">,</span> <span class="dt">value</span><span class="op">:</span> p3[fp3[<span class="dv">1</span>]][<span class="st">'first_val'</span>]})<span class="op">,</span></span>
+<span id="cb13-439"><a href="#cb13-439" aria-hidden="true" tabindex="-1"></a>  <span class="dt">fp2</span><span class="op">:</span> Inputs<span class="op">.</span><span class="fu">range</span>(p3[fp3[<span class="dv">2</span>]][<span class="st">'minmax'</span>]<span class="op">,</span> {<span class="dt">step</span><span class="op">:</span> p3[fp3[<span class="dv">2</span>]][<span class="st">'s'</span>]<span class="op">,</span> <span class="dt">label</span><span class="op">:</span> fp3[<span class="dv">2</span>]<span class="op">,</span> <span class="dt">value</span><span class="op">:</span> p3[fp3[<span class="dv">2</span>]][<span class="st">'first_val'</span>]<span class="op">,</span> <span class="dt">disabled</span><span class="op">:</span> <span class="kw">true</span>})<span class="op">,</span></span>
+<span id="cb13-440"><a href="#cb13-440" aria-hidden="true" tabindex="-1"></a>  <span class="dt">fp3</span><span class="op">:</span> Inputs<span class="op">.</span><span class="fu">range</span>(p3[fp3[<span class="dv">3</span>]][<span class="st">'minmax'</span>]<span class="op">,</span> {<span class="dt">step</span><span class="op">:</span> p3[fp3[<span class="dv">3</span>]][<span class="st">'s'</span>]<span class="op">,</span> <span class="dt">label</span><span class="op">:</span> fp3[<span class="dv">3</span>]<span class="op">,</span> <span class="dt">value</span><span class="op">:</span> p3[fp3[<span class="dv">3</span>]][<span class="st">'first_val'</span>]<span class="op">,</span> <span class="dt">disabled</span><span class="op">:</span> <span class="kw">true</span>})<span class="op">,</span></span>
+<span id="cb13-441"><a href="#cb13-441" aria-hidden="true" tabindex="-1"></a>  <span class="dt">fp4</span><span class="op">:</span> Inputs<span class="op">.</span><span class="fu">range</span>(p3[fp3[<span class="dv">4</span>]][<span class="st">'minmax'</span>]<span class="op">,</span> {<span class="dt">step</span><span class="op">:</span> p3[fp3[<span class="dv">4</span>]][<span class="st">'s'</span>]<span class="op">,</span> <span class="dt">label</span><span class="op">:</span> fp3[<span class="dv">4</span>]<span class="op">,</span> <span class="dt">value</span><span class="op">:</span> p3[fp3[<span class="dv">4</span>]][<span class="st">'first_val'</span>]<span class="op">,</span> <span class="dt">disabled</span><span class="op">:</span> <span class="kw">true</span>})</span>
+<span id="cb13-442"><a href="#cb13-442" aria-hidden="true" tabindex="-1"></a>})</span>
+<span id="cb13-443"><a href="#cb13-443" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-444"><a href="#cb13-444" aria-hidden="true" tabindex="-1"></a><span class="co">// radios</span></span>
+<span id="cb13-445"><a href="#cb13-445" aria-hidden="true" tabindex="-1"></a>viewof r3 <span class="op">=</span> Inputs<span class="op">.</span><span class="fu">form</span>({</span>
+<span id="cb13-446"><a href="#cb13-446" aria-hidden="true" tabindex="-1"></a>  <span class="dt">x</span><span class="op">:</span> Inputs<span class="op">.</span><span class="fu">radio</span>(av3<span class="op">,</span> {<span class="dt">label</span><span class="op">:</span> <span class="st">"x"</span><span class="op">,</span> <span class="dt">value</span><span class="op">:</span> av3[<span class="dv">0</span>]})<span class="op">,</span></span>
+<span id="cb13-447"><a href="#cb13-447" aria-hidden="true" tabindex="-1"></a>  <span class="dt">y</span><span class="op">:</span> Inputs<span class="op">.</span><span class="fu">radio</span>(av3<span class="op">,</span> {<span class="dt">label</span><span class="op">:</span> <span class="st">"y"</span><span class="op">,</span> <span class="dt">value</span><span class="op">:</span> av3[<span class="dv">1</span>]})</span>
+<span id="cb13-448"><a href="#cb13-448" aria-hidden="true" tabindex="-1"></a>})</span>
+<span id="cb13-449"><a href="#cb13-449" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-450"><a href="#cb13-450" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-451"><a href="#cb13-451" aria-hidden="true" tabindex="-1"></a>data3a <span class="op">=</span> <span class="fu">sql_data_a</span>(<span class="st">'sourcesink3'</span><span class="op">,</span> sourcesink3_lookup_map[<span class="vs">`</span><span class="sc">${</span><span class="fu">f</span>(s3[<span class="st">"ax0"</span>])<span class="sc">}</span><span class="vs">_</span><span class="sc">${</span><span class="fu">f</span>(s3[<span class="st">"ax0"</span>])<span class="sc">}</span><span class="vs">_</span><span class="sc">${</span><span class="fu">f</span>(s3[<span class="st">"ax1"</span>])<span class="sc">}</span><span class="vs">_</span><span class="sc">${</span><span class="fu">f</span>(s3[<span class="st">"fp1"</span>])<span class="sc">}</span><span class="vs">_</span><span class="sc">${</span><span class="fu">f</span>(s3[<span class="st">"fp2"</span>])<span class="sc">}</span><span class="vs">_</span><span class="sc">${</span><span class="fu">f</span>(s3[<span class="st">"fp3"</span>])<span class="sc">}</span><span class="vs">_</span><span class="sc">${</span><span class="fu">f</span>(s3[<span class="st">"fp4"</span>])<span class="sc">}</span><span class="vs">_</span><span class="sc">${</span><span class="fu">f</span>(s3[<span class="st">"ax2"</span>])<span class="sc">}</span><span class="vs">`</span>])</span>
+<span id="cb13-452"><a href="#cb13-452" aria-hidden="true" tabindex="-1"></a>data3b <span class="op">=</span> <span class="fu">sql_data_b</span>(<span class="st">"sourcesink3"</span>)</span>
+<span id="cb13-453"><a href="#cb13-453" aria-hidden="true" tabindex="-1"></a>data_hm3 <span class="op">=</span> <span class="fu">get_data_heatmap</span>(data3b<span class="op">,</span> lookup3<span class="op">,</span> fp3<span class="op">,</span> av3<span class="op">,</span> r3<span class="op">,</span> s3<span class="op">,</span> fy3)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<div>
+<div id="ojs-cell-9-1" data-nodetype="declaration">
 
-// Lookup table 3
-// param_str:   β,   γ,   ρ,   b,   c,   μ,   δ,   α
-// param_grid:  β    γ,   ρ,   b,   1., 0.2,  1.,  α
-// ax_vars:     β,        ρ,                       α
-// fps:              γ,        b,   c,   μ,   δ
-// s_vec_idx:  ax0, fp0, ax1, fp1, fp2, fp3, fp4, ax2
+</div>
+</div>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+<div id="ojs-cell-9-2" data-nodetype="declaration">
 
-sourcesink3_lookup = resdb.query("SELECT param_str::STRING as name, row_id FROM sourcesink3_lookup")
+</div>
+</div>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+<div id="ojs-cell-9-3" data-nodetype="declaration">
 
-// TODO: Ideally we would like to have resdb return a lookup
-sourcesink3_lookup_map = sourcesink3_lookup.reduce(function(map, obj) {
-    map[obj.name] = obj.row_id;
-    return map;
-}, {})
+</div>
+</div>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+<div id="ojs-cell-9-4" data-nodetype="declaration">
 
-lookup3 = {
-  const out = {}
-  out['idx2name'] = {0: "β", 1: 'γ', 2: 'ρ', 3: 'b', 4: 'c', 5: 'μ', 6: 'δ', 7: 'α'}
-  out['name2idx'] = {"β": 0, 'γ':1, 'ρ': 2, 'b': 3, 'c': 4, 'μ': 5, 'δ': 6, 'α': 7}
-  return out
-}
+</div>
+</div>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+<div id="ojs-cell-9-5" data-nodetype="declaration">
 
-p3 = get_param_table(sourcesink3_lookup_map, lookup3)
+</div>
+</div>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+<div id="ojs-cell-9-6" data-nodetype="declaration">
 
-av3 = ["β", "ρ", 'α']           // ax vars
-fy3 = "δ"                       // facet y var
-fp3 = ["γ", "b", "c", "μ", fy3] // fixed param vars
+</div>
+</div>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+<div id="ojs-cell-9-7" data-nodetype="declaration">
 
-// sliders
-viewof s3 = Inputs.form({
-  ax0: Inputs.range(p3[av3[0]]['minmax'], {step: p3[av3[0]]['s'], label: av3[0]}),
-  ax1: Inputs.range(p3[av3[1]]['minmax'], {step: p3[av3[1]]['s'], label: av3[1]}),
-  ax2: Inputs.range(p3[av3[2]]['minmax'], {step: p3[av3[2]]['s'], label: av3[2]}),
-  fp0: Inputs.range(p3[fp3[0]]['minmax'], {step: p3[fp3[0]]['s'], label: fp3[0], value: p3[fp3[0]]['first_val']}),
-  fp1: Inputs.range(p3[fp3[1]]['minmax'], {step: p3[fp3[1]]['s'], label: fp3[1], value: p3[fp3[1]]['first_val']}),
-  fp2: Inputs.range(p3[fp3[2]]['minmax'], {step: p3[fp3[2]]['s'], label: fp3[2], value: p3[fp3[2]]['first_val'], disabled: true}),
-  fp3: Inputs.range(p3[fp3[3]]['minmax'], {step: p3[fp3[3]]['s'], label: fp3[3], value: p3[fp3[3]]['first_val'], disabled: true}),
-  fp4: Inputs.range(p3[fp3[4]]['minmax'], {step: p3[fp3[4]]['s'], label: fp3[4], value: p3[fp3[4]]['first_val'], disabled: true})
-})
+</div>
+</div>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+<div id="ojs-cell-9-8" data-nodetype="declaration">
 
-// radios
-viewof r3 = Inputs.form({
-  x: Inputs.radio(av3, {label: "x", value: av3[0]}),
-  y: Inputs.radio(av3, {label: "y", value: av3[1]})
-})
+</div>
+</div>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+<div id="ojs-cell-9-9" data-nodetype="declaration">
 
+</div>
+</div>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+<div id="ojs-cell-9-10" data-nodetype="declaration">
 
-data3a = sql_data_a('sourcesink3', sourcesink3_lookup_map[`${f(s3["ax0"])}_${f(s3["fp0"])}_${f(s3["ax1"])}_${f(s3["fp1"])}_${f(s3["fp2"])}_${f(s3["fp3"])}_${f(s3["fp4"])}_${f(s3["ax2"])}`])
-data3b = sql_data_b("sourcesink3")
-data_hm3 = get_data_heatmap(data3b, lookup3, fp3, av3, r3, s3, fy3)
+</div>
+</div>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+<div id="ojs-cell-9-11" data-nodetype="declaration">
 
-//| panel: fill
-html`
-    <div style="display:flex; ">
-      <div>${ plot_time_evo(data3a, "value", "reds") }</div>
-      <div>${ plot_time_evo(data3a, "value_prop", "blues")}</div>
-    </div>
-`
+</div>
+</div>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+<div id="ojs-cell-9-12" data-nodetype="declaration">
 
-pd3 = phase_diagram(data_hm3,  r3['x'], r3['y'], 'value_prop', 'blues', fy3)
-pd3d = phase_diagram(global_hm(data_hm3),  r3['x'], r3['y'], 'value', 'viridis') 
-html`
-    <div style="display:flex; ">
-    <div>
-      <div>${ pd3 }</div>
-      <div>${ pd3.legend('color', {label: "Level proportion →", width: 350, marginLeft: 150}) }</div>
-    </div>
-    <div>
-      <div>${ pd3d }</div>
-      <div>${ pd3d.legend('color', {label: "Global Frequency of behavior →", width: 350, marginLeft: 150}) }</div>
-    </div>
-` -->
+</div>
+</div>
+</div>
+</div>
+<div class="panel-fill panel-grid g-col-24 g-col-lg-17 pt-3 pt-lg-0">
+<div class="g-col-24">
+<div class="cell panel-fill">
+<div class="sourceCode cell-code hidden" id="cb14" data-startfrom="457" data-source-offset="0"><pre class="sourceCode js code-with-copy"><code class="sourceCode javascript" style="counter-reset: source-line 456;"><span id="cb14-457"><a href="#cb14-457" aria-hidden="true" tabindex="-1"></a><span class="fu">html</span><span class="vs">`</span></span>
+<span id="cb14-458"><a href="#cb14-458" aria-hidden="true" tabindex="-1"></a><span class="vs">    &lt;div style="display:flex; "&gt;</span></span>
+<span id="cb14-459"><a href="#cb14-459" aria-hidden="true" tabindex="-1"></a><span class="vs">      &lt;div&gt;</span><span class="sc">${</span> <span class="fu">plot_time_evo</span>(data3a<span class="op">,</span> <span class="st">"value"</span><span class="op">,</span> <span class="st">"reds"</span>) <span class="sc">}</span><span class="vs">&lt;/div&gt;</span></span>
+<span id="cb14-460"><a href="#cb14-460" aria-hidden="true" tabindex="-1"></a><span class="vs">      &lt;div&gt;</span><span class="sc">${</span> <span class="fu">plot_time_evo</span>(data3a<span class="op">,</span> <span class="st">"value_prop"</span><span class="op">,</span> <span class="st">"blues"</span>)<span class="sc">}</span><span class="vs">&lt;/div&gt;</span></span>
+<span id="cb14-461"><a href="#cb14-461" aria-hidden="true" tabindex="-1"></a><span class="vs">    &lt;/div&gt;</span></span>
+<span id="cb14-462"><a href="#cb14-462" aria-hidden="true" tabindex="-1"></a><span class="vs">`</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<div id="ojs-cell-10" data-nodetype="expression">
+
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code hidden" id="cb15" data-startfrom="467" data-source-offset="-0"><pre class="sourceCode js code-with-copy"><code class="sourceCode javascript" style="counter-reset: source-line 466;"><span id="cb15-467"><a href="#cb15-467" aria-hidden="true" tabindex="-1"></a>pd3 <span class="op">=</span> <span class="fu">phase_diagram</span>(data_hm3<span class="op">,</span>  r3[<span class="st">'x'</span>]<span class="op">,</span> r3[<span class="st">'y'</span>]<span class="op">,</span> <span class="st">'value_prop'</span><span class="op">,</span> <span class="st">'blues'</span><span class="op">,</span> fy3)</span>
+<span id="cb15-468"><a href="#cb15-468" aria-hidden="true" tabindex="-1"></a>pd3d <span class="op">=</span> <span class="fu">phase_diagram</span>(<span class="fu">global_hm</span>(data_hm3)<span class="op">,</span>  r3[<span class="st">'x'</span>]<span class="op">,</span> r3[<span class="st">'y'</span>]<span class="op">,</span> <span class="st">'value'</span><span class="op">,</span> <span class="st">'viridis'</span>) </span>
+<span id="cb15-469"><a href="#cb15-469" aria-hidden="true" tabindex="-1"></a><span class="fu">html</span><span class="vs">`</span></span>
+<span id="cb15-470"><a href="#cb15-470" aria-hidden="true" tabindex="-1"></a><span class="vs">    &lt;div style="display:flex; "&gt;</span></span>
+<span id="cb15-471"><a href="#cb15-471" aria-hidden="true" tabindex="-1"></a><span class="vs">    &lt;div&gt;</span></span>
+<span id="cb15-472"><a href="#cb15-472" aria-hidden="true" tabindex="-1"></a><span class="vs">      &lt;div&gt;</span><span class="sc">${</span> pd3 <span class="sc">}</span><span class="vs">&lt;/div&gt;</span></span>
+<span id="cb15-473"><a href="#cb15-473" aria-hidden="true" tabindex="-1"></a><span class="vs">      &lt;div&gt;</span><span class="sc">${</span> pd3<span class="op">.</span><span class="fu">legend</span>(<span class="st">'color'</span><span class="op">,</span> {<span class="dt">label</span><span class="op">:</span> <span class="st">"Level proportion →"</span><span class="op">,</span> <span class="dt">width</span><span class="op">:</span> <span class="dv">350</span><span class="op">,</span> <span class="dt">marginLeft</span><span class="op">:</span> <span class="dv">150</span>}) <span class="sc">}</span><span class="vs">&lt;/div&gt;</span></span>
+<span id="cb15-474"><a href="#cb15-474" aria-hidden="true" tabindex="-1"></a><span class="vs">    &lt;/div&gt;</span></span>
+<span id="cb15-475"><a href="#cb15-475" aria-hidden="true" tabindex="-1"></a><span class="vs">    &lt;div&gt;</span></span>
+<span id="cb15-476"><a href="#cb15-476" aria-hidden="true" tabindex="-1"></a><span class="vs">      &lt;div&gt;</span><span class="sc">${</span> pd3d <span class="sc">}</span><span class="vs">&lt;/div&gt;</span></span>
+<span id="cb15-477"><a href="#cb15-477" aria-hidden="true" tabindex="-1"></a><span class="vs">      &lt;div&gt;</span><span class="sc">${</span> pd3d<span class="op">.</span><span class="fu">legend</span>(<span class="st">'color'</span><span class="op">,</span> {<span class="dt">label</span><span class="op">:</span> <span class="st">"Global Frequency of behavior →"</span><span class="op">,</span> <span class="dt">width</span><span class="op">:</span> <span class="dv">350</span><span class="op">,</span> <span class="dt">marginLeft</span><span class="op">:</span> <span class="dv">150</span>}) <span class="sc">}</span><span class="vs">&lt;/div&gt;</span></span>
+<span id="cb15-478"><a href="#cb15-478" aria-hidden="true" tabindex="-1"></a><span class="vs">    &lt;/div&gt;</span></span>
+<span id="cb15-479"><a href="#cb15-479" aria-hidden="true" tabindex="-1"></a><span class="vs">`</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<div>
+<div id="ojs-cell-11-1" data-nodetype="declaration">
+
+</div>
+</div>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+<div id="ojs-cell-11-2" data-nodetype="declaration">
+
+</div>
+</div>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+<div id="ojs-cell-11-3" data-nodetype="expression">
+
+</div>
+</div>
+</div>
+</div>
 </section>
 </div>
 </div>
@@ -854,274 +968,277 @@ Model 1 Sketch
 </div>
 </div>
 <div class="cell">
-<div class="sourceCode cell-code hidden" id="cb11" data-startfrom="486" data-source-offset="-0"><pre class="sourceCode js code-with-copy"><code class="sourceCode javascript" style="counter-reset: source-line 485;"><span id="cb11-486"><a href="#cb11-486" aria-hidden="true" tabindex="-1"></a><span class="kw">function</span> <span class="fu">sql_data_a</span>(model<span class="op">,</span> name) {</span>
-<span id="cb11-487"><a href="#cb11-487" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> resdb<span class="op">.</span><span class="fu">query</span>(<span class="vs">`</span></span>
-<span id="cb11-488"><a href="#cb11-488" aria-hidden="true" tabindex="-1"></a><span class="vs">      SELECT timestep::INT as timestep, L::INT as L, value, value_prop</span></span>
-<span id="cb11-489"><a href="#cb11-489" aria-hidden="true" tabindex="-1"></a><span class="vs">      FROM </span><span class="sc">${</span>model<span class="sc">}</span></span>
-<span id="cb11-490"><a href="#cb11-490" aria-hidden="true" tabindex="-1"></a><span class="vs">      WHERE</span></span>
-<span id="cb11-491"><a href="#cb11-491" aria-hidden="true" tabindex="-1"></a><span class="vs">      row_id = '</span><span class="sc">${</span>name<span class="sc">}</span><span class="vs">'</span></span>
-<span id="cb11-492"><a href="#cb11-492" aria-hidden="true" tabindex="-1"></a><span class="vs">    `</span>)</span>
-<span id="cb11-493"><a href="#cb11-493" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb11-494"><a href="#cb11-494" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb11-495"><a href="#cb11-495" aria-hidden="true" tabindex="-1"></a><span class="kw">function</span> <span class="fu">sql_data_b</span>(model) {</span>
-<span id="cb11-496"><a href="#cb11-496" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> resdb<span class="op">.</span><span class="fu">query</span>(<span class="vs">`</span></span>
-<span id="cb11-497"><a href="#cb11-497" aria-hidden="true" tabindex="-1"></a><span class="vs">      WITH tmp as (</span></span>
-<span id="cb11-498"><a href="#cb11-498" aria-hidden="true" tabindex="-1"></a><span class="vs">          SELECT row_id, L, MAX(timestep::INT) as timestep</span></span>
-<span id="cb11-499"><a href="#cb11-499" aria-hidden="true" tabindex="-1"></a><span class="vs">          FROM </span><span class="sc">${</span>model<span class="sc">}</span></span>
-<span id="cb11-500"><a href="#cb11-500" aria-hidden="true" tabindex="-1"></a><span class="vs">          GROUP BY row_id, L</span></span>
-<span id="cb11-501"><a href="#cb11-501" aria-hidden="true" tabindex="-1"></a><span class="vs">      )</span></span>
-<span id="cb11-502"><a href="#cb11-502" aria-hidden="true" tabindex="-1"></a><span class="vs">      SELECT s.value, s.L::INT as L, s.value_prop, ss.param_str::STRING as name</span></span>
-<span id="cb11-503"><a href="#cb11-503" aria-hidden="true" tabindex="-1"></a><span class="vs">      FROM </span><span class="sc">${</span>model<span class="sc">}</span><span class="vs"> s</span></span>
-<span id="cb11-504"><a href="#cb11-504" aria-hidden="true" tabindex="-1"></a><span class="vs">      JOIN tmp</span></span>
-<span id="cb11-505"><a href="#cb11-505" aria-hidden="true" tabindex="-1"></a><span class="vs">      ON s.row_id = tmp.row_id AND s.L = tmp.L AND s.timestep = tmp.timestep</span></span>
-<span id="cb11-506"><a href="#cb11-506" aria-hidden="true" tabindex="-1"></a><span class="vs">      JOIN </span><span class="sc">${</span>model<span class="sc">}</span><span class="vs">_lookup ss</span></span>
-<span id="cb11-507"><a href="#cb11-507" aria-hidden="true" tabindex="-1"></a><span class="vs">      ON s.row_id = ss.row_id</span></span>
-<span id="cb11-508"><a href="#cb11-508" aria-hidden="true" tabindex="-1"></a><span class="vs">      ORDER BY (s.row_id, s.L)</span></span>
-<span id="cb11-509"><a href="#cb11-509" aria-hidden="true" tabindex="-1"></a><span class="vs">  `</span>)</span>
-<span id="cb11-510"><a href="#cb11-510" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb11-511"><a href="#cb11-511" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb11-512"><a href="#cb11-512" aria-hidden="true" tabindex="-1"></a><span class="kw">function</span> <span class="fu">get_fixed_params</span>(param_table<span class="op">,</span> ax_vars<span class="op">,</span> fx) {</span>
-<span id="cb11-513"><a href="#cb11-513" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> all_params <span class="op">=</span> [<span class="op">...</span><span class="bu">Object</span><span class="op">.</span><span class="fu">keys</span>(param_table)]</span>
-<span id="cb11-514"><a href="#cb11-514" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> varying_params <span class="op">=</span> <span class="kw">typeof</span> fx <span class="op">!==</span> <span class="kw">undefined</span> <span class="op">?</span> <span class="kw">new</span> <span class="bu">Set</span>(ax_vars) <span class="op">:</span> <span class="kw">new</span> <span class="bu">Set</span>(ax_vars<span class="op">.</span><span class="fu">concat</span>(fx))</span>
-<span id="cb11-515"><a href="#cb11-515" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> diff_params <span class="op">=</span> <span class="kw">new</span> <span class="bu">Set</span>(all_params<span class="op">.</span><span class="fu">filter</span>((x) <span class="kw">=&gt;</span> <span class="op">!</span>varying_params<span class="op">.</span><span class="fu">has</span>(x)))</span>
-<span id="cb11-516"><a href="#cb11-516" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> <span class="bu">Array</span><span class="op">.</span><span class="fu">from</span>(diff_params)</span>
-<span id="cb11-517"><a href="#cb11-517" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb11-518"><a href="#cb11-518" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb11-519"><a href="#cb11-519" aria-hidden="true" tabindex="-1"></a>f <span class="op">=</span> (x) <span class="kw">=&gt;</span> <span class="bu">Number</span><span class="op">.</span><span class="fu">isInteger</span>(x) <span class="op">?</span> x<span class="op">.</span><span class="fu">toPrecision</span>(<span class="dv">2</span>) <span class="op">:</span> x</span>
-<span id="cb11-520"><a href="#cb11-520" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb11-521"><a href="#cb11-521" aria-hidden="true" tabindex="-1"></a><span class="co">// Extract the step from a list of values for a parameter</span></span>
-<span id="cb11-522"><a href="#cb11-522" aria-hidden="true" tabindex="-1"></a>s <span class="op">=</span> (p<span class="op">,</span>i) <span class="kw">=&gt;</span> { </span>
-<span id="cb11-523"><a href="#cb11-523" aria-hidden="true" tabindex="-1"></a>    <span class="kw">const</span> unique_vals <span class="op">=</span> <span class="bu">Array</span><span class="op">.</span><span class="fu">from</span>(<span class="kw">new</span> <span class="bu">Set</span>(p<span class="op">.</span><span class="fu">map</span>(d <span class="kw">=&gt;</span> <span class="pp">parseFloat</span>(d[i]))))<span class="op">.</span><span class="fu">sort</span>((a<span class="op">,</span>b) <span class="kw">=&gt;</span> a <span class="op">-</span> b)</span>
-<span id="cb11-524"><a href="#cb11-524" aria-hidden="true" tabindex="-1"></a>    <span class="kw">const</span> out <span class="op">=</span> []</span>
-<span id="cb11-525"><a href="#cb11-525" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> (<span class="kw">let</span> i<span class="op">=</span><span class="dv">1</span><span class="op">;</span> i <span class="op">&lt;</span> unique_vals<span class="op">.</span><span class="at">length</span><span class="op">;</span> i<span class="op">++</span> ) {</span>
-<span id="cb11-526"><a href="#cb11-526" aria-hidden="true" tabindex="-1"></a>      out<span class="op">.</span><span class="fu">push</span>(<span class="op">+</span>(unique_vals[i]<span class="op">-</span>unique_vals[i<span class="op">-</span><span class="dv">1</span>])<span class="op">.</span><span class="fu">toPrecision</span>(<span class="dv">2</span>))</span>
-<span id="cb11-527"><a href="#cb11-527" aria-hidden="true" tabindex="-1"></a>    } <span class="co">// return whatev if length is zero</span></span>
-<span id="cb11-528"><a href="#cb11-528" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> out<span class="op">.</span><span class="at">length</span> <span class="op">===</span> <span class="dv">0</span> <span class="op">?</span> <span class="fl">0.1</span> <span class="op">:</span> out[<span class="dv">0</span>]</span>
-<span id="cb11-529"><a href="#cb11-529" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb11-530"><a href="#cb11-530" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb11-531"><a href="#cb11-531" aria-hidden="true" tabindex="-1"></a>minmax <span class="op">=</span> (p<span class="op">,</span> i) <span class="kw">=&gt;</span> d3<span class="op">.</span><span class="fu">extent</span>(p<span class="op">.</span><span class="fu">map</span>(d <span class="kw">=&gt;</span> <span class="pp">parseFloat</span>(d[i])))</span>
-<span id="cb11-532"><a href="#cb11-532" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb11-533"><a href="#cb11-533" aria-hidden="true" tabindex="-1"></a><span class="co">// Param table where each key is a parameter, and values </span></span>
-<span id="cb11-534"><a href="#cb11-534" aria-hidden="true" tabindex="-1"></a><span class="co">// are list of values relevant to </span></span>
-<span id="cb11-535"><a href="#cb11-535" aria-hidden="true" tabindex="-1"></a><span class="co">// model: resdb output for a specific model</span></span>
-<span id="cb11-536"><a href="#cb11-536" aria-hidden="true" tabindex="-1"></a><span class="co">// lookup: { [0: param1, 1: param2, ...] }</span></span>
-<span id="cb11-537"><a href="#cb11-537" aria-hidden="true" tabindex="-1"></a><span class="kw">function</span> <span class="fu">get_param_table</span>(model_lookup<span class="op">,</span> param_lookup) {</span>
-<span id="cb11-538"><a href="#cb11-538" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb11-539"><a href="#cb11-539" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> p <span class="op">=</span> <span class="bu">Object</span><span class="op">.</span><span class="fu">keys</span>(model_lookup)<span class="op">.</span><span class="fu">map</span>(d <span class="kw">=&gt;</span> d<span class="op">.</span><span class="fu">split</span>(<span class="st">"_"</span>)) </span>
-<span id="cb11-540"><a href="#cb11-540" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb11-541"><a href="#cb11-541" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> param_table <span class="op">=</span> {}</span>
-<span id="cb11-542"><a href="#cb11-542" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> first_line_param <span class="op">=</span> p[<span class="dv">0</span>]</span>
-<span id="cb11-543"><a href="#cb11-543" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> ( <span class="kw">let</span> i<span class="op">=</span><span class="dv">0</span><span class="op">;</span> i <span class="op">&lt;</span> first_line_param<span class="op">.</span><span class="at">length</span><span class="op">;</span> i<span class="op">++</span> ) {</span>
-<span id="cb11-544"><a href="#cb11-544" aria-hidden="true" tabindex="-1"></a>    param_table[param_lookup[<span class="st">'idx2name'</span>][i]] <span class="op">=</span> { </span>
-<span id="cb11-545"><a href="#cb11-545" aria-hidden="true" tabindex="-1"></a>      <span class="st">'s'</span><span class="op">:</span> <span class="fu">s</span>(p<span class="op">,</span>i)<span class="op">,</span> <span class="st">'first_val'</span><span class="op">:</span> first_line_param[i]<span class="op">,</span> <span class="st">'minmax'</span><span class="op">:</span> <span class="fu">minmax</span>(p<span class="op">,</span>i) </span>
-<span id="cb11-546"><a href="#cb11-546" aria-hidden="true" tabindex="-1"></a>      }</span>
-<span id="cb11-547"><a href="#cb11-547" aria-hidden="true" tabindex="-1"></a>  }</span>
-<span id="cb11-548"><a href="#cb11-548" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> param_table</span>
-<span id="cb11-549"><a href="#cb11-549" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb11-550"><a href="#cb11-550" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb11-551"><a href="#cb11-551" aria-hidden="true" tabindex="-1"></a><span class="co">// To get heatmap data, we need</span></span>
-<span id="cb11-552"><a href="#cb11-552" aria-hidden="true" tabindex="-1"></a><span class="co">//   data: data from resdb join `name` and `L`</span></span>
-<span id="cb11-553"><a href="#cb11-553" aria-hidden="true" tabindex="-1"></a><span class="co">//   ax_vars: variables we want as x,y,z</span></span>
-<span id="cb11-554"><a href="#cb11-554" aria-hidden="true" tabindex="-1"></a><span class="co">//   fx: variable to facet</span></span>
-<span id="cb11-555"><a href="#cb11-555" aria-hidden="true" tabindex="-1"></a><span class="co">//   fp: other vars</span></span>
-<span id="cb11-556"><a href="#cb11-556" aria-hidden="true" tabindex="-1"></a><span class="co">//   sliders: set of sliders</span></span>
-<span id="cb11-557"><a href="#cb11-557" aria-hidden="true" tabindex="-1"></a><span class="kw">function</span> <span class="fu">get_data_heatmap</span>(data<span class="op">,</span> lookup<span class="op">,</span> fp<span class="op">,</span> ax_vars<span class="op">,</span> radios<span class="op">,</span> sliders<span class="op">,</span> fx) {</span>
-<span id="cb11-558"><a href="#cb11-558" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> dat_hm <span class="op">=</span> []<span class="op">;</span></span>
-<span id="cb11-559"><a href="#cb11-559" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb11-560"><a href="#cb11-560" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> (<span class="kw">let</span> i<span class="op">=</span><span class="dv">0</span><span class="op">;</span> i <span class="op">&lt;</span> data<span class="op">.</span><span class="at">length</span><span class="op">;</span> i<span class="op">++</span>) { </span>
-<span id="cb11-561"><a href="#cb11-561" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb11-562"><a href="#cb11-562" aria-hidden="true" tabindex="-1"></a>    <span class="kw">const</span> p_split <span class="op">=</span> data[i]<span class="op">.</span><span class="at">name</span><span class="op">.</span><span class="fu">split</span>(<span class="st">'_'</span>)</span>
-<span id="cb11-563"><a href="#cb11-563" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb11-564"><a href="#cb11-564" aria-hidden="true" tabindex="-1"></a>    <span class="kw">const</span> vs <span class="op">=</span> {} <span class="co">// dictionary containing all the values of selected parameters </span></span>
-<span id="cb11-565"><a href="#cb11-565" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb11-566"><a href="#cb11-566" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Grab the chosen axis0/x, axis1/y, axis2/z</span></span>
-<span id="cb11-567"><a href="#cb11-567" aria-hidden="true" tabindex="-1"></a>    <span class="kw">const</span> [ax0<span class="op">,</span> ax1<span class="op">,</span> ax2] <span class="op">=</span> ax_vars</span>
-<span id="cb11-568"><a href="#cb11-568" aria-hidden="true" tabindex="-1"></a>    vs[ax0] <span class="op">=</span> <span class="pp">parseFloat</span>(p_split[lookup[<span class="st">'name2idx'</span>][ax0]])</span>
-<span id="cb11-569"><a href="#cb11-569" aria-hidden="true" tabindex="-1"></a>    vs[ax1] <span class="op">=</span> <span class="pp">parseFloat</span>(p_split[lookup[<span class="st">'name2idx'</span>][ax1]])</span>
-<span id="cb11-570"><a href="#cb11-570" aria-hidden="true" tabindex="-1"></a>    vs[ax2] <span class="op">=</span> <span class="pp">parseFloat</span>(p_split[lookup[<span class="st">'name2idx'</span>][ax2]])</span>
-<span id="cb11-571"><a href="#cb11-571" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb11-572"><a href="#cb11-572" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Grab the Fixed parameters</span></span>
-<span id="cb11-573"><a href="#cb11-573" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> (<span class="kw">let</span> i<span class="op">=</span><span class="dv">0</span><span class="op">;</span> i <span class="op">&lt;</span> fp<span class="op">.</span><span class="at">length</span><span class="op">;</span> i<span class="op">++</span>) {</span>
-<span id="cb11-574"><a href="#cb11-574" aria-hidden="true" tabindex="-1"></a>      vs[fp[i]] <span class="op">=</span> <span class="pp">parseFloat</span>(p_split[lookup[<span class="st">'name2idx'</span>][fp[i]]])</span>
-<span id="cb11-575"><a href="#cb11-575" aria-hidden="true" tabindex="-1"></a>    }</span>
-<span id="cb11-576"><a href="#cb11-576" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb11-577"><a href="#cb11-577" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Grab the radios, which will be 2 of the 3 axis vars. </span></span>
-<span id="cb11-578"><a href="#cb11-578" aria-hidden="true" tabindex="-1"></a>    <span class="co">// The other other one we'll be the value of our heatmap.</span></span>
-<span id="cb11-579"><a href="#cb11-579" aria-hidden="true" tabindex="-1"></a>    <span class="co">// This is where we need to know the actual param_name.</span></span>
-<span id="cb11-580"><a href="#cb11-580" aria-hidden="true" tabindex="-1"></a>    <span class="kw">const</span> p1 <span class="op">=</span> <span class="pp">parseFloat</span>(p_split[lookup[<span class="st">'name2idx'</span>][radios[<span class="st">'x'</span>]]])</span>
-<span id="cb11-581"><a href="#cb11-581" aria-hidden="true" tabindex="-1"></a>    <span class="kw">const</span> p2 <span class="op">=</span> <span class="pp">parseFloat</span>(p_split[lookup[<span class="st">'name2idx'</span>][radios[<span class="st">'y'</span>]]])</span>
-<span id="cb11-582"><a href="#cb11-582" aria-hidden="true" tabindex="-1"></a>    <span class="kw">const</span> hm_vals_i <span class="op">=</span> {</span>
-<span id="cb11-583"><a href="#cb11-583" aria-hidden="true" tabindex="-1"></a>      <span class="st">'L'</span><span class="op">:</span> data[i]<span class="op">.</span><span class="at">L</span><span class="op">,</span></span>
-<span id="cb11-584"><a href="#cb11-584" aria-hidden="true" tabindex="-1"></a>      <span class="st">'fx'</span> <span class="op">:</span> <span class="kw">typeof</span> fx <span class="op">!==</span> <span class="kw">undefined</span> <span class="op">?</span> <span class="kw">null</span> <span class="op">:</span> p_split[lookup[<span class="st">'name2idx'</span>][fx]]<span class="op">,</span> </span>
-<span id="cb11-585"><a href="#cb11-585" aria-hidden="true" tabindex="-1"></a>      <span class="st">'param1'</span><span class="op">:</span> p1<span class="op">,</span></span>
-<span id="cb11-586"><a href="#cb11-586" aria-hidden="true" tabindex="-1"></a>      <span class="st">'param2'</span><span class="op">:</span> p2<span class="op">,</span></span>
-<span id="cb11-587"><a href="#cb11-587" aria-hidden="true" tabindex="-1"></a>      <span class="st">'param_str'</span><span class="op">:</span> <span class="vs">`</span><span class="sc">${</span>p1<span class="sc">}</span><span class="vs">/</span><span class="sc">${</span>p2<span class="sc">}</span><span class="vs">`</span><span class="op">,</span> <span class="co">// We need a way to groupby (p1,p2) for `global_hm()`</span></span>
-<span id="cb11-588"><a href="#cb11-588" aria-hidden="true" tabindex="-1"></a>      <span class="st">'value'</span><span class="op">:</span> data[i]<span class="op">.</span><span class="at">value</span><span class="op">,</span></span>
-<span id="cb11-589"><a href="#cb11-589" aria-hidden="true" tabindex="-1"></a>      <span class="st">'value_prop'</span><span class="op">:</span> data[i]<span class="op">.</span><span class="at">value_prop</span></span>
-<span id="cb11-590"><a href="#cb11-590" aria-hidden="true" tabindex="-1"></a>    }</span>
-<span id="cb11-591"><a href="#cb11-591" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb11-592"><a href="#cb11-592" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (vs[fp[<span class="dv">0</span>]] <span class="op">===</span> sliders[<span class="st">'fp0'</span>] <span class="op">&amp;&amp;</span> vs[fp[<span class="dv">1</span>]] <span class="op">===</span> sliders[<span class="st">'fp1'</span>] <span class="op">&amp;&amp;</span> vs[fp[<span class="dv">2</span>]] <span class="op">===</span> sliders[<span class="st">'fp2'</span>] <span class="op">&amp;&amp;</span> vs[fp[<span class="dv">3</span>]] <span class="op">==</span> sliders[<span class="st">'fp3'</span>] <span class="op">&amp;&amp;</span> vs[fp[<span class="dv">4</span>]] <span class="op">==</span> sliders[<span class="st">'fp4'</span>]) {</span>
-<span id="cb11-593"><a href="#cb11-593" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb11-594"><a href="#cb11-594" aria-hidden="true" tabindex="-1"></a>        <span class="co">// if ax1 == x &amp;&amp; ax2 ==y, then ax0 == z</span></span>
-<span id="cb11-595"><a href="#cb11-595" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> (radios[<span class="st">'x'</span>] <span class="op">==</span> ax1 <span class="op">&amp;&amp;</span> radios[<span class="st">'y'</span>] <span class="op">==</span> ax2 <span class="op">&amp;&amp;</span> vs[ax0] <span class="op">==</span> sliders[<span class="st">'ax0'</span>]) {</span>
-<span id="cb11-596"><a href="#cb11-596" aria-hidden="true" tabindex="-1"></a>             dat_hm<span class="op">.</span><span class="fu">push</span>(hm_vals_i)</span>
-<span id="cb11-597"><a href="#cb11-597" aria-hidden="true" tabindex="-1"></a>        } <span class="cf">else</span> <span class="cf">if</span> (radios[<span class="st">'x'</span>] <span class="op">==</span> ax0 <span class="op">&amp;&amp;</span> radios[<span class="st">'y'</span>] <span class="op">==</span> ax2 <span class="op">&amp;&amp;</span> vs[ax1] <span class="op">==</span> sliders[<span class="st">'ax1'</span>]) {</span>
-<span id="cb11-598"><a href="#cb11-598" aria-hidden="true" tabindex="-1"></a>             dat_hm<span class="op">.</span><span class="fu">push</span>(hm_vals_i)</span>
-<span id="cb11-599"><a href="#cb11-599" aria-hidden="true" tabindex="-1"></a>        } <span class="cf">else</span> <span class="cf">if</span> (radios[<span class="st">'x'</span>] <span class="op">==</span> ax0 <span class="op">&amp;&amp;</span> radios[<span class="st">'y'</span>] <span class="op">==</span> ax1 <span class="op">&amp;&amp;</span> vs[ax2] <span class="op">==</span> sliders[<span class="st">'ax2'</span>]) {</span>
-<span id="cb11-600"><a href="#cb11-600" aria-hidden="true" tabindex="-1"></a>             dat_hm<span class="op">.</span><span class="fu">push</span>(hm_vals_i)</span>
-<span id="cb11-601"><a href="#cb11-601" aria-hidden="true" tabindex="-1"></a>        }</span>
-<span id="cb11-602"><a href="#cb11-602" aria-hidden="true" tabindex="-1"></a>    }</span>
-<span id="cb11-603"><a href="#cb11-603" aria-hidden="true" tabindex="-1"></a>  }</span>
-<span id="cb11-604"><a href="#cb11-604" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> dat_hm</span>
-<span id="cb11-605"><a href="#cb11-605" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb11-606"><a href="#cb11-606" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb11-607"><a href="#cb11-607" aria-hidden="true" tabindex="-1"></a><span class="kw">function</span> <span class="fu">global_hm</span>(d){</span>
-<span id="cb11-608"><a href="#cb11-608" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> d3<span class="op">.</span><span class="fu">flatRollup</span>(d<span class="op">,</span> v <span class="kw">=&gt;</span> d3<span class="op">.</span><span class="fu">sum</span>(v<span class="op">,</span> d <span class="kw">=&gt;</span> d<span class="op">.</span><span class="at">value</span> <span class="op">*</span> d<span class="op">.</span><span class="at">value_prop</span>)<span class="op">,</span> d <span class="kw">=&gt;</span> d<span class="op">.</span><span class="at">param_str</span>)</span>
-<span id="cb11-609"><a href="#cb11-609" aria-hidden="true" tabindex="-1"></a>           <span class="op">.</span><span class="fu">map</span>(currentElement <span class="kw">=&gt;</span> ({</span>
-<span id="cb11-610"><a href="#cb11-610" aria-hidden="true" tabindex="-1"></a>             <span class="st">'param1'</span><span class="op">:</span> <span class="pp">parseFloat</span>(currentElement[<span class="dv">0</span>]<span class="op">.</span><span class="fu">split</span>(<span class="st">'/'</span>)[<span class="dv">0</span>])<span class="op">,</span></span>
-<span id="cb11-611"><a href="#cb11-611" aria-hidden="true" tabindex="-1"></a>             <span class="st">'param2'</span><span class="op">:</span> <span class="pp">parseFloat</span>(currentElement[<span class="dv">0</span>]<span class="op">.</span><span class="fu">split</span>(<span class="st">'/'</span>)[<span class="dv">1</span>])<span class="op">,</span></span>
-<span id="cb11-612"><a href="#cb11-612" aria-hidden="true" tabindex="-1"></a>             <span class="st">'value'</span><span class="op">:</span> currentElement[<span class="dv">1</span>]<span class="op">,</span></span>
-<span id="cb11-613"><a href="#cb11-613" aria-hidden="true" tabindex="-1"></a>             <span class="st">'L'</span><span class="op">:</span> <span class="dv">1</span></span>
-<span id="cb11-614"><a href="#cb11-614" aria-hidden="true" tabindex="-1"></a>          }))</span>
-<span id="cb11-615"><a href="#cb11-615" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb11-616"><a href="#cb11-616" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb11-617"><a href="#cb11-617" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb11-618"><a href="#cb11-618" aria-hidden="true" tabindex="-1"></a><span class="kw">function</span> <span class="fu">plot_time_evo</span>(d<span class="op">,</span> y_vals<span class="op">,</span> pal) {</span>
-<span id="cb11-619"><a href="#cb11-619" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> global_mean <span class="op">=</span> d3<span class="op">.</span><span class="fu">rollup</span>(d<span class="op">,</span> v <span class="kw">=&gt;</span> d3<span class="op">.</span><span class="fu">sum</span>(v<span class="op">,</span> d <span class="kw">=&gt;</span> d<span class="op">.</span><span class="at">value</span> <span class="op">*</span> d<span class="op">.</span><span class="at">value_prop</span>)<span class="op">,</span> d <span class="kw">=&gt;</span> d<span class="op">.</span><span class="at">timestep</span>)</span>
-<span id="cb11-620"><a href="#cb11-620" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb11-621"><a href="#cb11-621" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> Plot<span class="op">.</span><span class="fu">plot</span>({</span>
-<span id="cb11-622"><a href="#cb11-622" aria-hidden="true" tabindex="-1"></a>    <span class="dt">x</span><span class="op">:</span> {<span class="dt">type</span><span class="op">:</span><span class="st">"log"</span>}<span class="op">,</span></span>
-<span id="cb11-623"><a href="#cb11-623" aria-hidden="true" tabindex="-1"></a>    <span class="dt">marginLeft</span><span class="op">:</span> <span class="dv">50</span><span class="op">,</span></span>
-<span id="cb11-624"><a href="#cb11-624" aria-hidden="true" tabindex="-1"></a>    <span class="dt">color</span><span class="op">:</span> { </span>
-<span id="cb11-625"><a href="#cb11-625" aria-hidden="true" tabindex="-1"></a>      <span class="dt">scheme</span><span class="op">:</span> pal<span class="op">,</span> </span>
-<span id="cb11-626"><a href="#cb11-626" aria-hidden="true" tabindex="-1"></a>      <span class="dt">type</span><span class="op">:</span> <span class="st">"ordinal"</span><span class="op">,</span> </span>
-<span id="cb11-627"><a href="#cb11-627" aria-hidden="true" tabindex="-1"></a>      <span class="dt">range</span><span class="op">:</span> [<span class="fl">0.3</span><span class="op">,</span> <span class="dv">1</span>]<span class="op">,</span></span>
-<span id="cb11-628"><a href="#cb11-628" aria-hidden="true" tabindex="-1"></a>      <span class="dt">legend</span><span class="op">:</span> <span class="kw">true</span> </span>
-<span id="cb11-629"><a href="#cb11-629" aria-hidden="true" tabindex="-1"></a>    }<span class="op">,</span></span>
-<span id="cb11-630"><a href="#cb11-630" aria-hidden="true" tabindex="-1"></a>    <span class="dt">marks</span><span class="op">:</span> [</span>
-<span id="cb11-631"><a href="#cb11-631" aria-hidden="true" tabindex="-1"></a>      Plot<span class="op">.</span><span class="fu">lineY</span>(<span class="bu">Array</span><span class="op">.</span><span class="fu">from</span>(global_mean<span class="op">.</span><span class="fu">values</span>())<span class="op">,</span> {</span>
-<span id="cb11-632"><a href="#cb11-632" aria-hidden="true" tabindex="-1"></a>        <span class="dt">strokeDasharray</span><span class="op">:</span> <span class="st">"5,3"</span><span class="op">,</span> <span class="dt">opacity</span><span class="op">:</span> pal <span class="op">==</span> <span class="st">'blues'</span> <span class="op">?</span> <span class="dv">0</span> <span class="op">:</span> <span class="fl">1.</span></span>
-<span id="cb11-633"><a href="#cb11-633" aria-hidden="true" tabindex="-1"></a>        })<span class="op">,</span></span>
-<span id="cb11-634"><a href="#cb11-634" aria-hidden="true" tabindex="-1"></a>      Plot<span class="op">.</span><span class="fu">line</span>(</span>
-<span id="cb11-635"><a href="#cb11-635" aria-hidden="true" tabindex="-1"></a>        d<span class="op">,</span> {</span>
-<span id="cb11-636"><a href="#cb11-636" aria-hidden="true" tabindex="-1"></a>          <span class="dt">x</span><span class="op">:</span> <span class="st">'timestep'</span><span class="op">,</span> <span class="dt">y</span><span class="op">:</span> y_vals<span class="op">,</span> <span class="dt">stroke</span><span class="op">:</span> <span class="st">"L"</span></span>
-<span id="cb11-637"><a href="#cb11-637" aria-hidden="true" tabindex="-1"></a>          })<span class="op">,</span></span>
-<span id="cb11-638"><a href="#cb11-638" aria-hidden="true" tabindex="-1"></a>      Plot<span class="op">.</span><span class="fu">dot</span>(</span>
-<span id="cb11-639"><a href="#cb11-639" aria-hidden="true" tabindex="-1"></a>        d<span class="op">,</span> {</span>
-<span id="cb11-640"><a href="#cb11-640" aria-hidden="true" tabindex="-1"></a>          <span class="dt">x</span><span class="op">:</span> <span class="st">'timestep'</span><span class="op">,</span> <span class="dt">y</span><span class="op">:</span> y_vals<span class="op">,</span> <span class="dt">stroke</span><span class="op">:</span> <span class="st">"L"</span></span>
-<span id="cb11-641"><a href="#cb11-641" aria-hidden="true" tabindex="-1"></a>          })</span>
-<span id="cb11-642"><a href="#cb11-642" aria-hidden="true" tabindex="-1"></a>    ]</span>
-<span id="cb11-643"><a href="#cb11-643" aria-hidden="true" tabindex="-1"></a>  })</span>
-<span id="cb11-644"><a href="#cb11-644" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb11-645"><a href="#cb11-645" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb11-646"><a href="#cb11-646" aria-hidden="true" tabindex="-1"></a><span class="kw">function</span> <span class="fu">phase_diagram</span>(d<span class="op">,</span> x<span class="op">,</span> y<span class="op">,</span> z<span class="op">,</span> pal<span class="op">,</span> fy) {</span>
-<span id="cb11-647"><a href="#cb11-647" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> PlotDev<span class="op">.</span><span class="fu">plot</span>({</span>
-<span id="cb11-648"><a href="#cb11-648" aria-hidden="true" tabindex="-1"></a>    <span class="dt">width</span><span class="op">:</span> <span class="dv">1200</span><span class="op">,</span></span>
-<span id="cb11-649"><a href="#cb11-649" aria-hidden="true" tabindex="-1"></a>    <span class="dt">height</span><span class="op">:</span> <span class="dv">600</span><span class="op">,</span></span>
-<span id="cb11-650"><a href="#cb11-650" aria-hidden="true" tabindex="-1"></a>    <span class="dt">color</span><span class="op">:</span> {</span>
-<span id="cb11-651"><a href="#cb11-651" aria-hidden="true" tabindex="-1"></a>      <span class="dt">type</span><span class="op">:</span> <span class="st">"linear"</span><span class="op">,</span></span>
-<span id="cb11-652"><a href="#cb11-652" aria-hidden="true" tabindex="-1"></a>      <span class="dt">scheme</span><span class="op">:</span> pal</span>
-<span id="cb11-653"><a href="#cb11-653" aria-hidden="true" tabindex="-1"></a>    }<span class="op">,</span></span>
-<span id="cb11-654"><a href="#cb11-654" aria-hidden="true" tabindex="-1"></a>    <span class="dt">x</span><span class="op">:</span> { <span class="dt">label</span><span class="op">:</span> x }<span class="op">,</span></span>
-<span id="cb11-655"><a href="#cb11-655" aria-hidden="true" tabindex="-1"></a>    <span class="dt">y</span><span class="op">:</span> { <span class="dt">label</span><span class="op">:</span> y }<span class="op">,</span></span>
-<span id="cb11-656"><a href="#cb11-656" aria-hidden="true" tabindex="-1"></a>    <span class="dt">fy</span><span class="op">:</span> { <span class="dt">label</span><span class="op">:</span> fy }<span class="op">,</span></span>
-<span id="cb11-657"><a href="#cb11-657" aria-hidden="true" tabindex="-1"></a>    <span class="dt">facet</span><span class="op">:</span> { </span>
-<span id="cb11-658"><a href="#cb11-658" aria-hidden="true" tabindex="-1"></a>      <span class="dt">data</span><span class="op">:</span> d<span class="op">,</span> </span>
-<span id="cb11-659"><a href="#cb11-659" aria-hidden="true" tabindex="-1"></a>      <span class="dt">x</span><span class="op">:</span> <span class="st">"L"</span><span class="op">,</span> </span>
-<span id="cb11-660"><a href="#cb11-660" aria-hidden="true" tabindex="-1"></a>      <span class="dt">y</span><span class="op">:</span> <span class="kw">typeof</span> fy <span class="op">!==</span> <span class="kw">undefined</span> <span class="op">?</span> <span class="st">'fx'</span> <span class="op">:</span> <span class="kw">null</span> </span>
-<span id="cb11-661"><a href="#cb11-661" aria-hidden="true" tabindex="-1"></a>    }<span class="op">,</span></span>
-<span id="cb11-662"><a href="#cb11-662" aria-hidden="true" tabindex="-1"></a>    <span class="dt">marks</span><span class="op">:</span> [</span>
-<span id="cb11-663"><a href="#cb11-663" aria-hidden="true" tabindex="-1"></a>      PlotDev<span class="op">.</span><span class="fu">raster</span>(d<span class="op">,</span> {</span>
-<span id="cb11-664"><a href="#cb11-664" aria-hidden="true" tabindex="-1"></a>        <span class="dt">x</span><span class="op">:</span> <span class="st">"param1"</span><span class="op">,</span></span>
-<span id="cb11-665"><a href="#cb11-665" aria-hidden="true" tabindex="-1"></a>        <span class="dt">y</span><span class="op">:</span> <span class="st">"param2"</span><span class="op">,</span></span>
-<span id="cb11-666"><a href="#cb11-666" aria-hidden="true" tabindex="-1"></a>        <span class="dt">fill</span><span class="op">:</span> z<span class="op">,</span></span>
-<span id="cb11-667"><a href="#cb11-667" aria-hidden="true" tabindex="-1"></a>        <span class="dt">interpolate</span><span class="op">:</span> <span class="st">"nearest"</span></span>
-<span id="cb11-668"><a href="#cb11-668" aria-hidden="true" tabindex="-1"></a>      })<span class="op">,</span></span>
-<span id="cb11-669"><a href="#cb11-669" aria-hidden="true" tabindex="-1"></a>    ]</span>
-<span id="cb11-670"><a href="#cb11-670" aria-hidden="true" tabindex="-1"></a>  })</span>
-<span id="cb11-671"><a href="#cb11-671" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code hidden" id="cb16" data-startfrom="492" data-source-offset="-0"><pre class="sourceCode js code-with-copy"><code class="sourceCode javascript" style="counter-reset: source-line 491;"><span id="cb16-492"><a href="#cb16-492" aria-hidden="true" tabindex="-1"></a><span class="kw">function</span> <span class="fu">sql_data_a</span>(model<span class="op">,</span> name) {</span>
+<span id="cb16-493"><a href="#cb16-493" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> resdb<span class="op">.</span><span class="fu">query</span>(<span class="vs">`</span></span>
+<span id="cb16-494"><a href="#cb16-494" aria-hidden="true" tabindex="-1"></a><span class="vs">      SELECT timestep::INT as timestep, L::INT as L, value, value_prop</span></span>
+<span id="cb16-495"><a href="#cb16-495" aria-hidden="true" tabindex="-1"></a><span class="vs">      FROM </span><span class="sc">${</span>model<span class="sc">}</span></span>
+<span id="cb16-496"><a href="#cb16-496" aria-hidden="true" tabindex="-1"></a><span class="vs">      WHERE</span></span>
+<span id="cb16-497"><a href="#cb16-497" aria-hidden="true" tabindex="-1"></a><span class="vs">      row_id = '</span><span class="sc">${</span>name<span class="sc">}</span><span class="vs">'</span></span>
+<span id="cb16-498"><a href="#cb16-498" aria-hidden="true" tabindex="-1"></a><span class="vs">    `</span>)</span>
+<span id="cb16-499"><a href="#cb16-499" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb16-500"><a href="#cb16-500" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-501"><a href="#cb16-501" aria-hidden="true" tabindex="-1"></a><span class="co">// Grab values, values_prop at max timestep (steady states) grouped by row_id and L</span></span>
+<span id="cb16-502"><a href="#cb16-502" aria-hidden="true" tabindex="-1"></a><span class="kw">function</span> <span class="fu">sql_data_b</span>(model) {</span>
+<span id="cb16-503"><a href="#cb16-503" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> resdb<span class="op">.</span><span class="fu">query</span>(<span class="vs">`</span></span>
+<span id="cb16-504"><a href="#cb16-504" aria-hidden="true" tabindex="-1"></a><span class="vs">      WITH tmp as (</span></span>
+<span id="cb16-505"><a href="#cb16-505" aria-hidden="true" tabindex="-1"></a><span class="vs">          SELECT row_id, L, MAX(timestep::INT) as timestep</span></span>
+<span id="cb16-506"><a href="#cb16-506" aria-hidden="true" tabindex="-1"></a><span class="vs">          FROM </span><span class="sc">${</span>model<span class="sc">}</span></span>
+<span id="cb16-507"><a href="#cb16-507" aria-hidden="true" tabindex="-1"></a><span class="vs">          GROUP BY row_id, L</span></span>
+<span id="cb16-508"><a href="#cb16-508" aria-hidden="true" tabindex="-1"></a><span class="vs">      )</span></span>
+<span id="cb16-509"><a href="#cb16-509" aria-hidden="true" tabindex="-1"></a><span class="vs">      SELECT s.value, s.L::INT as L, s.value_prop, ss.param_str::STRING as name</span></span>
+<span id="cb16-510"><a href="#cb16-510" aria-hidden="true" tabindex="-1"></a><span class="vs">      FROM </span><span class="sc">${</span>model<span class="sc">}</span><span class="vs"> s</span></span>
+<span id="cb16-511"><a href="#cb16-511" aria-hidden="true" tabindex="-1"></a><span class="vs">      JOIN tmp</span></span>
+<span id="cb16-512"><a href="#cb16-512" aria-hidden="true" tabindex="-1"></a><span class="vs">      ON s.row_id = tmp.row_id AND s.L = tmp.L AND s.timestep = tmp.timestep</span></span>
+<span id="cb16-513"><a href="#cb16-513" aria-hidden="true" tabindex="-1"></a><span class="vs">      JOIN </span><span class="sc">${</span>model<span class="sc">}</span><span class="vs">_lookup ss</span></span>
+<span id="cb16-514"><a href="#cb16-514" aria-hidden="true" tabindex="-1"></a><span class="vs">      ON s.row_id = ss.row_id</span></span>
+<span id="cb16-515"><a href="#cb16-515" aria-hidden="true" tabindex="-1"></a><span class="vs">      ORDER BY (s.row_id, s.L)</span></span>
+<span id="cb16-516"><a href="#cb16-516" aria-hidden="true" tabindex="-1"></a><span class="vs">  `</span>)</span>
+<span id="cb16-517"><a href="#cb16-517" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb16-518"><a href="#cb16-518" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-519"><a href="#cb16-519" aria-hidden="true" tabindex="-1"></a><span class="kw">function</span> <span class="fu">get_fixed_params</span>(param_table<span class="op">,</span> ax_vars<span class="op">,</span> fx) {</span>
+<span id="cb16-520"><a href="#cb16-520" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> all_params <span class="op">=</span> [<span class="op">...</span><span class="bu">Object</span><span class="op">.</span><span class="fu">keys</span>(param_table)]</span>
+<span id="cb16-521"><a href="#cb16-521" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> varying_params <span class="op">=</span> <span class="kw">typeof</span> fx <span class="op">!==</span> <span class="kw">undefined</span> <span class="op">?</span> <span class="kw">new</span> <span class="bu">Set</span>(ax_vars) <span class="op">:</span> <span class="kw">new</span> <span class="bu">Set</span>(ax_vars<span class="op">.</span><span class="fu">concat</span>(fx))</span>
+<span id="cb16-522"><a href="#cb16-522" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> diff_params <span class="op">=</span> <span class="kw">new</span> <span class="bu">Set</span>(all_params<span class="op">.</span><span class="fu">filter</span>((x) <span class="kw">=&gt;</span> <span class="op">!</span>varying_params<span class="op">.</span><span class="fu">has</span>(x)))</span>
+<span id="cb16-523"><a href="#cb16-523" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> <span class="bu">Array</span><span class="op">.</span><span class="fu">from</span>(diff_params)</span>
+<span id="cb16-524"><a href="#cb16-524" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb16-525"><a href="#cb16-525" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-526"><a href="#cb16-526" aria-hidden="true" tabindex="-1"></a>f <span class="op">=</span> (x) <span class="kw">=&gt;</span> <span class="bu">Number</span><span class="op">.</span><span class="fu">isInteger</span>(x) <span class="op">?</span> x<span class="op">.</span><span class="fu">toPrecision</span>(<span class="dv">2</span>) <span class="op">:</span> x</span>
+<span id="cb16-527"><a href="#cb16-527" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-528"><a href="#cb16-528" aria-hidden="true" tabindex="-1"></a><span class="co">// Extract the step from a list of values for a parameter</span></span>
+<span id="cb16-529"><a href="#cb16-529" aria-hidden="true" tabindex="-1"></a>s <span class="op">=</span> (p<span class="op">,</span>i) <span class="kw">=&gt;</span> { </span>
+<span id="cb16-530"><a href="#cb16-530" aria-hidden="true" tabindex="-1"></a>    <span class="kw">const</span> unique_vals <span class="op">=</span> <span class="bu">Array</span><span class="op">.</span><span class="fu">from</span>(<span class="kw">new</span> <span class="bu">Set</span>(p<span class="op">.</span><span class="fu">map</span>(d <span class="kw">=&gt;</span> <span class="pp">parseFloat</span>(d[i]))))<span class="op">.</span><span class="fu">sort</span>((a<span class="op">,</span>b) <span class="kw">=&gt;</span> a <span class="op">-</span> b)</span>
+<span id="cb16-531"><a href="#cb16-531" aria-hidden="true" tabindex="-1"></a>    <span class="kw">const</span> out <span class="op">=</span> []</span>
+<span id="cb16-532"><a href="#cb16-532" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> (<span class="kw">let</span> i<span class="op">=</span><span class="dv">1</span><span class="op">;</span> i <span class="op">&lt;</span> unique_vals<span class="op">.</span><span class="at">length</span><span class="op">;</span> i<span class="op">++</span> ) {</span>
+<span id="cb16-533"><a href="#cb16-533" aria-hidden="true" tabindex="-1"></a>      out<span class="op">.</span><span class="fu">push</span>(<span class="op">+</span>(unique_vals[i]<span class="op">-</span>unique_vals[i<span class="op">-</span><span class="dv">1</span>])<span class="op">.</span><span class="fu">toPrecision</span>(<span class="dv">2</span>))</span>
+<span id="cb16-534"><a href="#cb16-534" aria-hidden="true" tabindex="-1"></a>    } <span class="co">// return whatev if length is zero</span></span>
+<span id="cb16-535"><a href="#cb16-535" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> out<span class="op">.</span><span class="at">length</span> <span class="op">===</span> <span class="dv">0</span> <span class="op">?</span> <span class="fl">0.1</span> <span class="op">:</span> out[<span class="dv">0</span>]</span>
+<span id="cb16-536"><a href="#cb16-536" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb16-537"><a href="#cb16-537" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-538"><a href="#cb16-538" aria-hidden="true" tabindex="-1"></a>minmax <span class="op">=</span> (p<span class="op">,</span> i) <span class="kw">=&gt;</span> d3<span class="op">.</span><span class="fu">extent</span>(p<span class="op">.</span><span class="fu">map</span>(d <span class="kw">=&gt;</span> <span class="pp">parseFloat</span>(d[i])))</span>
+<span id="cb16-539"><a href="#cb16-539" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-540"><a href="#cb16-540" aria-hidden="true" tabindex="-1"></a><span class="co">// Param table where each key is a parameter, and values </span></span>
+<span id="cb16-541"><a href="#cb16-541" aria-hidden="true" tabindex="-1"></a><span class="co">// are list of values relevant to </span></span>
+<span id="cb16-542"><a href="#cb16-542" aria-hidden="true" tabindex="-1"></a><span class="co">// model: resdb output for a specific model</span></span>
+<span id="cb16-543"><a href="#cb16-543" aria-hidden="true" tabindex="-1"></a><span class="co">// lookup: { [0: param1, 1: param2, ...] }</span></span>
+<span id="cb16-544"><a href="#cb16-544" aria-hidden="true" tabindex="-1"></a><span class="kw">function</span> <span class="fu">get_param_table</span>(model_lookup<span class="op">,</span> param_lookup) {</span>
+<span id="cb16-545"><a href="#cb16-545" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb16-546"><a href="#cb16-546" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> p <span class="op">=</span> <span class="bu">Object</span><span class="op">.</span><span class="fu">keys</span>(model_lookup)<span class="op">.</span><span class="fu">map</span>(d <span class="kw">=&gt;</span> d<span class="op">.</span><span class="fu">split</span>(<span class="st">"_"</span>)) </span>
+<span id="cb16-547"><a href="#cb16-547" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb16-548"><a href="#cb16-548" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> param_table <span class="op">=</span> {}</span>
+<span id="cb16-549"><a href="#cb16-549" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> first_line_param <span class="op">=</span> p[<span class="dv">0</span>]</span>
+<span id="cb16-550"><a href="#cb16-550" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> ( <span class="kw">let</span> i<span class="op">=</span><span class="dv">0</span><span class="op">;</span> i <span class="op">&lt;</span> first_line_param<span class="op">.</span><span class="at">length</span><span class="op">;</span> i<span class="op">++</span> ) {</span>
+<span id="cb16-551"><a href="#cb16-551" aria-hidden="true" tabindex="-1"></a>    param_table[param_lookup[<span class="st">'idx2name'</span>][i]] <span class="op">=</span> { </span>
+<span id="cb16-552"><a href="#cb16-552" aria-hidden="true" tabindex="-1"></a>      <span class="st">'s'</span><span class="op">:</span> <span class="fu">s</span>(p<span class="op">,</span>i)<span class="op">,</span> <span class="st">'first_val'</span><span class="op">:</span> first_line_param[i]<span class="op">,</span> <span class="st">'minmax'</span><span class="op">:</span> <span class="fu">minmax</span>(p<span class="op">,</span>i) </span>
+<span id="cb16-553"><a href="#cb16-553" aria-hidden="true" tabindex="-1"></a>      }</span>
+<span id="cb16-554"><a href="#cb16-554" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb16-555"><a href="#cb16-555" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> param_table</span>
+<span id="cb16-556"><a href="#cb16-556" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb16-557"><a href="#cb16-557" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-558"><a href="#cb16-558" aria-hidden="true" tabindex="-1"></a><span class="co">// To get heatmap data, we need</span></span>
+<span id="cb16-559"><a href="#cb16-559" aria-hidden="true" tabindex="-1"></a><span class="co">//   data: `value`, `value_prop` at max `timestep` grouped by `row_id` and `L`</span></span>
+<span id="cb16-560"><a href="#cb16-560" aria-hidden="true" tabindex="-1"></a><span class="co">//   ax_vars: variables we want as x,y,z</span></span>
+<span id="cb16-561"><a href="#cb16-561" aria-hidden="true" tabindex="-1"></a><span class="co">//   fx: variable to facet</span></span>
+<span id="cb16-562"><a href="#cb16-562" aria-hidden="true" tabindex="-1"></a><span class="co">//   fp: other vars</span></span>
+<span id="cb16-563"><a href="#cb16-563" aria-hidden="true" tabindex="-1"></a><span class="co">//   sliders: set of sliders</span></span>
+<span id="cb16-564"><a href="#cb16-564" aria-hidden="true" tabindex="-1"></a><span class="kw">function</span> <span class="fu">get_data_heatmap</span>(data<span class="op">,</span> lookup<span class="op">,</span> fp<span class="op">,</span> ax_vars<span class="op">,</span> radios<span class="op">,</span> sliders<span class="op">,</span> fx) {</span>
+<span id="cb16-565"><a href="#cb16-565" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> dat_hm <span class="op">=</span> []<span class="op">;</span></span>
+<span id="cb16-566"><a href="#cb16-566" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb16-567"><a href="#cb16-567" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> (<span class="kw">let</span> i<span class="op">=</span><span class="dv">0</span><span class="op">;</span> i <span class="op">&lt;</span> data<span class="op">.</span><span class="at">length</span><span class="op">;</span> i<span class="op">++</span>) { </span>
+<span id="cb16-568"><a href="#cb16-568" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb16-569"><a href="#cb16-569" aria-hidden="true" tabindex="-1"></a>    <span class="kw">const</span> p_split <span class="op">=</span> data[i]<span class="op">.</span><span class="at">name</span><span class="op">.</span><span class="fu">split</span>(<span class="st">'_'</span>)</span>
+<span id="cb16-570"><a href="#cb16-570" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb16-571"><a href="#cb16-571" aria-hidden="true" tabindex="-1"></a>    <span class="kw">const</span> vs <span class="op">=</span> {} <span class="co">// dictionary containing all the values of selected parameters </span></span>
+<span id="cb16-572"><a href="#cb16-572" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-573"><a href="#cb16-573" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Grab the chosen axis0/x, axis1/y, axis2/z</span></span>
+<span id="cb16-574"><a href="#cb16-574" aria-hidden="true" tabindex="-1"></a>    <span class="kw">const</span> [ax0<span class="op">,</span> ax1<span class="op">,</span> ax2] <span class="op">=</span> ax_vars</span>
+<span id="cb16-575"><a href="#cb16-575" aria-hidden="true" tabindex="-1"></a>    vs[ax0] <span class="op">=</span> <span class="pp">parseFloat</span>(p_split[lookup[<span class="st">'name2idx'</span>][ax0]])</span>
+<span id="cb16-576"><a href="#cb16-576" aria-hidden="true" tabindex="-1"></a>    vs[ax1] <span class="op">=</span> <span class="pp">parseFloat</span>(p_split[lookup[<span class="st">'name2idx'</span>][ax1]])</span>
+<span id="cb16-577"><a href="#cb16-577" aria-hidden="true" tabindex="-1"></a>    vs[ax2] <span class="op">=</span> <span class="pp">parseFloat</span>(p_split[lookup[<span class="st">'name2idx'</span>][ax2]])</span>
+<span id="cb16-578"><a href="#cb16-578" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-579"><a href="#cb16-579" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Grab the Fixed parameters</span></span>
+<span id="cb16-580"><a href="#cb16-580" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> (<span class="kw">let</span> i<span class="op">=</span><span class="dv">0</span><span class="op">;</span> i <span class="op">&lt;</span> fp<span class="op">.</span><span class="at">length</span><span class="op">;</span> i<span class="op">++</span>) {</span>
+<span id="cb16-581"><a href="#cb16-581" aria-hidden="true" tabindex="-1"></a>      vs[fp[i]] <span class="op">=</span> <span class="pp">parseFloat</span>(p_split[lookup[<span class="st">'name2idx'</span>][fp[i]]])</span>
+<span id="cb16-582"><a href="#cb16-582" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb16-583"><a href="#cb16-583" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb16-584"><a href="#cb16-584" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Grab the radios, which will be 2 of the 3 axis vars. </span></span>
+<span id="cb16-585"><a href="#cb16-585" aria-hidden="true" tabindex="-1"></a>    <span class="co">// The other other one we'll be the value of our heatmap.</span></span>
+<span id="cb16-586"><a href="#cb16-586" aria-hidden="true" tabindex="-1"></a>    <span class="co">// This is where we need to know the actual param_name.</span></span>
+<span id="cb16-587"><a href="#cb16-587" aria-hidden="true" tabindex="-1"></a>    <span class="kw">const</span> p1 <span class="op">=</span> <span class="pp">parseFloat</span>(p_split[lookup[<span class="st">'name2idx'</span>][radios[<span class="st">'x'</span>]]])</span>
+<span id="cb16-588"><a href="#cb16-588" aria-hidden="true" tabindex="-1"></a>    <span class="kw">const</span> p2 <span class="op">=</span> <span class="pp">parseFloat</span>(p_split[lookup[<span class="st">'name2idx'</span>][radios[<span class="st">'y'</span>]]])</span>
+<span id="cb16-589"><a href="#cb16-589" aria-hidden="true" tabindex="-1"></a>    <span class="kw">const</span> hm_vals_i <span class="op">=</span> {</span>
+<span id="cb16-590"><a href="#cb16-590" aria-hidden="true" tabindex="-1"></a>      <span class="st">'L'</span><span class="op">:</span> data[i]<span class="op">.</span><span class="at">L</span><span class="op">,</span></span>
+<span id="cb16-591"><a href="#cb16-591" aria-hidden="true" tabindex="-1"></a>      <span class="st">'fx'</span> <span class="op">:</span> <span class="kw">typeof</span> fx <span class="op">!==</span> <span class="kw">undefined</span> <span class="op">?</span> <span class="kw">null</span> <span class="op">:</span> p_split[lookup[<span class="st">'name2idx'</span>][fx]]<span class="op">,</span> </span>
+<span id="cb16-592"><a href="#cb16-592" aria-hidden="true" tabindex="-1"></a>      <span class="st">'param1'</span><span class="op">:</span> p1<span class="op">,</span></span>
+<span id="cb16-593"><a href="#cb16-593" aria-hidden="true" tabindex="-1"></a>      <span class="st">'param2'</span><span class="op">:</span> p2<span class="op">,</span></span>
+<span id="cb16-594"><a href="#cb16-594" aria-hidden="true" tabindex="-1"></a>      <span class="st">'param_str'</span><span class="op">:</span> <span class="vs">`</span><span class="sc">${</span>p1<span class="sc">}</span><span class="vs">/</span><span class="sc">${</span>p2<span class="sc">}</span><span class="vs">`</span><span class="op">,</span> <span class="co">// We need a way to groupby (p1,p2) for `global_hm()`</span></span>
+<span id="cb16-595"><a href="#cb16-595" aria-hidden="true" tabindex="-1"></a>      <span class="st">'value'</span><span class="op">:</span> data[i]<span class="op">.</span><span class="at">value</span><span class="op">,</span></span>
+<span id="cb16-596"><a href="#cb16-596" aria-hidden="true" tabindex="-1"></a>      <span class="st">'value_prop'</span><span class="op">:</span> data[i]<span class="op">.</span><span class="at">value_prop</span></span>
+<span id="cb16-597"><a href="#cb16-597" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb16-598"><a href="#cb16-598" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-599"><a href="#cb16-599" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (vs[fp[<span class="dv">0</span>]] <span class="op">===</span> sliders[<span class="st">'fp0'</span>] <span class="op">&amp;&amp;</span> vs[fp[<span class="dv">1</span>]] <span class="op">===</span> sliders[<span class="st">'fp1'</span>] <span class="op">&amp;&amp;</span> vs[fp[<span class="dv">2</span>]] <span class="op">===</span> sliders[<span class="st">'fp2'</span>] <span class="op">&amp;&amp;</span> vs[fp[<span class="dv">3</span>]] <span class="op">==</span> sliders[<span class="st">'fp3'</span>] <span class="op">&amp;&amp;</span> vs[fp[<span class="dv">4</span>]] <span class="op">==</span> sliders[<span class="st">'fp4'</span>]) {</span>
+<span id="cb16-600"><a href="#cb16-600" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-601"><a href="#cb16-601" aria-hidden="true" tabindex="-1"></a>        <span class="co">// if ax1 == x &amp;&amp; ax2 ==y, then ax0 == z</span></span>
+<span id="cb16-602"><a href="#cb16-602" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> (radios[<span class="st">'x'</span>] <span class="op">==</span> ax1 <span class="op">&amp;&amp;</span> radios[<span class="st">'y'</span>] <span class="op">==</span> ax2 <span class="op">&amp;&amp;</span> vs[ax0] <span class="op">==</span> sliders[<span class="st">'ax0'</span>]) {</span>
+<span id="cb16-603"><a href="#cb16-603" aria-hidden="true" tabindex="-1"></a>             dat_hm<span class="op">.</span><span class="fu">push</span>(hm_vals_i)</span>
+<span id="cb16-604"><a href="#cb16-604" aria-hidden="true" tabindex="-1"></a>        } <span class="cf">else</span> <span class="cf">if</span> (radios[<span class="st">'x'</span>] <span class="op">==</span> ax0 <span class="op">&amp;&amp;</span> radios[<span class="st">'y'</span>] <span class="op">==</span> ax2 <span class="op">&amp;&amp;</span> vs[ax1] <span class="op">==</span> sliders[<span class="st">'ax1'</span>]) {</span>
+<span id="cb16-605"><a href="#cb16-605" aria-hidden="true" tabindex="-1"></a>             dat_hm<span class="op">.</span><span class="fu">push</span>(hm_vals_i)</span>
+<span id="cb16-606"><a href="#cb16-606" aria-hidden="true" tabindex="-1"></a>        } <span class="cf">else</span> <span class="cf">if</span> (radios[<span class="st">'x'</span>] <span class="op">==</span> ax0 <span class="op">&amp;&amp;</span> radios[<span class="st">'y'</span>] <span class="op">==</span> ax1 <span class="op">&amp;&amp;</span> vs[ax2] <span class="op">==</span> sliders[<span class="st">'ax2'</span>]) {</span>
+<span id="cb16-607"><a href="#cb16-607" aria-hidden="true" tabindex="-1"></a>             dat_hm<span class="op">.</span><span class="fu">push</span>(hm_vals_i)</span>
+<span id="cb16-608"><a href="#cb16-608" aria-hidden="true" tabindex="-1"></a>        }</span>
+<span id="cb16-609"><a href="#cb16-609" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb16-610"><a href="#cb16-610" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb16-611"><a href="#cb16-611" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> dat_hm</span>
+<span id="cb16-612"><a href="#cb16-612" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb16-613"><a href="#cb16-613" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-614"><a href="#cb16-614" aria-hidden="true" tabindex="-1"></a><span class="kw">function</span> <span class="fu">global_hm</span>(d){</span>
+<span id="cb16-615"><a href="#cb16-615" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> d3<span class="op">.</span><span class="fu">flatRollup</span>(d<span class="op">,</span> v <span class="kw">=&gt;</span> d3<span class="op">.</span><span class="fu">sum</span>(v<span class="op">,</span> d <span class="kw">=&gt;</span> d<span class="op">.</span><span class="at">value</span> <span class="op">*</span> d<span class="op">.</span><span class="at">value_prop</span>)<span class="op">,</span> d <span class="kw">=&gt;</span> d<span class="op">.</span><span class="at">param_str</span>)</span>
+<span id="cb16-616"><a href="#cb16-616" aria-hidden="true" tabindex="-1"></a>           <span class="op">.</span><span class="fu">map</span>(currentElement <span class="kw">=&gt;</span> ({</span>
+<span id="cb16-617"><a href="#cb16-617" aria-hidden="true" tabindex="-1"></a>             <span class="st">'param1'</span><span class="op">:</span> <span class="pp">parseFloat</span>(currentElement[<span class="dv">0</span>]<span class="op">.</span><span class="fu">split</span>(<span class="st">'/'</span>)[<span class="dv">0</span>])<span class="op">,</span></span>
+<span id="cb16-618"><a href="#cb16-618" aria-hidden="true" tabindex="-1"></a>             <span class="st">'param2'</span><span class="op">:</span> <span class="pp">parseFloat</span>(currentElement[<span class="dv">0</span>]<span class="op">.</span><span class="fu">split</span>(<span class="st">'/'</span>)[<span class="dv">1</span>])<span class="op">,</span></span>
+<span id="cb16-619"><a href="#cb16-619" aria-hidden="true" tabindex="-1"></a>             <span class="st">'value'</span><span class="op">:</span> currentElement[<span class="dv">1</span>]<span class="op">,</span></span>
+<span id="cb16-620"><a href="#cb16-620" aria-hidden="true" tabindex="-1"></a>             <span class="st">'L'</span><span class="op">:</span> <span class="dv">1</span></span>
+<span id="cb16-621"><a href="#cb16-621" aria-hidden="true" tabindex="-1"></a>          }))</span>
+<span id="cb16-622"><a href="#cb16-622" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb16-623"><a href="#cb16-623" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-624"><a href="#cb16-624" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-625"><a href="#cb16-625" aria-hidden="true" tabindex="-1"></a><span class="kw">function</span> <span class="fu">plot_time_evo</span>(d<span class="op">,</span> y_vals<span class="op">,</span> pal) {</span>
+<span id="cb16-626"><a href="#cb16-626" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> global_mean <span class="op">=</span> d3<span class="op">.</span><span class="fu">flatRollup</span>(d<span class="op">,</span> v <span class="kw">=&gt;</span> d3<span class="op">.</span><span class="fu">sum</span>(v<span class="op">,</span> d <span class="kw">=&gt;</span> d<span class="op">.</span><span class="at">value</span> <span class="op">*</span> d<span class="op">.</span><span class="at">value_prop</span>)<span class="op">,</span> d <span class="kw">=&gt;</span> d<span class="op">.</span><span class="at">timestep</span>)</span>
+<span id="cb16-627"><a href="#cb16-627" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-628"><a href="#cb16-628" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> PlotDev<span class="op">.</span><span class="fu">plot</span>({</span>
+<span id="cb16-629"><a href="#cb16-629" aria-hidden="true" tabindex="-1"></a>    <span class="dt">x</span><span class="op">:</span> {<span class="dt">type</span><span class="op">:</span><span class="st">"log"</span>}<span class="op">,</span></span>
+<span id="cb16-630"><a href="#cb16-630" aria-hidden="true" tabindex="-1"></a>    <span class="dt">marginLeft</span><span class="op">:</span> <span class="dv">50</span><span class="op">,</span></span>
+<span id="cb16-631"><a href="#cb16-631" aria-hidden="true" tabindex="-1"></a>    <span class="dt">color</span><span class="op">:</span> { </span>
+<span id="cb16-632"><a href="#cb16-632" aria-hidden="true" tabindex="-1"></a>      <span class="dt">scheme</span><span class="op">:</span> pal<span class="op">,</span> </span>
+<span id="cb16-633"><a href="#cb16-633" aria-hidden="true" tabindex="-1"></a>      <span class="dt">type</span><span class="op">:</span> <span class="st">"ordinal"</span><span class="op">,</span> </span>
+<span id="cb16-634"><a href="#cb16-634" aria-hidden="true" tabindex="-1"></a>      <span class="dt">range</span><span class="op">:</span> [<span class="fl">0.3</span><span class="op">,</span> <span class="dv">1</span>]<span class="op">,</span></span>
+<span id="cb16-635"><a href="#cb16-635" aria-hidden="true" tabindex="-1"></a>      <span class="dt">legend</span><span class="op">:</span> <span class="kw">true</span> </span>
+<span id="cb16-636"><a href="#cb16-636" aria-hidden="true" tabindex="-1"></a>    }<span class="op">,</span></span>
+<span id="cb16-637"><a href="#cb16-637" aria-hidden="true" tabindex="-1"></a>    <span class="dt">marks</span><span class="op">:</span> [</span>
+<span id="cb16-638"><a href="#cb16-638" aria-hidden="true" tabindex="-1"></a>      PlotDev<span class="op">.</span><span class="fu">lineY</span>(global_mean<span class="op">,</span> {</span>
+<span id="cb16-639"><a href="#cb16-639" aria-hidden="true" tabindex="-1"></a>        <span class="dt">x</span><span class="op">:</span> d <span class="kw">=&gt;</span> d[<span class="dv">0</span>]<span class="op">,</span> <span class="dt">y</span><span class="op">:</span> d <span class="kw">=&gt;</span> d[<span class="dv">1</span>]<span class="op">,</span></span>
+<span id="cb16-640"><a href="#cb16-640" aria-hidden="true" tabindex="-1"></a>        <span class="dt">strokeDasharray</span><span class="op">:</span> <span class="st">"5,3"</span><span class="op">,</span> <span class="dt">opacity</span><span class="op">:</span> pal <span class="op">==</span> <span class="st">'blues'</span> <span class="op">?</span> <span class="dv">0</span> <span class="op">:</span> <span class="fl">1.</span></span>
+<span id="cb16-641"><a href="#cb16-641" aria-hidden="true" tabindex="-1"></a>        })<span class="op">,</span></span>
+<span id="cb16-642"><a href="#cb16-642" aria-hidden="true" tabindex="-1"></a>      PlotDev<span class="op">.</span><span class="fu">line</span>(</span>
+<span id="cb16-643"><a href="#cb16-643" aria-hidden="true" tabindex="-1"></a>        d<span class="op">,</span> {</span>
+<span id="cb16-644"><a href="#cb16-644" aria-hidden="true" tabindex="-1"></a>          <span class="dt">x</span><span class="op">:</span> <span class="st">'timestep'</span><span class="op">,</span> <span class="dt">y</span><span class="op">:</span> y_vals<span class="op">,</span> <span class="dt">stroke</span><span class="op">:</span> <span class="st">"L"</span></span>
+<span id="cb16-645"><a href="#cb16-645" aria-hidden="true" tabindex="-1"></a>          })<span class="op">,</span></span>
+<span id="cb16-646"><a href="#cb16-646" aria-hidden="true" tabindex="-1"></a>      PlotDev<span class="op">.</span><span class="fu">dot</span>(</span>
+<span id="cb16-647"><a href="#cb16-647" aria-hidden="true" tabindex="-1"></a>        d<span class="op">,</span> {</span>
+<span id="cb16-648"><a href="#cb16-648" aria-hidden="true" tabindex="-1"></a>          <span class="dt">x</span><span class="op">:</span> <span class="st">'timestep'</span><span class="op">,</span> <span class="dt">y</span><span class="op">:</span> y_vals<span class="op">,</span> <span class="dt">stroke</span><span class="op">:</span> <span class="st">"L"</span><span class="op">,</span> <span class="dt">tip</span><span class="op">:</span> <span class="kw">true</span></span>
+<span id="cb16-649"><a href="#cb16-649" aria-hidden="true" tabindex="-1"></a>          })</span>
+<span id="cb16-650"><a href="#cb16-650" aria-hidden="true" tabindex="-1"></a>    ]</span>
+<span id="cb16-651"><a href="#cb16-651" aria-hidden="true" tabindex="-1"></a>  })</span>
+<span id="cb16-652"><a href="#cb16-652" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb16-653"><a href="#cb16-653" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-654"><a href="#cb16-654" aria-hidden="true" tabindex="-1"></a><span class="kw">function</span> <span class="fu">phase_diagram</span>(d<span class="op">,</span> x<span class="op">,</span> y<span class="op">,</span> z<span class="op">,</span> pal<span class="op">,</span> fy) {</span>
+<span id="cb16-655"><a href="#cb16-655" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> PlotDev<span class="op">.</span><span class="fu">plot</span>({</span>
+<span id="cb16-656"><a href="#cb16-656" aria-hidden="true" tabindex="-1"></a>    <span class="dt">width</span><span class="op">:</span> <span class="dv">1200</span><span class="op">,</span></span>
+<span id="cb16-657"><a href="#cb16-657" aria-hidden="true" tabindex="-1"></a>    <span class="dt">height</span><span class="op">:</span> <span class="dv">600</span><span class="op">,</span></span>
+<span id="cb16-658"><a href="#cb16-658" aria-hidden="true" tabindex="-1"></a>    <span class="dt">color</span><span class="op">:</span> {</span>
+<span id="cb16-659"><a href="#cb16-659" aria-hidden="true" tabindex="-1"></a>      <span class="dt">type</span><span class="op">:</span> <span class="st">"linear"</span><span class="op">,</span></span>
+<span id="cb16-660"><a href="#cb16-660" aria-hidden="true" tabindex="-1"></a>      <span class="dt">scheme</span><span class="op">:</span> pal</span>
+<span id="cb16-661"><a href="#cb16-661" aria-hidden="true" tabindex="-1"></a>    }<span class="op">,</span></span>
+<span id="cb16-662"><a href="#cb16-662" aria-hidden="true" tabindex="-1"></a>    <span class="dt">x</span><span class="op">:</span> { <span class="dt">label</span><span class="op">:</span> x }<span class="op">,</span></span>
+<span id="cb16-663"><a href="#cb16-663" aria-hidden="true" tabindex="-1"></a>    <span class="dt">y</span><span class="op">:</span> { <span class="dt">label</span><span class="op">:</span> y }<span class="op">,</span></span>
+<span id="cb16-664"><a href="#cb16-664" aria-hidden="true" tabindex="-1"></a>    <span class="dt">fy</span><span class="op">:</span> { <span class="dt">label</span><span class="op">:</span> fy }<span class="op">,</span></span>
+<span id="cb16-665"><a href="#cb16-665" aria-hidden="true" tabindex="-1"></a>    <span class="dt">facet</span><span class="op">:</span> { </span>
+<span id="cb16-666"><a href="#cb16-666" aria-hidden="true" tabindex="-1"></a>      <span class="dt">data</span><span class="op">:</span> d<span class="op">,</span> </span>
+<span id="cb16-667"><a href="#cb16-667" aria-hidden="true" tabindex="-1"></a>      <span class="dt">x</span><span class="op">:</span> <span class="st">"L"</span><span class="op">,</span> </span>
+<span id="cb16-668"><a href="#cb16-668" aria-hidden="true" tabindex="-1"></a>      <span class="dt">y</span><span class="op">:</span> <span class="kw">typeof</span> fy <span class="op">!==</span> <span class="kw">undefined</span> <span class="op">?</span> <span class="st">'fx'</span> <span class="op">:</span> <span class="kw">null</span> </span>
+<span id="cb16-669"><a href="#cb16-669" aria-hidden="true" tabindex="-1"></a>    }<span class="op">,</span></span>
+<span id="cb16-670"><a href="#cb16-670" aria-hidden="true" tabindex="-1"></a>    <span class="dt">marks</span><span class="op">:</span> [</span>
+<span id="cb16-671"><a href="#cb16-671" aria-hidden="true" tabindex="-1"></a>      PlotDev<span class="op">.</span><span class="fu">raster</span>(d<span class="op">,</span> {</span>
+<span id="cb16-672"><a href="#cb16-672" aria-hidden="true" tabindex="-1"></a>        <span class="dt">x</span><span class="op">:</span> <span class="st">"param1"</span><span class="op">,</span></span>
+<span id="cb16-673"><a href="#cb16-673" aria-hidden="true" tabindex="-1"></a>        <span class="dt">y</span><span class="op">:</span> <span class="st">"param2"</span><span class="op">,</span></span>
+<span id="cb16-674"><a href="#cb16-674" aria-hidden="true" tabindex="-1"></a>        <span class="dt">fill</span><span class="op">:</span> z<span class="op">,</span></span>
+<span id="cb16-675"><a href="#cb16-675" aria-hidden="true" tabindex="-1"></a>        <span class="dt">interpolate</span><span class="op">:</span> <span class="st">"nearest"</span><span class="op">,</span></span>
+<span id="cb16-676"><a href="#cb16-676" aria-hidden="true" tabindex="-1"></a>        <span class="dt">tip</span><span class="op">:</span> <span class="kw">true</span></span>
+<span id="cb16-677"><a href="#cb16-677" aria-hidden="true" tabindex="-1"></a>      })<span class="op">,</span></span>
+<span id="cb16-678"><a href="#cb16-678" aria-hidden="true" tabindex="-1"></a>    ]</span>
+<span id="cb16-679"><a href="#cb16-679" aria-hidden="true" tabindex="-1"></a>  })</span>
+<span id="cb16-680"><a href="#cb16-680" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display">
 <div>
-<div id="ojs-cell-8-1" data-nodetype="declaration">
+<div id="ojs-cell-12-1" data-nodetype="declaration">
 
 </div>
 </div>
 </div>
 <div class="cell-output cell-output-display">
 <div>
-<div id="ojs-cell-8-2" data-nodetype="declaration">
+<div id="ojs-cell-12-2" data-nodetype="declaration">
 
 </div>
 </div>
 </div>
 <div class="cell-output cell-output-display">
 <div>
-<div id="ojs-cell-8-3" data-nodetype="declaration">
+<div id="ojs-cell-12-3" data-nodetype="declaration">
 
 </div>
 </div>
 </div>
 <div class="cell-output cell-output-display">
 <div>
-<div id="ojs-cell-8-4" data-nodetype="declaration">
+<div id="ojs-cell-12-4" data-nodetype="declaration">
 
 </div>
 </div>
 </div>
 <div class="cell-output cell-output-display">
 <div>
-<div id="ojs-cell-8-5" data-nodetype="declaration">
+<div id="ojs-cell-12-5" data-nodetype="declaration">
 
 </div>
 </div>
 </div>
 <div class="cell-output cell-output-display">
 <div>
-<div id="ojs-cell-8-6" data-nodetype="declaration">
+<div id="ojs-cell-12-6" data-nodetype="declaration">
 
 </div>
 </div>
 </div>
 <div class="cell-output cell-output-display">
 <div>
-<div id="ojs-cell-8-7" data-nodetype="declaration">
+<div id="ojs-cell-12-7" data-nodetype="declaration">
 
 </div>
 </div>
 </div>
 <div class="cell-output cell-output-display">
 <div>
-<div id="ojs-cell-8-8" data-nodetype="declaration">
+<div id="ojs-cell-12-8" data-nodetype="declaration">
 
 </div>
 </div>
 </div>
 <div class="cell-output cell-output-display">
 <div>
-<div id="ojs-cell-8-9" data-nodetype="declaration">
+<div id="ojs-cell-12-9" data-nodetype="declaration">
 
 </div>
 </div>
 </div>
 <div class="cell-output cell-output-display">
 <div>
-<div id="ojs-cell-8-10" data-nodetype="declaration">
+<div id="ojs-cell-12-10" data-nodetype="declaration">
 
 </div>
 </div>
 </div>
 <div class="cell-output cell-output-display">
 <div>
-<div id="ojs-cell-8-11" data-nodetype="declaration">
+<div id="ojs-cell-12-11" data-nodetype="declaration">
 
 </div>
 </div>
 </div>
 </div>
 <div class="cell">
-<div class="sourceCode cell-code hidden" id="cb12" data-startfrom="675" data-source-offset="0"><pre class="sourceCode js code-with-copy"><code class="sourceCode javascript" style="counter-reset: source-line 674;"><span id="cb12-675"><a href="#cb12-675" aria-hidden="true" tabindex="-1"></a>PlotDev <span class="op">=</span> <span class="cf">await</span> <span class="im">import</span>(<span class="st">"https://esm.sh/@observablehq/plot"</span>)<span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code hidden" id="cb17" data-startfrom="684" data-source-offset="0"><pre class="sourceCode js code-with-copy"><code class="sourceCode javascript" style="counter-reset: source-line 683;"><span id="cb17-684"><a href="#cb17-684" aria-hidden="true" tabindex="-1"></a>PlotDev <span class="op">=</span> <span class="cf">await</span> <span class="im">import</span>(<span class="st">"https://esm.sh/@observablehq/plot"</span>)<span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display">
-<div id="ojs-cell-9" data-nodetype="declaration">
+<div id="ojs-cell-13" data-nodetype="declaration">
 
 </div>
 </div>
@@ -1149,7 +1266,7 @@ author = {Hébert-Dufresne, Laurent and Waring, Timothy M. and St-Onge, Guillaum
 </section></div></main> <!-- /main -->
 
 <script type="ojs-module-contents">
-{"contents":[{"methodName":"interpret","cellName":"ojs-cell-1","inline":false,"source":"resdb = DuckDBClient.of({\n  sourcesink1: FileAttachment(\"sourcesink1.parquet\"),\n  sourcesink1_lookup: FileAttachment(\"sourcesink1_lookup.parquet\"),\n  sourcesink2: FileAttachment(\"sourcesink2.parquet\"),\n  sourcesink2_lookup: FileAttachment(\"sourcesink2_lookup.parquet\"),\n  // sourcesink3: FileAttachment(\"sourcesink3.parquet\"),\n  // sourcesink3_lookup: FileAttachment(\"sourcesink3_lookup.parquet\")\n})\n"},{"methodName":"interpret","cellName":"ojs-cell-2","inline":false,"source":"\n// Lookup table 1\n// ax_vars:     β               b    c\n// fps:              γ    ρ                μ\n// s_vec_idx:  ax0  fp0  fp1   ax1  ax2   fp2\n\nsourcesink1_lookup = resdb.query(\"SELECT param_str::STRING as name, row_id FROM sourcesink1_lookup\")\n\n// TODO: Ideally we would like to have resdb return a lookup\nsourcesink1_lookup_map = sourcesink1_lookup.reduce(function(map, obj) {\n    map[obj.name] = obj.row_id;\n    return map;\n}, {})\n\nlookup1 = {\n  const out = {}\n  out['idx2name'] = {0: \"β\", 1: 'γ', 2: 'ρ', 3: 'b', 4: 'c', 5: 'μ'}\n  out['name2idx'] = {\"β\": 0, 'γ': 1, 'ρ': 2, 'b': 3, 'c': 4, 'μ': 5}\n  return out\n}\n\np1 = get_param_table(sourcesink1_lookup_map, lookup1)\n\nav1 = [\"β\", \"b\", \"c\"] \n// fy1 = \"α\"  // choose the facet variable\nfp1 = [\"γ\", \"ρ\", \"μ\"]\n\nviewof s1 = Inputs.form({\n  ax0: Inputs.range(p1[av1[0]]['minmax'], {step: p1[av1[0]]['s'], label: av1[0]}),\n  ax1: Inputs.range(p1[av1[1]]['minmax'], {step: p1[av1[1]]['s'], label: av1[1]}),\n  ax2: Inputs.range(p1[av1[2]]['minmax'], {step: p1[av1[2]]['s'], label: av1[2]}),\n  fp0: Inputs.range(p1[fp1[0]]['minmax'], {step: p1[fp1[0]]['s'], label: fp1[0], value: p1[fp1[0]]['first_val']}),\n  fp1: Inputs.range(p1[fp1[1]]['minmax'], {step: p1[fp1[1]]['s'], label: fp1[1], value: p1[fp1[1]]['first_val']}),\n  fp2: Inputs.range(p1[fp1[2]]['minmax'], {step: p1[fp1[2]]['s'], label: fp1[2], value: p1[fp1[2]]['first_val']})\n})\n\nviewof r1 = Inputs.form({\n  x: Inputs.radio(av1, {label: \"x\", value: av1[0]}),\n  y: Inputs.radio(av1, {label: \"y\", value: av1[1]})\n})\n\n\ndata = sql_data_a('sourcesink1', sourcesink1_lookup_map[`${f(s1['ax0'])}_${f(s1['fp0'])}_${f(s1['fp1'])}_${f(s1['ax1'])}_${f(s1['ax2'])}_${f(s1['fp2'])}`])\ndatab = sql_data_b('sourcesink1')\ndata_hm = get_data_heatmap(datab, lookup1, fp1, av1, r1, s1)\n"},{"methodName":"interpret","cellName":"ojs-cell-3","inline":false,"source":"html`\n    <div style=\"display:flex; \">\n      <div>${ plot_time_evo(data, \"value\", \"reds\") }</div>\n      <div>${ plot_time_evo(data, \"value_prop\", \"blues\")}</div>\n    </div>\n`\n"},{"methodName":"interpret","cellName":"ojs-cell-4","inline":false,"source":"pd1 = phase_diagram(data_hm, r1['x'], r1['y'], 'value_prop', 'blues')\npd1d = phase_diagram(global_hm(data_hm),  r1['x'], r1['y'], 'value', 'viridis') \n\nhtml`\n    <div style=\"display:flex; \">\n    <div>\n      <div>${ pd1 }</div>\n      <div>${ pd1.legend('color', {label: \"Level proportion →\", width: 350, marginLeft: 150})\n }</div>\n    </div>\n    <div>\n      <div>${ pd1d }</div>\n      <div>${ pd1d.legend('color', {label: \"Global Frequency of behavior →\", width: 350, marginLeft: 150}) }</div>\n    </div>\n`\n"},{"methodName":"interpret","cellName":"ojs-cell-5","inline":false,"source":"\n// Lookup table 2\n// param_str:   β,   ξ,   α,   γ,   ρ,   η,   b,   c    μ\n// param_grid: \n// ax_vars:    \n// fps:        \n// s_vec_idx:  \n\nsourcesink2_lookup = resdb.query(\"SELECT param_str::STRING as name, row_id FROM sourcesink2_lookup\")\n\n// TODO: Ideally we would like to have resdb return a lookup\nsourcesink2_lookup_map = sourcesink2_lookup.reduce(function(map, obj) {\n    map[obj.name] = obj.row_id;\n    return map;\n}, {})\n\nlookup2 = {\n  const out = {}\n  out['idx2name'] = {0: 'β', 1: 'ξ', 2: 'α', 3: 'γ', 4: 'ρ', 5: 'η', 6: 'b', 7: 'c', 8:'μ'}\n  out['name2idx'] = {'β': 0, 'ξ': 1, 'α': 2, 'γ': 3, 'ρ': 4, 'η': 5, 'b': 6, 'c': 7, 'μ': 8}\n  return out\n}\n\np2 = get_param_table(sourcesink2_lookup_map, lookup2)\n\nax_vars2 = [\"β\", \"ρ\", \"η\"] // choose the x,y,z axis, i.e. params to vary\nfy2 = \"α\"  // choose the facet variable\nfp2 = [\"ξ\", \"α\", \"γ\", \"b\", \"c\", \"μ\"]\n\n\nviewof r2 = Inputs.form({\n  x: Inputs.radio(ax_vars2, {label: \"x\", value: ax_vars2[0]}),\n  y: Inputs.radio(ax_vars2, {label: \"y\", value: ax_vars2[1]})\n})\n\nviewof s2 = Inputs.form({\n  ax0: Inputs.range(p2[ax_vars2[0]]['minmax'], {step: p2[ax_vars2[0]]['s'], label: ax_vars2[0]}),\n  ax1: Inputs.range(p2[ax_vars2[1]]['minmax'], {step: p2[ax_vars2[1]]['s'], label: ax_vars2[1]}),\n  ax2: Inputs.range(p2[ax_vars2[2]]['minmax'], {step: p2[ax_vars2[2]]['s'], label: ax_vars2[2]}),\n  fp0: Inputs.range(p2[fp2[0]]['minmax'], {step: p2[fp2[0]]['s'], label: fp2[0], value: p2[fp2[0]]['first_val']}),\n  fp1: Inputs.range(p2[fy2]['minmax'], {step: p2[fy2]['s'], label: fy2, value: p2[fy2]['first_val']}),\n  fp2: Inputs.range(p2[fp2[2]]['minmax'], {step: p2[fp2[2]]['s'], label: fp2[2], value: p2[fp2[2]]['first_val']}),\n  fp3: Inputs.range(p2[fp2[3]]['minmax'], {step: p2[fp2[3]]['s'], label: fp2[3], value: p2[fp2[3]]['first_val']}),\n  fp4: Inputs.range(p2[fp2[4]]['minmax'], {step: p2[fp2[4]]['s'], label: fp2[4], value: p2[fp2[4]]['first_val']}),\n  fp5: Inputs.range(p2[fp2[5]]['minmax'], {step: p2[fp2[5]]['s'], label: fp2[5], value: p2[fp2[5]]['first_val']}),\n})\n\n\ndata2 = sql_data_a('sourcesink2', sourcesink2_lookup_map[`${f(s2['ax0'])}_${f(s2['fp0'])}_${f(s2['fp1'])}_${f(s2['fp2'])}_${f(s2['ax1'])}_${f(s2['ax2'])}_${f(s2['fp3'])}_${f(s2['fp4'])}_${f(s2['fp5'])}`])\ndata2b = sql_data_b(\"sourcesink2\")\ndata_hm2 = get_data_heatmap(data2b, lookup2, fp2, ax_vars2, r2, s2, fy2)\n"},{"methodName":"interpret","cellName":"ojs-cell-6","inline":false,"source":"html`\n    <div style=\"display:flex; \">\n      <div>${ plot_time_evo(data2, \"value\", \"reds\") }</div>\n      <div>${ plot_time_evo(data2, \"value_prop\", \"blues\")}</div>\n    </div>\n`\n"},{"methodName":"interpret","cellName":"ojs-cell-7","inline":false,"source":"pd2 = phase_diagram(data_hm2, r2['x'], r2['y'], 'value_prop', \"blues\", fy2)\npd2d = phase_diagram(global_hm(data_hm2),  r2['x'], r2['y'], 'value', 'viridis') \n\nhtml`\n    <div style=\"display:flex; \">\n    <div>\n      <div>${ pd2 }</div>\n      <div>${ pd2.legend('color', {label: \"Level proportion →\", width: 350, marginLeft: 150})\n }</div>\n    </div>\n    <div>\n      <div>${ pd2d }</div>\n      <div>${ pd2d.legend('color', {label: \"Global Frequency of behavior →\", width: 350, marginLeft: 150}) }</div>\n    </div>\n`\n"},{"methodName":"interpret","cellName":"ojs-cell-8","inline":false,"source":"function sql_data_a(model, name) {\n    return resdb.query(`\n      SELECT timestep::INT as timestep, L::INT as L, value, value_prop\n      FROM ${model}\n      WHERE\n      row_id = '${name}'\n    `)\n}\n\nfunction sql_data_b(model) {\n    return resdb.query(`\n      WITH tmp as (\n          SELECT row_id, L, MAX(timestep::INT) as timestep\n          FROM ${model}\n          GROUP BY row_id, L\n      )\n      SELECT s.value, s.L::INT as L, s.value_prop, ss.param_str::STRING as name\n      FROM ${model} s\n      JOIN tmp\n      ON s.row_id = tmp.row_id AND s.L = tmp.L AND s.timestep = tmp.timestep\n      JOIN ${model}_lookup ss\n      ON s.row_id = ss.row_id\n      ORDER BY (s.row_id, s.L)\n  `)\n}\n\nfunction get_fixed_params(param_table, ax_vars, fx) {\n  const all_params = [...Object.keys(param_table)]\n  const varying_params = typeof fx !== undefined ? new Set(ax_vars) : new Set(ax_vars.concat(fx))\n  const diff_params = new Set(all_params.filter((x) => !varying_params.has(x)))\n  return Array.from(diff_params)\n}\n\nf = (x) => Number.isInteger(x) ? x.toPrecision(2) : x\n\n// Extract the step from a list of values for a parameter\ns = (p,i) => { \n    const unique_vals = Array.from(new Set(p.map(d => parseFloat(d[i])))).sort((a,b) => a - b)\n    const out = []\n    for (let i=1; i < unique_vals.length; i++ ) {\n      out.push(+(unique_vals[i]-unique_vals[i-1]).toPrecision(2))\n    } // return whatev if length is zero\n    return out.length === 0 ? 0.1 : out[0]\n}\n\nminmax = (p, i) => d3.extent(p.map(d => parseFloat(d[i])))\n\n// Param table where each key is a parameter, and values \n// are list of values relevant to \n// model: resdb output for a specific model\n// lookup: { [0: param1, 1: param2, ...] }\nfunction get_param_table(model_lookup, param_lookup) {\n    \n  const p = Object.keys(model_lookup).map(d => d.split(\"_\")) \n  \n  const param_table = {}\n  const first_line_param = p[0]\n  for ( let i=0; i < first_line_param.length; i++ ) {\n    param_table[param_lookup['idx2name'][i]] = { \n      's': s(p,i), 'first_val': first_line_param[i], 'minmax': minmax(p,i) \n      }\n  }\n  return param_table\n}\n\n// To get heatmap data, we need\n//   data: data from resdb join `name` and `L`\n//   ax_vars: variables we want as x,y,z\n//   fx: variable to facet\n//   fp: other vars\n//   sliders: set of sliders\nfunction get_data_heatmap(data, lookup, fp, ax_vars, radios, sliders, fx) {\n  const dat_hm = [];\n  \n  for (let i=0; i < data.length; i++) { \n    \n    const p_split = data[i].name.split('_')\n    \n    const vs = {} // dictionary containing all the values of selected parameters \n\n    // Grab the chosen axis0/x, axis1/y, axis2/z\n    const [ax0, ax1, ax2] = ax_vars\n    vs[ax0] = parseFloat(p_split[lookup['name2idx'][ax0]])\n    vs[ax1] = parseFloat(p_split[lookup['name2idx'][ax1]])\n    vs[ax2] = parseFloat(p_split[lookup['name2idx'][ax2]])\n\n    // Grab the Fixed parameters\n    for (let i=0; i < fp.length; i++) {\n      vs[fp[i]] = parseFloat(p_split[lookup['name2idx'][fp[i]]])\n    }\n    \n    // Grab the radios, which will be 2 of the 3 axis vars. \n    // The other other one we'll be the value of our heatmap.\n    // This is where we need to know the actual param_name.\n    const p1 = parseFloat(p_split[lookup['name2idx'][radios['x']]])\n    const p2 = parseFloat(p_split[lookup['name2idx'][radios['y']]])\n    const hm_vals_i = {\n      'L': data[i].L,\n      'fx' : typeof fx !== undefined ? null : p_split[lookup['name2idx'][fx]], \n      'param1': p1,\n      'param2': p2,\n      'param_str': `${p1}/${p2}`, // We need a way to groupby (p1,p2) for `global_hm()`\n      'value': data[i].value,\n      'value_prop': data[i].value_prop\n    }\n\n    if (vs[fp[0]] === sliders['fp0'] && vs[fp[1]] === sliders['fp1'] && vs[fp[2]] === sliders['fp2'] && vs[fp[3]] == sliders['fp3'] && vs[fp[4]] == sliders['fp4']) {\n\n        // if ax1 == x && ax2 ==y, then ax0 == z\n        if (radios['x'] == ax1 && radios['y'] == ax2 && vs[ax0] == sliders['ax0']) {\n             dat_hm.push(hm_vals_i)\n        } else if (radios['x'] == ax0 && radios['y'] == ax2 && vs[ax1] == sliders['ax1']) {\n             dat_hm.push(hm_vals_i)\n        } else if (radios['x'] == ax0 && radios['y'] == ax1 && vs[ax2] == sliders['ax2']) {\n             dat_hm.push(hm_vals_i)\n        }\n    }\n  }\n  return dat_hm\n}\n\nfunction global_hm(d){\n  return d3.flatRollup(d, v => d3.sum(v, d => d.value * d.value_prop), d => d.param_str)\n           .map(currentElement => ({\n             'param1': parseFloat(currentElement[0].split('/')[0]),\n             'param2': parseFloat(currentElement[0].split('/')[1]),\n             'value': currentElement[1],\n             'L': 1\n          }))\n}\n\n\nfunction plot_time_evo(d, y_vals, pal) {\n  const global_mean = d3.rollup(d, v => d3.sum(v, d => d.value * d.value_prop), d => d.timestep)\n\n  return Plot.plot({\n    x: {type:\"log\"},\n    marginLeft: 50,\n    color: { \n      scheme: pal, \n      type: \"ordinal\", \n      range: [0.3, 1],\n      legend: true \n    },\n    marks: [\n      Plot.lineY(Array.from(global_mean.values()), {\n        strokeDasharray: \"5,3\", opacity: pal == 'blues' ? 0 : 1.\n        }),\n      Plot.line(\n        d, {\n          x: 'timestep', y: y_vals, stroke: \"L\"\n          }),\n      Plot.dot(\n        d, {\n          x: 'timestep', y: y_vals, stroke: \"L\"\n          })\n    ]\n  })\n}\n\nfunction phase_diagram(d, x, y, z, pal, fy) {\n  return PlotDev.plot({\n    width: 1200,\n    height: 600,\n    color: {\n      type: \"linear\",\n      scheme: pal\n    },\n    x: { label: x },\n    y: { label: y },\n    fy: { label: fy },\n    facet: { \n      data: d, \n      x: \"L\", \n      y: typeof fy !== undefined ? 'fx' : null \n    },\n    marks: [\n      PlotDev.raster(d, {\n        x: \"param1\",\n        y: \"param2\",\n        fill: z,\n        interpolate: \"nearest\"\n      }),\n    ]\n  })\n}\n"},{"methodName":"interpret","cellName":"ojs-cell-9","inline":false,"source":"PlotDev = await import(\"https://esm.sh/@observablehq/plot\");\n"},{"methodName":"interpretQuiet","source":"shinyInput('s1')"},{"methodName":"interpretQuiet","source":"shinyInput('r1')"},{"methodName":"interpretQuiet","source":"shinyInput('r2')"},{"methodName":"interpretQuiet","source":"shinyInput('s2')"}]}
+{"contents":[{"methodName":"interpret","cellName":"ojs-cell-1","inline":false,"source":"resdb = DuckDBClient.of({\n  sourcesink1: FileAttachment(\"sourcesink1_simple.parquet\"),\n  sourcesink1_lookup: FileAttachment(\"sourcesink1_lookup.parquet\"),\n  sourcesink2: FileAttachment(\"sourcesink2_simple.parquet\"),\n  sourcesink2_lookup: FileAttachment(\"sourcesink2_lookup.parquet\"),\n  sourcesink3: FileAttachment(\"sourcesink3.parquet\"),\n  sourcesink3_lookup: FileAttachment(\"sourcesink3_lookup.parquet\")\n})\n"},{"methodName":"interpret","cellName":"ojs-cell-2","inline":false,"source":"\n// Lookup table 1\n// ax_vars:     β               b    c\n// fps:              γ    ρ                μ\n// s_vec_idx:  ax0  fp0  fp1   ax1  ax2   fp2\n\nsourcesink1_lookup = resdb.query(\"SELECT param_str::STRING as name, row_id FROM sourcesink1_lookup\")\n\n// TODO: Ideally we would like to have resdb return a lookup\nsourcesink1_lookup_map = sourcesink1_lookup.reduce(function(map, obj) {\n    map[obj.name] = obj.row_id;\n    return map;\n}, {})\n\nlookup1 = {\n  const out = {}\n  out['idx2name'] = {0: \"β\", 1: 'γ', 2: 'ρ', 3: 'b', 4: 'c', 5: 'μ'}\n  out['name2idx'] = {\"β\": 0, 'γ': 1, 'ρ': 2, 'b': 3, 'c': 4, 'μ': 5}\n  return out\n}\n\np1 = get_param_table(sourcesink1_lookup_map, lookup1)\n\nav1 = [\"β\", \"b\", \"c\"] \n// fy1 = \"α\"  // choose the facet variable\nfp1 = [\"γ\", \"ρ\", \"μ\"]\n\nviewof s1 = Inputs.form({\n  ax0: Inputs.range(p1[av1[0]]['minmax'], {step: p1[av1[0]]['s'], label: av1[0]}),\n  ax1: Inputs.range(p1[av1[1]]['minmax'], {step: p1[av1[1]]['s'], label: av1[1]}),\n  ax2: Inputs.range(p1[av1[2]]['minmax'], {step: p1[av1[2]]['s'], label: av1[2]}),\n  fp0: Inputs.range(p1[fp1[0]]['minmax'], {step: p1[fp1[0]]['s'], label: fp1[0], value: p1[fp1[0]]['first_val']}),\n  fp1: Inputs.range(p1[fp1[1]]['minmax'], {step: p1[fp1[1]]['s'], label: fp1[1], value: p1[fp1[1]]['first_val']}),\n  fp2: Inputs.range(p1[fp1[2]]['minmax'], {step: p1[fp1[2]]['s'], label: fp1[2], value: p1[fp1[2]]['first_val']})\n})\n\nviewof r1 = Inputs.form({\n  x: Inputs.radio(av1, {label: \"x\", value: av1[0]}),\n  y: Inputs.radio(av1, {label: \"y\", value: av1[1]})\n})\n\n\ndata = sql_data_a('sourcesink1', sourcesink1_lookup_map[`${f(s1['ax0'])}_${f(s1['fp0'])}_${f(s1['fp1'])}_${f(s1['ax1'])}_${f(s1['ax2'])}_${f(s1['fp2'])}`])\ndatab = sql_data_b('sourcesink1')\ndata_hm = get_data_heatmap(datab, lookup1, fp1, av1, r1, s1)\n"},{"methodName":"interpret","cellName":"ojs-cell-3","inline":false,"source":"html`\n    <div style=\"display:flex; \">\n      <div>${ plot_time_evo(data, \"value\", \"reds\") }</div>\n      <div>${ plot_time_evo(data, \"value_prop\", \"blues\")}</div>\n    </div>\n`\n"},{"methodName":"interpret","cellName":"ojs-cell-4","inline":false,"source":"pd1 = phase_diagram(data_hm, r1['x'], r1['y'], 'value_prop', 'blues')\npd1d = phase_diagram(global_hm(data_hm),  r1['x'], r1['y'], 'value', 'viridis') \n\nhtml`\n    <div style=\"display:flex; \">\n    <div>\n      <div>${ pd1 }</div>\n      <div>${ pd1.legend('color', {label: \"Level proportion →\", width: 350, marginLeft: 150})\n }</div>\n    </div>\n    <div>\n      <div>${ pd1d }</div>\n      <div>${ pd1d.legend('color', {label: \"Global Frequency of behavior →\", width: 350, marginLeft: 150}) }</div>\n    </div>\n`\n"},{"methodName":"interpret","cellName":"ojs-cell-5","inline":false,"source":"\n// Lookup table 2\n// param_str:   β,   ξ,   α,   γ,   ρ,   η,   b,   c    μ\n// param_grid: \n// ax_vars:    \n// fps:        \n// s_vec_idx:  \n\nsourcesink2_lookup = resdb.query(\"SELECT param_str::STRING as name, row_id FROM sourcesink2_lookup\")\n\n// TODO: Ideally we would like to have resdb return a lookup\nsourcesink2_lookup_map = sourcesink2_lookup.reduce(function(map, obj) {\n    map[obj.name] = obj.row_id;\n    return map;\n}, {})\n\nlookup2 = {\n  const out = {}\n  out['idx2name'] = {0: 'β', 1: 'ξ', 2: 'α', 3: 'γ', 4: 'ρ', 5: 'η', 6: 'b', 7: 'c', 8:'μ'}\n  out['name2idx'] = {'β': 0, 'ξ': 1, 'α': 2, 'γ': 3, 'ρ': 4, 'η': 5, 'b': 6, 'c': 7, 'μ': 8}\n  return out\n}\n\np2 = get_param_table(sourcesink2_lookup_map, lookup2)\n\nax_vars2 = [\"β\", \"ρ\", \"η\"] // choose the x,y,z axis, i.e. params to vary\nfy2 = \"α\"  // choose the facet variable\nfp2 = [\"ξ\", \"α\", \"γ\", \"b\", \"c\", \"μ\"]\n\n\nviewof r2 = Inputs.form({\n  x: Inputs.radio(ax_vars2, {label: \"x\", value: ax_vars2[0]}),\n  y: Inputs.radio(ax_vars2, {label: \"y\", value: ax_vars2[1]})\n})\n\nviewof s2 = Inputs.form({\n  ax0: Inputs.range(p2[ax_vars2[0]]['minmax'], {step: p2[ax_vars2[0]]['s'], label: ax_vars2[0]}),\n  ax1: Inputs.range(p2[ax_vars2[1]]['minmax'], {step: p2[ax_vars2[1]]['s'], label: ax_vars2[1]}),\n  ax2: Inputs.range(p2[ax_vars2[2]]['minmax'], {step: p2[ax_vars2[2]]['s'], label: ax_vars2[2]}),\n  fp0: Inputs.range(p2[fp2[0]]['minmax'], {step: p2[fp2[0]]['s'], label: fp2[0], value: p2[fp2[0]]['first_val']}),\n  fp1: Inputs.range(p2[fy2]['minmax'], {step: p2[fy2]['s'], label: fy2, value: p2[fy2]['first_val']}),\n  fp2: Inputs.range(p2[fp2[2]]['minmax'], {step: p2[fp2[2]]['s'], label: fp2[2], value: p2[fp2[2]]['first_val']}),\n  fp3: Inputs.range(p2[fp2[3]]['minmax'], {step: p2[fp2[3]]['s'], label: fp2[3], value: p2[fp2[3]]['first_val']}),\n  fp4: Inputs.range(p2[fp2[4]]['minmax'], {step: p2[fp2[4]]['s'], label: fp2[4], value: p2[fp2[4]]['first_val']}),\n  fp5: Inputs.range(p2[fp2[5]]['minmax'], {step: p2[fp2[5]]['s'], label: fp2[5], value: p2[fp2[5]]['first_val']}),\n})\n\n\ndata2 = sql_data_a('sourcesink2', sourcesink2_lookup_map[`${f(s2['ax0'])}_${f(s2['fp0'])}_${f(s2['fp1'])}_${f(s2['fp2'])}_${f(s2['ax1'])}_${f(s2['ax2'])}_${f(s2['fp3'])}_${f(s2['fp4'])}_${f(s2['fp5'])}`])\ndata2b = sql_data_b(\"sourcesink2\")\ndata_hm2 = get_data_heatmap(data2b, lookup2, fp2, ax_vars2, r2, s2, fy2)\n"},{"methodName":"interpret","cellName":"ojs-cell-6","inline":false,"source":"html`\n    <div style=\"display:flex; \">\n      <div>${ plot_time_evo(data2, \"value\", \"reds\") }</div>\n      <div>${ plot_time_evo(data2, \"value_prop\", \"blues\")}</div>\n    </div>\n`\n"},{"methodName":"interpret","cellName":"ojs-cell-7","inline":false,"source":"pd2 = phase_diagram(data_hm2, r2['x'], r2['y'], 'value_prop', \"blues\", fy2)\npd2d = phase_diagram(global_hm(data_hm2),  r2['x'], r2['y'], 'value', 'viridis') \n\nhtml`\n    <div style=\"display:flex; \">\n    <div>\n      <div>${ pd2 }</div>\n      <div>${ pd2.legend('color', {label: \"Level proportion →\", width: 350, marginLeft: 150})\n }</div>\n    </div>\n    <div>\n      <div>${ pd2d }</div>\n      <div>${ pd2d.legend('color', {label: \"Global Frequency of behavior →\", width: 350, marginLeft: 150}) }</div>\n    </div>\n`\n"},{"methodName":"interpret","cellName":"ojs-cell-8","inline":false,"source":"data_hm3\n"},{"methodName":"interpret","cellName":"ojs-cell-9","inline":false,"source":"\n// Lookup table 3\n// param_str:   β,   γ,   ρ,   b,   c,   μ,   δ,   α\n// param_grid:  β    γ,   ρ,   b,   1., 0.2,  1.,  α\n// ax_vars:     β,        ρ,                       α\n// fps:              γ,        b,   c,   μ,   δ\n// s_vec_idx:  ax0, fp0, ax1, fp1, fp2, fp3, fp4, ax2\n\nsourcesink3_lookup = resdb.query(\"SELECT param_str::STRING as name, row_id FROM sourcesink3_lookup\")\n\n// TODO: Ideally we would like to have resdb return a lookup\nsourcesink3_lookup_map = sourcesink3_lookup.reduce(function(map, obj) {\n    map[obj.name] = obj.row_id;\n    return map;\n}, {})\n\nlookup3 = {\n  const out = {}\n  out['idx2name'] = {0: \"β\", 1: 'γ', 2: 'ρ', 3: 'b', 4: 'c', 5: 'μ', 6: 'δ', 7: 'α'}\n  out['name2idx'] = {\"β\": 0, 'γ':1, 'ρ': 2, 'b': 3, 'c': 4, 'μ': 5, 'δ': 6, 'α': 7}\n  return out\n}\n\np3 = get_param_table(sourcesink3_lookup_map, lookup3)\n\nav3 = [\"β\", \"ρ\", 'α']           // ax vars\nfy3 = \"δ\"                       // facet y var\nfp3 = [\"γ\", \"b\", \"c\", \"μ\", fy3] // fixed param vars\n\n// sliders\nviewof s3 = Inputs.form({\n  ax0: Inputs.range(p3[av3[0]]['minmax'], {step: p3[av3[0]]['s'], label: av3[0]}),\n  ax1: Inputs.range(p3[av3[1]]['minmax'], {step: p3[av3[1]]['s'], label: av3[1]}),\n  ax2: Inputs.range(p3[av3[2]]['minmax'], {step: p3[av3[2]]['s'], label: av3[2]}),\n  fp0: Inputs.range(p3[fp3[0]]['minmax'], {step: p3[fp3[0]]['s'], label: fp3[0], disabled: true}),\n  fp1: Inputs.range(p3[fp3[1]]['minmax'], {step: p3[fp3[1]]['s'], label: fp3[1], value: p3[fp3[1]]['first_val']}),\n  fp2: Inputs.range(p3[fp3[2]]['minmax'], {step: p3[fp3[2]]['s'], label: fp3[2], value: p3[fp3[2]]['first_val'], disabled: true}),\n  fp3: Inputs.range(p3[fp3[3]]['minmax'], {step: p3[fp3[3]]['s'], label: fp3[3], value: p3[fp3[3]]['first_val'], disabled: true}),\n  fp4: Inputs.range(p3[fp3[4]]['minmax'], {step: p3[fp3[4]]['s'], label: fp3[4], value: p3[fp3[4]]['first_val'], disabled: true})\n})\n\n// radios\nviewof r3 = Inputs.form({\n  x: Inputs.radio(av3, {label: \"x\", value: av3[0]}),\n  y: Inputs.radio(av3, {label: \"y\", value: av3[1]})\n})\n\n\ndata3a = sql_data_a('sourcesink3', sourcesink3_lookup_map[`${f(s3[\"ax0\"])}_${f(s3[\"ax0\"])}_${f(s3[\"ax1\"])}_${f(s3[\"fp1\"])}_${f(s3[\"fp2\"])}_${f(s3[\"fp3\"])}_${f(s3[\"fp4\"])}_${f(s3[\"ax2\"])}`])\ndata3b = sql_data_b(\"sourcesink3\")\ndata_hm3 = get_data_heatmap(data3b, lookup3, fp3, av3, r3, s3, fy3)\n"},{"methodName":"interpret","cellName":"ojs-cell-10","inline":false,"source":"html`\n    <div style=\"display:flex; \">\n      <div>${ plot_time_evo(data3a, \"value\", \"reds\") }</div>\n      <div>${ plot_time_evo(data3a, \"value_prop\", \"blues\")}</div>\n    </div>\n`\n"},{"methodName":"interpret","cellName":"ojs-cell-11","inline":false,"source":"pd3 = phase_diagram(data_hm3,  r3['x'], r3['y'], 'value_prop', 'blues', fy3)\npd3d = phase_diagram(global_hm(data_hm3),  r3['x'], r3['y'], 'value', 'viridis') \nhtml`\n    <div style=\"display:flex; \">\n    <div>\n      <div>${ pd3 }</div>\n      <div>${ pd3.legend('color', {label: \"Level proportion →\", width: 350, marginLeft: 150}) }</div>\n    </div>\n    <div>\n      <div>${ pd3d }</div>\n      <div>${ pd3d.legend('color', {label: \"Global Frequency of behavior →\", width: 350, marginLeft: 150}) }</div>\n    </div>\n`\n"},{"methodName":"interpret","cellName":"ojs-cell-12","inline":false,"source":"function sql_data_a(model, name) {\n    return resdb.query(`\n      SELECT timestep::INT as timestep, L::INT as L, value, value_prop\n      FROM ${model}\n      WHERE\n      row_id = '${name}'\n    `)\n}\n\n// Grab values, values_prop at max timestep (steady states) grouped by row_id and L\nfunction sql_data_b(model) {\n    return resdb.query(`\n      WITH tmp as (\n          SELECT row_id, L, MAX(timestep::INT) as timestep\n          FROM ${model}\n          GROUP BY row_id, L\n      )\n      SELECT s.value, s.L::INT as L, s.value_prop, ss.param_str::STRING as name\n      FROM ${model} s\n      JOIN tmp\n      ON s.row_id = tmp.row_id AND s.L = tmp.L AND s.timestep = tmp.timestep\n      JOIN ${model}_lookup ss\n      ON s.row_id = ss.row_id\n      ORDER BY (s.row_id, s.L)\n  `)\n}\n\nfunction get_fixed_params(param_table, ax_vars, fx) {\n  const all_params = [...Object.keys(param_table)]\n  const varying_params = typeof fx !== undefined ? new Set(ax_vars) : new Set(ax_vars.concat(fx))\n  const diff_params = new Set(all_params.filter((x) => !varying_params.has(x)))\n  return Array.from(diff_params)\n}\n\nf = (x) => Number.isInteger(x) ? x.toPrecision(2) : x\n\n// Extract the step from a list of values for a parameter\ns = (p,i) => { \n    const unique_vals = Array.from(new Set(p.map(d => parseFloat(d[i])))).sort((a,b) => a - b)\n    const out = []\n    for (let i=1; i < unique_vals.length; i++ ) {\n      out.push(+(unique_vals[i]-unique_vals[i-1]).toPrecision(2))\n    } // return whatev if length is zero\n    return out.length === 0 ? 0.1 : out[0]\n}\n\nminmax = (p, i) => d3.extent(p.map(d => parseFloat(d[i])))\n\n// Param table where each key is a parameter, and values \n// are list of values relevant to \n// model: resdb output for a specific model\n// lookup: { [0: param1, 1: param2, ...] }\nfunction get_param_table(model_lookup, param_lookup) {\n    \n  const p = Object.keys(model_lookup).map(d => d.split(\"_\")) \n  \n  const param_table = {}\n  const first_line_param = p[0]\n  for ( let i=0; i < first_line_param.length; i++ ) {\n    param_table[param_lookup['idx2name'][i]] = { \n      's': s(p,i), 'first_val': first_line_param[i], 'minmax': minmax(p,i) \n      }\n  }\n  return param_table\n}\n\n// To get heatmap data, we need\n//   data: `value`, `value_prop` at max `timestep` grouped by `row_id` and `L`\n//   ax_vars: variables we want as x,y,z\n//   fx: variable to facet\n//   fp: other vars\n//   sliders: set of sliders\nfunction get_data_heatmap(data, lookup, fp, ax_vars, radios, sliders, fx) {\n  const dat_hm = [];\n  \n  for (let i=0; i < data.length; i++) { \n    \n    const p_split = data[i].name.split('_')\n    \n    const vs = {} // dictionary containing all the values of selected parameters \n\n    // Grab the chosen axis0/x, axis1/y, axis2/z\n    const [ax0, ax1, ax2] = ax_vars\n    vs[ax0] = parseFloat(p_split[lookup['name2idx'][ax0]])\n    vs[ax1] = parseFloat(p_split[lookup['name2idx'][ax1]])\n    vs[ax2] = parseFloat(p_split[lookup['name2idx'][ax2]])\n\n    // Grab the Fixed parameters\n    for (let i=0; i < fp.length; i++) {\n      vs[fp[i]] = parseFloat(p_split[lookup['name2idx'][fp[i]]])\n    }\n    \n    // Grab the radios, which will be 2 of the 3 axis vars. \n    // The other other one we'll be the value of our heatmap.\n    // This is where we need to know the actual param_name.\n    const p1 = parseFloat(p_split[lookup['name2idx'][radios['x']]])\n    const p2 = parseFloat(p_split[lookup['name2idx'][radios['y']]])\n    const hm_vals_i = {\n      'L': data[i].L,\n      'fx' : typeof fx !== undefined ? null : p_split[lookup['name2idx'][fx]], \n      'param1': p1,\n      'param2': p2,\n      'param_str': `${p1}/${p2}`, // We need a way to groupby (p1,p2) for `global_hm()`\n      'value': data[i].value,\n      'value_prop': data[i].value_prop\n    }\n\n    if (vs[fp[0]] === sliders['fp0'] && vs[fp[1]] === sliders['fp1'] && vs[fp[2]] === sliders['fp2'] && vs[fp[3]] == sliders['fp3'] && vs[fp[4]] == sliders['fp4']) {\n\n        // if ax1 == x && ax2 ==y, then ax0 == z\n        if (radios['x'] == ax1 && radios['y'] == ax2 && vs[ax0] == sliders['ax0']) {\n             dat_hm.push(hm_vals_i)\n        } else if (radios['x'] == ax0 && radios['y'] == ax2 && vs[ax1] == sliders['ax1']) {\n             dat_hm.push(hm_vals_i)\n        } else if (radios['x'] == ax0 && radios['y'] == ax1 && vs[ax2] == sliders['ax2']) {\n             dat_hm.push(hm_vals_i)\n        }\n    }\n  }\n  return dat_hm\n}\n\nfunction global_hm(d){\n  return d3.flatRollup(d, v => d3.sum(v, d => d.value * d.value_prop), d => d.param_str)\n           .map(currentElement => ({\n             'param1': parseFloat(currentElement[0].split('/')[0]),\n             'param2': parseFloat(currentElement[0].split('/')[1]),\n             'value': currentElement[1],\n             'L': 1\n          }))\n}\n\n\nfunction plot_time_evo(d, y_vals, pal) {\n  const global_mean = d3.flatRollup(d, v => d3.sum(v, d => d.value * d.value_prop), d => d.timestep)\n\n  return PlotDev.plot({\n    x: {type:\"log\"},\n    marginLeft: 50,\n    color: { \n      scheme: pal, \n      type: \"ordinal\", \n      range: [0.3, 1],\n      legend: true \n    },\n    marks: [\n      PlotDev.lineY(global_mean, {\n        x: d => d[0], y: d => d[1],\n        strokeDasharray: \"5,3\", opacity: pal == 'blues' ? 0 : 1.\n        }),\n      PlotDev.line(\n        d, {\n          x: 'timestep', y: y_vals, stroke: \"L\"\n          }),\n      PlotDev.dot(\n        d, {\n          x: 'timestep', y: y_vals, stroke: \"L\", tip: true\n          })\n    ]\n  })\n}\n\nfunction phase_diagram(d, x, y, z, pal, fy) {\n  return PlotDev.plot({\n    width: 1200,\n    height: 600,\n    color: {\n      type: \"linear\",\n      scheme: pal\n    },\n    x: { label: x },\n    y: { label: y },\n    fy: { label: fy },\n    facet: { \n      data: d, \n      x: \"L\", \n      y: typeof fy !== undefined ? 'fx' : null \n    },\n    marks: [\n      PlotDev.raster(d, {\n        x: \"param1\",\n        y: \"param2\",\n        fill: z,\n        interpolate: \"nearest\",\n        tip: true\n      }),\n    ]\n  })\n}\n"},{"methodName":"interpret","cellName":"ojs-cell-13","inline":false,"source":"PlotDev = await import(\"https://esm.sh/@observablehq/plot\");\n"},{"methodName":"interpretQuiet","source":"shinyInput('s1')"},{"methodName":"interpretQuiet","source":"shinyInput('r1')"},{"methodName":"interpretQuiet","source":"shinyInput('r2')"},{"methodName":"interpretQuiet","source":"shinyInput('s2')"},{"methodName":"interpretQuiet","source":"shinyInput('s3')"},{"methodName":"interpretQuiet","source":"shinyInput('r3')"}]}
 </script>
 <script type="module">
 if (window.location.protocol === "file:") { alert("The OJS runtime does not work with file:// URLs. Please use a web server to view this document."); }
