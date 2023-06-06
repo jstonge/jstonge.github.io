@@ -1,0 +1,3 @@
+[submodule "posts/source-sink/posts/source-sink/InstitutionalDynamics.jl"]
+	path = posts/source-sink/posts/source-sink/InstitutionalDynamics.jl
+	url = https://github.com/jstonge/InstitutionalDynamics.jl
