@@ -122,11 +122,10 @@ function run_source_sink3(p)
 
   # Solve problem
   prob = ODEProblem(source_sink3!, u₀, tspan, p)
-  return solve(prob, DP5(), saveat = 1., reltol=1e-8, abstol=1e-8)
+  return solve(prob, Tsit5(), saveat = 1., reltol=1e-8, abstol=1e-8)
 end
 
 function main()
-  # β,1 γ, ρ, b, c, μ, δ, α  = 0.07, 0.5, 1, 0.1, 0.18, 1.05, 0.2, 1, 0.2
   args = parse_commandline()
 
   modelname = "sourcesink3"
@@ -167,6 +166,7 @@ function main()
     end
   end
 end
+
 
 main()
 

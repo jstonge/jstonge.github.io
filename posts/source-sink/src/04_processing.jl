@@ -23,7 +23,7 @@ Combine all sols and proportion in `sourcesink_output/`, using only unique value
 function main()
   args = parse_commandline()
   
-  # DATA_DIR = "sourcesink1_output"
+  # DATA_DIR = "sourcesink3_output"
   DATA_DIR = args["d"]
   fnames = filter(x -> endswith(x, "txt"),  readdir(DATA_DIR, join=true))
 
@@ -38,8 +38,8 @@ function main()
   tot_rows = 0
   dfs = []
   p = ProgressMeter.Progress(length(fnames))
-  # @showprogress for i=eachindex(fnames)
-  Threads.@threads for i=eachindex(fnames)
+  @showprogress for i=eachindex(fnames)
+  # Threads.@threads for i=eachindex(fnames)
     fname = fnames[i]
 
     p_str = @pipe split(fname, "/")[end] |> 
@@ -90,8 +90,11 @@ function main()
 
   # Write output to disk
   all_dfs.row_id = [lookup_name[n] for n in all_dfs.name]
+  
   select!(all_dfs, Not(:name))
+  
   all_dfs.L = all_dfs.L
+  
   all_dfs.timestep = Int32.(all_dfs.timestep)
   all_dfs.value = round.(all_dfs.value, digits=4)
   all_dfs.value_prop = round.(all_dfs.value_prop, digits=4)

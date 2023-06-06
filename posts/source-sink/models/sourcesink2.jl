@@ -123,7 +123,8 @@ function run_source_sink2(p; perc_inf::Float64=0.001, lvl_1_inf::Bool=false)
   L = 4
   u₀ = initialize_u0(n=n, L=L, M=M, p=perc_inf, lvl_1_inf=lvl_1_inf)
 
-  tspan = (1.0, 10000)
+  t_max = 2000
+  tspan = (1.0, t_max)
   
   # Solve problem
   prob = ODEProblem(source_sink2!, u₀, tspan, p)

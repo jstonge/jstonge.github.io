@@ -5,4 +5,4 @@
 #SBATCH --time=02:59:59
 #SBATCH --job-name=17
 #SBATCH --output=sourcesink2_output/res_17.out 
-julia models/sourcesink2.jl --db source-sink.db -O 480 -L 30 -o sourcesink2_output
+julia models/sourcesink2.jl --db source-sink.db -O 400 -L 25 -o sourcesink2_output
