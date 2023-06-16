@@ -19,7 +19,7 @@ end
 function model1()
   SQLite.execute(db, """DROP TABLE IF EXISTS sourcesink1""")
   param_list = []
-  for β=0.:0.02:0.2, γ= 0.9:0.1:1.1, ρ=0.1:0.15:0.40, b=0.12:0.05:0.22, c=0.:0.1:2.0
+  for β=0.:0.02:0.22, γ= 0.9:0.1:1.1, ρ=0.1:0.15:0.40, b=0.02:0.02:0.22, c=0.05:0.2:2.0
     μ = 1e-4
     params = (β, γ, ρ, b, c, μ)
     push!(param_list, params)
@@ -33,7 +33,7 @@ function model2()
   SQLite.execute(db, """DROP TABLE IF EXISTS sourcesink2""")
   param_list = []
   for β = 0.06:0.01:0.17, ρ = 0.005:0.005:0.1, η = 0.005:0.005:0.05, b = 0.2:0.2:1.0
-    ξ, α, γ, c, μ = 1.0, 1.0, 1.0, 1e-4
+    ξ, α, γ, c, μ = 1.0, 1.0, 1.0, 1.05, 1e-4
     params = (β, ξ, α, γ, ρ, η, -b, c, μ)
     push!(param_list, params)
   end

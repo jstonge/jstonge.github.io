@@ -8,3 +8,7 @@ posts/source-sink/sourcesink3_output/old_res/*.txt
 posts/source-sink/sourcesink3_output/vacc_script/
 posts/source-sink/sourcesink3.parquet
 posts/source-sink/sourcesink2.parquet
+
+posts/source-sink/source-sink.db
+posts/source-sink/sourcesink3_output/vacc_script/
+posts/source-sink/sourcesink2.parquet

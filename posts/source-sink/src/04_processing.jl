@@ -23,8 +23,8 @@ Combine all sols and proportion in `sourcesink_output/`, using only unique value
 function main()
   args = parse_commandline()
   
-  # DATA_DIR = "sourcesink3_output"
-  DATA_DIR = args["d"]
+  DATA_DIR = "sourcesink1_output"
+  # DATA_DIR = args["d"]
   fnames = filter(x -> endswith(x, "txt"),  readdir(DATA_DIR, join=true))
 
   @assert length(fnames) > 0 println("There are no data files at the given directory")
@@ -38,8 +38,8 @@ function main()
   tot_rows = 0
   dfs = []
   p = ProgressMeter.Progress(length(fnames))
-  @showprogress for i=eachindex(fnames)
-  # Threads.@threads for i=eachindex(fnames)
+  # @showprogress for i=eachindex(fnames)
+  Threads.@threads for i=eachindex(fnames)
     fname = fnames[i]
 
     p_str = @pipe split(fname, "/")[end] |> 

@@ -48,7 +48,7 @@ function main()
             write(io, "#SBATCH --time=$(wall_time)\n")
             write(io, "#SBATCH --job-name=$(batch_counter)\n")
             write(io, "#SBATCH --output=$(OUTPUT_DIR)/res_$(batch_counter).out \n")
-            write(io, "julia --project=InstitutionalDynamics.jl InstitutionalDynamics.jl/src/$(MODEL_NAME).jl --db $(DB_NAME) -O $(OFFSET) -L $(batch_size) -o $(OUTPUT_DIR)")
+            write(io, "julia --project=../.. InstitutionalDynamics.jl/src/$(MODEL_NAME).jl --db $(DB_NAME) -O $(OFFSET) -L $(batch_size) -o $(OUTPUT_DIR)")
         end
     end
 

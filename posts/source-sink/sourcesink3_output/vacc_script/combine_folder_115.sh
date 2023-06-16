@@ -5,4 +5,4 @@
 #SBATCH --time=02:59:59
 #SBATCH --job-name=115
 #SBATCH --output=sourcesink3_output/res_115.out 
-julia models/sourcesink3.jl --db source-sink.db -O 3420 -L 30 -o sourcesink3_output
+julia --project=../.. InstitutionalDynamics.jl/src/sourcesink3.jl --db source-sink.db -O 3420 -L 30 -o sourcesink3_output
